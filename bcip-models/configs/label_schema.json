@@ -1,0 +1,30 @@
+{
+  "version": "1.0",
+  "data_source": "fully_synthetic",
+  "seed": 42,
+  "category": {
+    "billing": "Incorrect, unexplained, duplicate, or disputed charges and payment records.",
+    "delivery": "Late, missing, stalled, or incorrectly fulfilled deliveries and promised items.",
+    "product_quality": "Damaged, incomplete, defective, unsafe, or misdescribed products and materials.",
+    "customer_service": "Rude, dismissive, unhelpful, or unprofessional staff behavior.",
+    "technical_issue": "Portal, application, login, tracking, or other software malfunction.",
+    "refund_return": "Accepted or requested returns and refunds that are delayed or unresolved."
+  },
+  "sentiment": {
+    "neutral": "Predominantly factual request without strong emotional evaluation.",
+    "negative": "Explicit frustration, disappointment, anger, or dissatisfaction.",
+    "mixed": "Both appreciation and dissatisfaction occur in the same complaint."
+  },
+  "priority": {
+    "low": "Minor inconvenience; no safety, account-security, essential-service, or urgent deadline risk.",
+    "medium": "Ongoing delay or moderate disruption without a critical risk indicator.",
+    "high": "Repeated unresolved contact, significant loss, paid-service blockage, or same-day commitment.",
+    "critical": "Immediate safety, unauthorized payment, essential-service outage, or legal/regulatory risk."
+  },
+  "duplicate": {
+    "1": "Both texts describe the same underlying incident, even if wording or language differs.",
+    "0": "Different incidents. Same-category complaints are still negatives unless the incident is the same."
+  },
+  "exclusion_rule": "Priority is assigned from the highest applicable severity level; emotional intensity alone does not imply critical priority.",
+  "annotation_status": "Programmatically assigned synthetic labels; not human-verified. Use annotation_review_sample.csv for team review."
+}

@@ -1,0 +1,97 @@
+.admin-portal {
+  --admin-bg: #0b1120;
+  --admin-panel: #0d1322;
+  --admin-panel-raised: #111b2e;
+  --admin-line: rgb(255 255 255 / 8%);
+  --admin-text: #f8fafc;
+  --admin-muted: #94a3b8;
+  --admin-accent: #10b981;
+  --admin-accent-hover: #34d399;
+  min-height: 100vh;
+  background-color: var(--admin-bg);
+  background-image:
+    linear-gradient(to right, rgb(148 163 184 / 3%) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(148 163 184 / 3%) 1px, transparent 1px),
+    radial-gradient(ellipse at 78% 0%, rgb(16 185 129 / 7%), transparent 42%);
+  background-size: 48px 48px, 48px 48px, auto;
+  background-attachment: fixed;
+  color: var(--admin-text);
+  color-scheme: dark;
+}
+
+.admin-shell-sidebar {
+  background:
+    radial-gradient(ellipse at top left, rgb(16 185 129 / 7%), transparent 44%),
+    var(--admin-panel);
+  border-color: var(--admin-line);
+}
+
+.admin-portal header {
+  background: rgb(13 19 34 / 90%);
+  border-color: var(--admin-line);
+}
+
+.admin-portal main {
+  min-width: 0;
+}
+
+.admin-portal [class~="bg-white"],
+.admin-portal [class~="bg-gray-50"],
+.admin-portal [class~="bg-gray-100"] {
+  background-color: var(--admin-panel-raised);
+}
+
+.admin-portal [class~="border-gray-200"],
+.admin-portal [class~="border-gray-300"],
+.admin-portal [class~="border-slate-200"] {
+  border-color: var(--admin-line);
+}
+
+.admin-portal [class~="text-gray-900"],
+.admin-portal [class~="text-gray-800"],
+.admin-portal [class~="text-slate-900"],
+.admin-portal [class~="text-slate-800"] {
+  color: var(--admin-text);
+}
+
+.admin-portal [class~="text-gray-700"],
+.admin-portal [class~="text-gray-600"],
+.admin-portal [class~="text-slate-700"],
+.admin-portal [class~="text-slate-600"] {
+  color: #cbd5e1;
+}
+
+.admin-portal [class~="text-gray-500"],
+.admin-portal [class~="text-slate-500"] {
+  color: var(--admin-muted);
+}
+
+.admin-portal [class~="focus:ring-purple-500"]:focus,
+.admin-portal [class~="focus:ring-blue-500"]:focus {
+  --tw-ring-color: rgb(16 185 129 / 45%);
+}
+
+.admin-portal [class~="focus:border-purple-500"]:focus,
+.admin-portal [class~="focus:border-blue-500"]:focus {
+  border-color: var(--admin-accent);
+}
+
+.admin-portal button:focus-visible,
+.admin-portal a:focus-visible,
+.admin-portal input:focus-visible,
+.admin-portal select:focus-visible,
+.admin-portal textarea:focus-visible {
+  outline: 2px solid var(--admin-accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-portal *,
+  .admin-portal *::before,
+  .admin-portal *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,733 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// BCIP — BUSINESS COMPLAINT INTELLIGENCE PLATFORM
+// Database: PostgreSQL
+// ORM: Prisma
+// ============================================================
+
+// ============================================================
+// 1. TENANT / BUSINESS
+// ============================================================
+model Tenant {
+  id              String       @id @default(uuid())
+  name            String
+  slug            String       @unique
+  email           String       @unique
+  phone           String?
+  website         String?
+  industry        String?
+  teamSize        String?      // ➕ ADDED: For Step 4 (e.g., "1-5", "6-10", "10+")
+  source          String?      // ➕ ADDED: For Step 3 (e.g., "search", "referral")
+  description     String?
+  logoUrl         String?
+  timezone        String       @default("Asia/Karachi")
+
+  isActive        Boolean      @default(true)
+  businessVerified Boolean     @default(false)
+  stripeCustomerId String?     @unique
+  stripeSubscriptionId String?  @unique
+  subscriptionStatus String?
+  subscriptionPlan  String?
+  subscriptionCurrentPeriodEnd DateTime?
+  subscriptionCancelAtPeriodEnd Boolean @default(false)
+
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  // Relations
+  users           User[]
+  customers       Customer[]
+  complaints      Complaint[]
+  categories      ComplaintCategory[]
+  notifications   Notification[]
+  auditLogs       AuditLog[]
+  integrations    Integration[]
+  aiProcesses     AIProcessing[]
+  teams           Team[]
+  settings        TenantSettings?
+  documents       AccountDocument[]
+  policies        CompanyPolicy[]
+  businessTrial   BusinessTrial?
+  metrics         TenantMetrics? // ➕ ADDED: Relation to cached analytics
+
+  @@index([isActive])
+  @@map("tenants")
+}
+
+// ============================================================
+// 2. USERS / IDENTITY & ACCESS
+// ============================================================
+model User {
+  id              String       @id @default(uuid())
+
+  email           String       @unique
+  firebaseUid     String?      @unique
+  passwordHash    String
+  fullName        String
+  accountType     AccountType  @default(EMPLOYEE)
+  phone           String?
+
+  role            Role         @default(AGENT) // ⚠️ Note: Backend must override to BUSINESS_ADMIN on signup
+
+  tenantId        String
+  tenant          Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  teamId          String?
+  team            Team?        @relation(fields: [teamId], references: [id], onDelete: SetNull)
+
+  isActive        Boolean      @default(true)
+  emailVerified   Boolean      @default(false)
+  emailVerificationTokenHash String?
+  emailVerificationExpiresAt DateTime?
+  emailVerificationSentAt DateTime?
+  passwordResetTokenHash String?
+  passwordResetExpiresAt DateTime?
+  passwordResetSentAt    DateTime?
+  profileQrSecret  String       @unique @default(uuid())
+
+  lastLoginAt     DateTime?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  // Relations
+  assignedComplaints Complaint[] @relation("AssignedAgent")
+  notifications      Notification[]
+  auditLogs          AuditLog[]
+  statusChanges      StatusHistory[]
+  aiProcesses        AIProcessing[] @relation("ProcessedByUser")
+  documents          AccountDocument[]
+  acceptedTrials     BusinessTrial[] @relation("BusinessTrialAcceptedBy")
+
+  @@index([tenantId])
+  @@index([tenantId, role])
+  @@index([tenantId, isActive])
+  @@index([passwordResetTokenHash])
+  @@map("users")
+}
+
+enum Role {
+  SUPER_ADMIN
+  BUSINESS_ADMIN
+  MANAGER
+  AGENT
+  CUSTOMER
+  ESCALATION_AGENT
+}
+
+enum AccountType {
+  CUSTOMER
+  BUSINESS
+  EMPLOYEE
+  ESCALATION_AGENT
+}
+
+model BusinessTrial {
+  id               String   @id @default(uuid())
+  tenantId         String   @unique
+  acceptedByUserId String
+  acceptedAt       DateTime @default(now())
+  expiresAt        DateTime
+  termsVersion     String   @default("14-day-free-trial-v1")
+  complaintChannel String   @default("WEB_PORTAL")
+  channelConfiguredAt DateTime?
+  onboardingCompletedAt DateTime?
+  
+  // ➕ ADDED: For Step 5 (Goals & Plans)
+  planType         String?  // e.g., "start_from_scratch", "migrate_outlook"
+  primaryGoal      String?  // e.g., "improve_response_times", "gather_support"
+
+  tenant       Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  acceptedBy   User   @relation("BusinessTrialAcceptedBy", fields: [acceptedByUserId], references: [id], onDelete: Restrict)
+
+  @@index([expiresAt])
+  @@map("business_trials")
+}
+
+// ============================================================
+// 3. TEAMS
+// ============================================================
+model Team {
+  id              String       @id @default(uuid())
+  name            String
+  description     String?
+
+  tenantId        String
+  tenant          Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  isActive        Boolean      @default(true)
+
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  users           User[]
+
+  @@unique([tenantId, name])
+  @@index([tenantId])
+  @@map("teams")
+}
+
+// ============================================================
+// 4. CUSTOMERS
+// ============================================================
+model Customer {
+  id              String       @id @default(uuid())
+
+  fullName        String?
+  email           String?
+  phone           String?
+
+  tenantId        String
+  tenant          Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  externalId      String?
+
+  isActive        Boolean      @default(true)
+
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  complaints      Complaint[]
+
+  @@unique([tenantId, email])
+  @@index([tenantId])
+  @@index([tenantId, phone])
+  @@map("customers")
+}
+
+// ============================================================
+// 5. COMPLAINT — CORE BCIP ENTITY
+// ============================================================
+model Complaint {
+  id                    String             @id @default(uuid())
+
+  // Identification
+  trackingId            String             @unique
+
+  title                 String
+  description           String
+
+  // Complaint lifecycle
+  status                ComplaintStatus    @default(PENDING)
+  priority              Priority           @default(MEDIUM)
+
+  source                ComplaintSource    @default(WEB_PORTAL)
+
+  // Tenant
+  tenantId              String
+  tenant                Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Customer
+  customerId            String?
+  customer              Customer?          @relation(fields: [customerId], references: [id], onDelete: SetNull)
+
+  // Classification
+  categoryId            String?
+  category              ComplaintCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  // Assignment
+  assignedToId          String?
+  assignedTo            User?              @relation("AssignedAgent", fields: [assignedToId], references: [id], onDelete: SetNull)
+
+  // ========================================================
+  // AI ANALYSIS
+  // ========================================================
+  aiCategory            String?
+  aiCategoryConfidence  Float?
+  aiSentiment           Sentiment?
+  aiSentimentScore      Float?
+  aiPriority            Priority?
+  aiPriorityScore       Float?
+  aiUrgencyScore        Float?
+
+  // CURS components
+  categoryUrgencyScore  Float?
+  sentimentScore        Float?
+  keywordScore          Float?
+  frequencyScore        Float?
+  cursScore             Float?
+
+  // Duplicate detection
+  isDuplicate           Boolean            @default(false)
+  duplicateOfId         String?
+  duplicateOf           Complaint?         @relation("DuplicateComplaints", fields: [duplicateOfId], references: [id], onDelete: SetNull)
+  duplicates            Complaint[]        @relation("DuplicateComplaints")
+  duplicateSimilarity   Float?
+
+  // AI generated content
+  suggestedResponse     String?
+  aiSummary             String?
+
+  // AI metadata
+  aiProcessed           Boolean            @default(false)
+  aiProcessedAt         DateTime?
+
+  // ========================================================
+  // RESOLUTION
+  // ========================================================
+  resolutionNotes       String?
+  resolutionType        ResolutionType?
+  resolvedAt            DateTime?
+  closedAt              DateTime?
+
+  // ========================================================
+  // SLA
+  // ========================================================
+  dueAt                 DateTime?
+  firstResponseAt       DateTime?
+
+  // ========================================================
+  // TIMESTAMPS
+  // ========================================================
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+
+  // Relations
+  attachments           ComplaintAttachment[]
+  statusHistory         StatusHistory[]
+  feedback              CSATFeedback?
+  aiProcesses           AIProcessing[]
+  notifications         Notification[]
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([tenantId, priority])
+  @@index([tenantId, categoryId])
+  @@index([tenantId, aiCategory])
+  @@index([tenantId, aiSentiment])
+  @@index([tenantId, aiPriority])
+  @@index([tenantId, assignedToId])
+  @@index([tenantId, createdAt])
+  @@index([customerId])
+  @@index([trackingId])
+  @@map("complaints")
+}
+
+// ============================================================
+// 6. COMPLAINT ENUMS
+// ============================================================
+enum ComplaintStatus {
+  PENDING
+  AI_PROCESSING
+  OPEN
+  IN_PROGRESS
+  WAITING_FOR_CUSTOMER
+  ESCALATED
+  RESOLVED
+  CLOSED
+  REOPENED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum Sentiment {
+  POSITIVE
+  NEUTRAL
+  NEGATIVE
+  MIXED
+}
+
+enum ComplaintSource {
+  WEB_PORTAL
+  CUSTOMER_PORTAL
+  EMAIL
+  PHONE
+  API
+  WHATSAPP
+  SOCIAL_MEDIA
+  IMPORT
+  ADMIN
+}
+
+enum ResolutionType {
+  FIXED
+  REFUNDED
+  REPLACED
+  EXPLAINED
+  ESCALATED
+  REJECTED
+  DUPLICATE
+  OTHER
+}
+
+// ============================================================
+// 7. COMPLAINT CATEGORIES
+// ============================================================
+model ComplaintCategory {
+  id              String       @id @default(uuid())
+  name            String
+  description     String?
+
+  // AI classification metadata
+  aiLabel         String?
+  keywords        String[]
+
+  // Default priority for category
+  defaultPriority Priority     @default(MEDIUM)
+
+  tenantId        String
+  tenant          Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  isActive        Boolean      @default(true)
+
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  complaints      Complaint[]
+
+  @@unique([tenantId, name])
+  @@index([tenantId])
+  @@map("complaint_categories")
+}
+
+// ============================================================
+// 8. COMPLAINT ATTACHMENTS
+// ============================================================
+model ComplaintAttachment {
+  id              String      @id @default(uuid())
+
+  fileName        String
+  originalName    String?
+  fileUrl         String
+
+  mimeType        String
+  fileSize        Int?
+
+  storageProvider String?
+
+  complaintId     String
+  complaint       Complaint   @relation(fields: [complaintId], references: [id], onDelete: Cascade)
+
+  uploadedAt      DateTime    @default(now())
+
+  @@index([complaintId])
+  @@map("complaint_attachments")
+}
+
+// ============================================================
+// 9. STATUS HISTORY
+// ============================================================
+model StatusHistory {
+  id              String          @id @default(uuid())
+
+  fromStatus      ComplaintStatus?
+  toStatus        ComplaintStatus
+
+  comment         String?
+
+  changedById     String?
+  changedBy       User?           @relation(fields: [changedById], references: [id], onDelete: SetNull)
+
+  complaintId     String
+  complaint       Complaint       @relation(fields: [complaintId], references: [id], onDelete: Cascade)
+
+  changedAt       DateTime        @default(now())
+
+  @@index([complaintId])
+  @@index([changedById])
+  @@map("status_history")
+}
+
+// ============================================================
+// 10. CSAT / CUSTOMER FEEDBACK
+// ============================================================
+model CSATFeedback {
+  id              String      @id @default(uuid())
+
+  rating          Int
+  comments        String?
+  submittedAt     DateTime    @default(now())
+
+  complaintId     String      @unique
+  complaint       Complaint   @relation(fields: [complaintId], references: [id], onDelete: Cascade)
+
+  @@index([rating])
+  @@map("csat_feedback")
+}
+
+// ============================================================
+// 11. AI PROCESSING
+// ============================================================
+model AIProcessing {
+  id                String       @id @default(uuid())
+
+  complaintId       String
+  complaint         Complaint    @relation(fields: [complaintId], references: [id], onDelete: Cascade)
+
+  // Processing information
+  pipelineVersion   String?
+  modelName         String
+  modelVersion      String?
+  processingType    AIProcessingType
+
+  // Results
+  result            Json?
+  confidenceScore   Float?
+  processingTimeMs  Int?
+  errorMessage      String?
+  status            AIProcessingStatus @default(PENDING)
+
+  processedById     String?
+  processedBy       User?        @relation("ProcessedByUser", fields: [processedById], references: [id], onDelete: SetNull)
+
+  createdAt         DateTime     @default(now())
+  completedAt       DateTime?
+
+  tenantId          String 
+  tenant            Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([complaintId])
+  @@index([processingType])
+  @@index([status])
+  @@index([tenantId])
+  @@map("ai_processing")
+}
+
+enum AIProcessingType {
+  CATEGORY_CLASSIFICATION
+  SENTIMENT_ANALYSIS
+  PRIORITY_DETECTION
+  DUPLICATE_DETECTION
+  SUMMARY_GENERATION
+  RESPONSE_SUGGESTION
+  FULL_PIPELINE
+}
+
+enum AIProcessingStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+// ============================================================
+// 12. NOTIFICATIONS
+// ============================================================
+model Notification {
+  id              String           @id @default(uuid())
+
+  title           String
+  message         String
+  type            NotificationType
+  isRead          Boolean          @default(false)
+
+  userId          String?
+  user            User?            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  tenantId        String
+  tenant          Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  complaintId     String?
+  complaint       Complaint?       @relation(fields: [complaintId], references: [id], onDelete: Cascade)
+
+  createdAt       DateTime         @default(now())
+
+  @@index([userId, isRead])
+  @@index([tenantId])
+  @@index([complaintId])
+  @@map("notifications")
+}
+
+enum NotificationType {
+  NEW_COMPLAINT
+  COMPLAINT_ASSIGNED
+  STATUS_CHANGED
+  HIGH_PRIORITY
+  CRITICAL_COMPLAINT
+  SLA_WARNING
+  SLA_BREACH
+  AI_COMPLETED
+  DUPLICATE_DETECTED
+  COMPLAINT_RESOLVED
+  SYSTEM
+}
+
+// ============================================================
+// 13. AUDIT LOG
+// ============================================================
+model AuditLog {
+  id              String      @id @default(uuid())
+
+  action          String
+  entity          String
+  entityId        String?
+
+  oldValue        Json?
+  newValue        Json?
+
+  ipAddress       String?
+  userAgent       String?
+
+  userId          String?
+  user            User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  tenantId        String
+  tenant          Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  createdAt       DateTime    @default(now())
+
+  @@index([tenantId, createdAt])
+  @@index([entity, entityId])
+  @@index([userId])
+  @@map("audit_logs")
+}
+
+// ============================================================
+// 14. TENANT SETTINGS & DOCUMENTS
+// ============================================================
+model AccountDocument {
+  id          String   @id @default(uuid())
+  documentType String
+  fileName    String
+  fileUrl     String
+  status      DocumentStatus @default(PENDING)
+  metadata    Json?
+  reviewedAt  DateTime?
+  reviewedById String?
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([tenantId, status])
+  @@index([userId])
+  @@map("account_documents")
+}
+
+model CompanyPolicy {
+  id          String   @id @default(uuid())
+  name        String
+  version     String
+  content     String
+  isActive    Boolean  @default(true)
+  effectiveAt DateTime?
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([tenantId, name, version])
+  @@index([tenantId, isActive])
+  @@map("company_policies")
+}
+
+enum DocumentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model TenantSettings {
+  id                    String    @id @default(uuid())
+
+  tenantId              String    @unique
+  tenant                Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Complaint configuration
+  autoAssignComplaints  Boolean   @default(false)
+  autoProcessAI         Boolean   @default(true)
+  allowCustomerReopen   Boolean   @default(true)
+
+  // SLA
+  defaultSlaHours       Int       @default(48)
+
+  // Notifications
+  emailNotifications    Boolean   @default(true)
+  inAppNotifications    Boolean   @default(true)
+
+  // AI
+  aiEnabled             Boolean   @default(true)
+  duplicateThreshold    Float     @default(0.85)
+
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@map("tenant_settings")
+}
+
+// ============================================================
+// 15. INTEGRATIONS
+// ============================================================
+model Integration {
+  id              String             @id @default(uuid())
+
+  provider        IntegrationProvider
+  name            String
+  credentials     Json?
+  configuration   Json?
+  isActive        Boolean            @default(true)
+  lastSyncAt      DateTime?
+
+  tenantId        String
+  tenant          Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  @@unique([tenantId, provider])
+  @@index([tenantId])
+  @@map("integrations")
+}
+
+enum IntegrationProvider {
+  EMAIL
+  WHATSAPP
+  SLACK
+  MICROSOFT_TEAMS
+  ZENDESK
+  SALESFORCE
+  HUBSPOT
+  CUSTOM_API
+}
+
+// ============================================================
+// 16. SYSTEM CONFIGURATION
+// ============================================================
+model SystemConfiguration {
+  id              String    @id @default(uuid())
+
+  key             String    @unique
+  value           Json
+  description     String?
+  isActive        Boolean   @default(true)
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@map("system_configurations")
+}
+
+// ============================================================
+// 17. TENANT METRICS (➕ NEW: For Instant Dashboard Analytics)
+// ============================================================
+model TenantMetrics {
+  id                 String   @id @default(uuid())
+  tenantId           String   @unique
+  tenant             Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  totalComplaints    Int      @default(0)
+  pendingComplaints  Int      @default(0)   // PENDING, OPEN, AI_PROCESSING
+  inProgressCount    Int      @default(0)   // IN_PROGRESS, WAITING_FOR_CUSTOMER, ESCALATED
+  resolvedComplaints Int      @default(0)   // RESOLVED, CLOSED
+  
+  avgResolutionHours Float    @default(0)
+
+  updatedAt          DateTime @updatedAt
+
+  @@index([tenantId])
+  @@map("tenant_metrics")
+}

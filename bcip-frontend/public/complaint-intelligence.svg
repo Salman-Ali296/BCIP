@@ -1,0 +1,119 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="960" viewBox="0 0 1440 960" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="152" y1="20" x2="1278" y2="930" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F6F8FF"/>
+      <stop offset="1" stop-color="#E8F0FC"/>
+    </linearGradient>
+    <linearGradient id="blue" x1="721" y1="166" x2="1205" y2="851" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#3478F6"/>
+      <stop offset="1" stop-color="#163BAA"/>
+    </linearGradient>
+    <filter id="shadow" x="108" y="105" width="1224" height="787" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feColorMatrix in="SourceAlpha" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+      <feOffset dy="24"/>
+      <feGaussianBlur stdDeviation="24"/>
+      <feComposite in2="hardAlpha" operator="out"/>
+      <feColorMatrix values="0 0 0 0 0.055 0 0 0 0 0.11 0 0 0 0 0.22 0 0 0 0.13 0"/>
+      <feBlend in2="BackgroundImageFix" result="effect1_dropShadow"/>
+      <feBlend in="SourceGraphic" in2="effect1_dropShadow" result="shape"/>
+    </filter>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M32 0H0V32" stroke="#2454D6" stroke-opacity=".045"/>
+    </pattern>
+  </defs>
+  <rect width="1440" height="960" rx="38" fill="url(#bg)"/>
+  <rect width="1440" height="960" rx="38" fill="url(#grid)"/>
+  <circle cx="1200" cy="176" r="132" fill="#B8EDCF" fill-opacity=".38"/>
+  <circle cx="212" cy="790" r="160" fill="#F5D76E" fill-opacity=".28"/>
+  <g filter="url(#shadow)">
+    <rect x="160" y="153" width="1120" height="672" rx="28" fill="white"/>
+    <path d="M188 153h1064a28 28 0 0 1 28 28v48H160v-48a28 28 0 0 1 28-28Z" fill="#FBFCFE"/>
+    <path d="M160 229h1120" stroke="#E8ECF2"/>
+    <circle cx="196" cy="191" r="6" fill="#D7DDE6"/>
+    <circle cx="218" cy="191" r="6" fill="#D7DDE6"/>
+    <circle cx="240" cy="191" r="6" fill="#D7DDE6"/>
+    <text x="288" y="196" fill="#718096" font-family="Arial, sans-serif" font-size="12" font-weight="700" letter-spacing="2">BCIP  /  BUSINESS WORKSPACE</text>
+    <circle cx="1234" cy="191" r="6" fill="#36B37E"/>
+
+    <rect x="192" y="263" width="218" height="520" rx="18" fill="#F8FAFD"/>
+    <text x="220" y="301" fill="#8A96A8" font-family="Arial, sans-serif" font-size="11" font-weight="700" letter-spacing="1.7">WORKSPACE</text>
+    <rect x="211" y="323" width="180" height="43" rx="11" fill="#EAF0FF"/>
+    <rect x="226" y="338" width="12" height="12" rx="3" fill="#2454D6"/>
+    <text x="249" y="349" fill="#2454D6" font-family="Arial, sans-serif" font-size="14" font-weight="700">Overview</text>
+    <circle cx="232" cy="397" r="6" fill="#AAB5C4"/>
+    <text x="249" y="402" fill="#718096" font-family="Arial, sans-serif" font-size="13">Complaints</text>
+    <circle cx="232" cy="445" r="6" fill="#AAB5C4"/>
+    <text x="249" y="450" fill="#718096" font-family="Arial, sans-serif" font-size="13">Analytics</text>
+    <circle cx="232" cy="493" r="6" fill="#AAB5C4"/>
+    <text x="249" y="498" fill="#718096" font-family="Arial, sans-serif" font-size="13">Team</text>
+
+    <text x="450" y="291" fill="#8290A2" font-family="Arial, sans-serif" font-size="11" font-weight="700" letter-spacing="1.6">CUSTOMER OPERATIONS</text>
+    <text x="450" y="328" fill="#101D30" font-family="Arial, sans-serif" font-size="27" font-weight="700">Complaint intelligence</text>
+    <rect x="1080" y="276" width="166" height="40" rx="12" fill="#F3F6FA"/>
+    <text x="1102" y="301" fill="#59677A" font-family="Arial, sans-serif" font-size="12" font-weight="700">LAST 30 DAYS</text>
+
+    <rect x="450" y="352" width="181" height="111" rx="16" fill="white" stroke="#E6EAF0"/>
+    <text x="470" y="382" fill="#6A7687" font-family="Arial, sans-serif" font-size="12">Open complaints</text>
+    <text x="470" y="430" fill="#101D30" font-family="Arial, sans-serif" font-size="32" font-weight="700">128</text>
+    <text x="548" y="429" fill="#267A54" font-family="Arial, sans-serif" font-size="12" font-weight="700">IN QUEUE</text>
+
+    <rect x="646" y="352" width="181" height="111" rx="16" fill="white" stroke="#E6EAF0"/>
+    <text x="666" y="382" fill="#6A7687" font-family="Arial, sans-serif" font-size="12">Needs attention</text>
+    <text x="666" y="430" fill="#101D30" font-family="Arial, sans-serif" font-size="32" font-weight="700">24</text>
+    <rect x="714" y="408" width="91" height="24" rx="12" fill="#FFF5E8"/>
+    <text x="729" y="424" fill="#A35B12" font-family="Arial, sans-serif" font-size="10" font-weight="700">PRIORITY</text>
+
+    <rect x="842" y="352" width="181" height="111" rx="16" fill="white" stroke="#E6EAF0"/>
+    <text x="862" y="382" fill="#6A7687" font-family="Arial, sans-serif" font-size="12">Recurring themes</text>
+    <text x="862" y="430" fill="#101D30" font-family="Arial, sans-serif" font-size="32" font-weight="700">12</text>
+    <text x="918" y="429" fill="#2454D6" font-family="Arial, sans-serif" font-size="12" font-weight="700">PATTERNS</text>
+
+    <rect x="1038" y="352" width="208" height="111" rx="16" fill="white" stroke="#E6EAF0"/>
+    <text x="1058" y="382" fill="#6A7687" font-family="Arial, sans-serif" font-size="12">Resolution tracking</text>
+    <text x="1058" y="430" fill="#101D30" font-family="Arial, sans-serif" font-size="28" font-weight="700">On track</text>
+    <circle cx="1216" cy="420" r="8" fill="#36B37E"/>
+
+    <rect x="450" y="485" width="495" height="272" rx="18" fill="white" stroke="#E6EAF0"/>
+    <text x="476" y="520" fill="#101D30" font-family="Arial, sans-serif" font-size="15" font-weight="700">Complaint volume</text>
+    <text x="476" y="543" fill="#8A96A8" font-family="Arial, sans-serif" font-size="11">Illustrative weekly trend</text>
+    <path d="M508 688H913M508 638H913M508 588H913" stroke="#E8ECF2" stroke-dasharray="4 6"/>
+    <text x="480" y="692" fill="#929EAC" font-family="Arial, sans-serif" font-size="10">0</text>
+    <text x="474" y="642" fill="#929EAC" font-family="Arial, sans-serif" font-size="10">25</text>
+    <text x="474" y="592" fill="#929EAC" font-family="Arial, sans-serif" font-size="10">50</text>
+    <rect x="535" y="633" width="34" height="55" rx="7" fill="#AFC3F8"/>
+    <rect x="590" y="615" width="34" height="73" rx="7" fill="#9AB4F5"/>
+    <rect x="645" y="625" width="34" height="63" rx="7" fill="#839FF0"/>
+    <rect x="700" y="589" width="34" height="99" rx="7" fill="#6D8EEB"/>
+    <rect x="755" y="601" width="34" height="87" rx="7" fill="#5B7FE4"/>
+    <rect x="810" y="567" width="34" height="121" rx="7" fill="#4169DA"/>
+    <rect x="865" y="581" width="34" height="107" rx="7" fill="url(#blue)"/>
+    <text x="541" y="716" fill="#788597" font-family="Arial, sans-serif" font-size="10">M</text>
+    <text x="596" y="716" fill="#788597" font-family="Arial, sans-serif" font-size="10">T</text>
+    <text x="651" y="716" fill="#788597" font-family="Arial, sans-serif" font-size="10">W</text>
+    <text x="706" y="716" fill="#788597" font-family="Arial, sans-serif" font-size="10">T</text>
+    <text x="761" y="716" fill="#788597" font-family="Arial, sans-serif" font-size="10">F</text>
+    <text x="816" y="716" fill="#788597" font-family="Arial, sans-serif" font-size="10">S</text>
+    <text x="871" y="716" fill="#788597" font-family="Arial, sans-serif" font-size="10">S</text>
+
+    <rect x="962" y="485" width="284" height="272" rx="18" fill="white" stroke="#E6EAF0"/>
+    <text x="986" y="520" fill="#101D30" font-family="Arial, sans-serif" font-size="15" font-weight="700">Emerging themes</text>
+    <text x="986" y="543" fill="#8A96A8" font-family="Arial, sans-serif" font-size="11">Grouped for team review</text>
+    <text x="986" y="585" fill="#59677A" font-family="Arial, sans-serif" font-size="12">Billing &amp; payments</text>
+    <text x="1205" y="585" fill="#101D30" font-family="Arial, sans-serif" font-size="12" font-weight="700">34%</text>
+    <rect x="986" y="597" width="236" height="7" rx="4" fill="#EDF0F5"/>
+    <rect x="986" y="597" width="151" height="7" rx="4" fill="#2454D6"/>
+    <text x="986" y="635" fill="#59677A" font-family="Arial, sans-serif" font-size="12">Service experience</text>
+    <text x="1205" y="635" fill="#101D30" font-family="Arial, sans-serif" font-size="12" font-weight="700">27%</text>
+    <rect x="986" y="647" width="236" height="7" rx="4" fill="#EDF0F5"/>
+    <rect x="986" y="647" width="120" height="7" rx="4" fill="#3C70E3"/>
+    <text x="986" y="685" fill="#59677A" font-family="Arial, sans-serif" font-size="12">Account access</text>
+    <text x="1205" y="685" fill="#101D30" font-family="Arial, sans-serif" font-size="12" font-weight="700">21%</text>
+    <rect x="986" y="697" width="236" height="7" rx="4" fill="#EDF0F5"/>
+    <rect x="986" y="697" width="94" height="7" rx="4" fill="#6F92EA"/>
+
+    <rect x="450" y="774" width="796" height="30" rx="10" fill="#EDF6F2"/>
+    <circle cx="469" cy="789" r="5" fill="#36B37E"/>
+    <text x="484" y="793" fill="#49705E" font-family="Arial, sans-serif" font-size="11" font-weight="700">Illustrative product visual — example values only</text>
+  </g>
+</svg>

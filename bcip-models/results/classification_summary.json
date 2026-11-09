@@ -1,0 +1,82 @@
+{
+  "selection_rule": "highest validation macro_f1",
+  "test_used_for_selection": false,
+  "tasks": {
+    "category": {
+      "selected_model": "linear_svc",
+      "validation_macro_f1": 1.0,
+      "test": {
+        "task": "category",
+        "split": "test",
+        "model": "linear_svc",
+        "accuracy": 1.0,
+        "macro_precision": 1.0,
+        "macro_recall": 1.0,
+        "macro_f1": 1.0,
+        "weighted_f1": 1.0
+      },
+      "test_macro_f1_95pct_bootstrap_ci": [
+        1.0,
+        1.0
+      ],
+      "labels": [
+        "billing",
+        "customer_service",
+        "delivery",
+        "product_quality",
+        "refund_return",
+        "technical_issue"
+      ],
+      "probability_output": false
+    },
+    "sentiment": {
+      "selected_model": "linear_svc",
+      "validation_macro_f1": 1.0,
+      "test": {
+        "task": "sentiment",
+        "split": "test",
+        "model": "linear_svc",
+        "accuracy": 1.0,
+        "macro_precision": 1.0,
+        "macro_recall": 1.0,
+        "macro_f1": 1.0,
+        "weighted_f1": 1.0
+      },
+      "test_macro_f1_95pct_bootstrap_ci": [
+        1.0,
+        1.0
+      ],
+      "labels": [
+        "mixed",
+        "negative",
+        "neutral"
+      ],
+      "probability_output": false
+    },
+    "priority": {
+      "selected_model": "linear_svc",
+      "validation_macro_f1": 1.0,
+      "test": {
+        "task": "priority",
+        "split": "test",
+        "model": "linear_svc",
+        "accuracy": 1.0,
+        "macro_precision": 1.0,
+        "macro_recall": 1.0,
+        "macro_f1": 1.0,
+        "weighted_f1": 1.0
+      },
+      "test_macro_f1_95pct_bootstrap_ci": [
+        1.0,
+        1.0
+      ],
+      "labels": [
+        "critical",
+        "high",
+        "low",
+        "medium"
+      ],
+      "probability_output": false
+    }
+  }
+}

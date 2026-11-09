@@ -1,0 +1,26 @@
+{
+  "all_passed": true,
+  "checks": {
+    "required_columns": true,
+    "unique_complaint_ids": true,
+    "two_variants_per_incident": true,
+    "no_missing_required_text_or_labels": true,
+    "no_exact_duplicate_text": true,
+    "synthetic_flag": true,
+    "incident_split_isolation": true,
+    "expected_split_sizes": true,
+    "balanced_languages": true,
+    "balanced_categories": true,
+    "balanced_sectors": true,
+    "positive_pairs_same_incident": true,
+    "negative_pairs_different_incidents": true,
+    "balanced_pair_labels": true,
+    "pair_complaint_split_consistency": true,
+    "unique_pair_ids": true,
+    "challenge_size_180": true,
+    "challenge_text_disjoint": true
+  },
+  "complaint_rows": 6000,
+  "pair_rows": 6000,
+  "note": "Automated integrity checks only; labels are not human-verified."
+}

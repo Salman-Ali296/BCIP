@@ -1,0 +1,10 @@
+task,dimension,value,support,accuracy,macro_f1
+category,language,english,60,0.3,0.23276723276723277
+category,language,roman_urdu,60,0.36666666666666664,0.3515406162464986
+category,language,urdu,60,0.4,0.30169753086419754
+sentiment,language,english,60,0.3333333333333333,0.16666666666666666
+sentiment,language,roman_urdu,60,0.6833333333333333,0.5910680656443369
+sentiment,language,urdu,60,0.6666666666666666,0.615485050267659
+priority,language,english,60,0.95,0.9498326513586526
+priority,language,roman_urdu,60,0.6666666666666666,0.6475840336134453
+priority,language,urdu,60,0.7,0.6725251644606483

@@ -1,0 +1,131 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1680" height="600" viewBox="0 0 1680 600" fill="none">
+  <defs>
+    <linearGradient id="flow-backdrop" x1="170" y1="50" x2="1540" y2="590" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFDF8"/>
+      <stop offset="1" stop-color="#F5EBDD"/>
+    </linearGradient>
+    <linearGradient id="flow-core" x1="696" y1="121" x2="1020" y2="465" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2454D6"/>
+      <stop offset="1" stop-color="#142E70"/>
+    </linearGradient>
+    <filter id="flow-shadow" x="0" y="0" width="1680" height="600" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#28364A" flood-opacity=".09"/>
+    </filter>
+    <pattern id="flow-dots" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1" fill="#A9824D" fill-opacity=".12"/>
+    </pattern>
+  </defs>
+
+  <rect width="1680" height="600" rx="30" fill="url(#flow-backdrop)"/>
+  <rect width="1680" height="600" rx="30" fill="url(#flow-dots)"/>
+  <path d="M0 500C247 454 354 562 589 487C809 416 872 155 1101 201C1309 243 1448 448 1680 344V600H0V500Z" fill="#F0E5D5" fill-opacity=".58"/>
+
+  <g fill="none" stroke-linecap="round">
+    <path d="M391 151C526 151 550 189 683 221" stroke="#D2B78E" stroke-width="2"/>
+    <path d="M470 226C554 226 587 243 683 263" stroke="#D2B78E" stroke-width="2"/>
+    <path d="M402 304C520 304 578 302 683 302" stroke="#D2B78E" stroke-width="2"/>
+    <path d="M474 379C559 379 589 352 683 341" stroke="#D2B78E" stroke-width="2"/>
+    <path d="M391 454C526 454 552 395 683 382" stroke="#D2B78E" stroke-width="2"/>
+    <path d="M1004 221C1112 221 1133 145 1243 145" stroke="#D2B78E" stroke-width="2"/>
+    <path d="M1004 263C1112 263 1133 255 1243 255" stroke="#D2B78E" stroke-width="2"/>
+    <path d="M1004 302C1112 302 1134 365 1243 365" stroke="#D2B78E" stroke-width="2"/>
+    <path d="M1004 341C1112 341 1134 475 1243 475" stroke="#D2B78E" stroke-width="2"/>
+  </g>
+
+  <g fill="#E5AD60">
+    <circle cx="683" cy="221" r="4"/><circle cx="683" cy="263" r="4"/>
+    <circle cx="683" cy="302" r="4"/><circle cx="683" cy="341" r="4"/>
+    <circle cx="683" cy="382" r="4"/><circle cx="1004" cy="221" r="4"/>
+    <circle cx="1004" cy="263" r="4"/><circle cx="1004" cy="302" r="4"/>
+    <circle cx="1004" cy="341" r="4"/>
+  </g>
+
+  <text x="78" y="76" fill="#9A6B2F" font-family="Arial, sans-serif" font-size="12" font-weight="700" letter-spacing="2.3">CUSTOMER VOICE</text>
+  <text x="693" y="76" fill="#9A6B2F" font-family="Arial, sans-serif" font-size="12" font-weight="700" letter-spacing="2.3">COMPLAINT INTELLIGENCE</text>
+  <text x="1247" y="76" fill="#9A6B2F" font-family="Arial, sans-serif" font-size="12" font-weight="700" letter-spacing="2.3">TEAM ACTION</text>
+
+  <g filter="url(#flow-shadow)">
+    <rect x="78" y="104" width="313" height="92" rx="16" fill="white"/>
+    <circle cx="105" cy="134" r="12" fill="#FFF0DB"/>
+    <path d="M100 134h10M105 129v10" stroke="#B66A1D" stroke-width="1.7" stroke-linecap="round"/>
+    <text x="128" y="137" fill="#253143" font-family="Arial, sans-serif" font-size="13" font-weight="700">Customer message</text>
+    <text x="99" y="164" fill="#687487" font-family="Arial, sans-serif" font-size="12">“I was charged twice for my order.”</text>
+    <text x="99" y="182" fill="#9AA2AD" font-family="Arial, sans-serif" font-size="10">Billing · just now</text>
+
+    <rect x="157" y="210" width="313" height="92" rx="16" fill="white"/>
+    <circle cx="184" cy="240" r="12" fill="#EAF0FF"/>
+    <path d="M179 240h10M184 235v10" stroke="#2454D6" stroke-width="1.7" stroke-linecap="round"/>
+    <text x="207" y="243" fill="#253143" font-family="Arial, sans-serif" font-size="13" font-weight="700">Customer message</text>
+    <text x="178" y="270" fill="#687487" font-family="Arial, sans-serif" font-size="12">“My refund still has not arrived.”</text>
+    <text x="178" y="288" fill="#9AA2AD" font-family="Arial, sans-serif" font-size="10">Payments · 4 min ago</text>
+
+    <rect x="78" y="318" width="324" height="92" rx="16" fill="white"/>
+    <circle cx="105" cy="348" r="12" fill="#F0EAFE"/>
+    <path d="M100 348h10M105 343v10" stroke="#7155B8" stroke-width="1.7" stroke-linecap="round"/>
+    <text x="128" y="351" fill="#253143" font-family="Arial, sans-serif" font-size="13" font-weight="700">Customer message</text>
+    <text x="99" y="378" fill="#687487" font-family="Arial, sans-serif" font-size="12">“Support has not replied to my case.”</text>
+    <text x="99" y="396" fill="#9AA2AD" font-family="Arial, sans-serif" font-size="10">Service · 12 min ago</text>
+
+    <rect x="157" y="426" width="313" height="92" rx="16" fill="white"/>
+    <circle cx="184" cy="456" r="12" fill="#E8F5EE"/>
+    <path d="M179 456h10M184 451v10" stroke="#267A54" stroke-width="1.7" stroke-linecap="round"/>
+    <text x="207" y="459" fill="#253143" font-family="Arial, sans-serif" font-size="13" font-weight="700">Customer message</text>
+    <text x="178" y="486" fill="#687487" font-family="Arial, sans-serif" font-size="12">“I cannot access my account today.”</text>
+    <text x="178" y="504" fill="#9AA2AD" font-family="Arial, sans-serif" font-size="10">Account · 18 min ago</text>
+  </g>
+
+  <g filter="url(#flow-shadow)">
+    <rect x="683" y="127" width="321" height="351" rx="25" fill="url(#flow-core)"/>
+    <rect x="708" y="153" width="120" height="27" rx="13.5" fill="white" fill-opacity=".13"/>
+    <circle cx="724" cy="166.5" r="4" fill="#B8EDCF"/>
+    <text x="737" y="171" fill="white" font-family="Arial, sans-serif" font-size="10" font-weight="700" letter-spacing="1.1">BCIP SIGNALS</text>
+    <text x="708" y="223" fill="white" font-family="Arial, sans-serif" font-size="24" font-weight="700">One clearer picture.</text>
+    <text x="708" y="249" fill="#D8E3FF" font-family="Arial, sans-serif" font-size="12">AI helps structure the information</text>
+    <text x="708" y="267" fill="#D8E3FF" font-family="Arial, sans-serif" font-size="12">for a human team to review.</text>
+    <rect x="708" y="293" width="270" height="1" fill="white" fill-opacity=".18"/>
+    <text x="708" y="322" fill="#B8EDCF" font-family="Arial, sans-serif" font-size="10" font-weight="700" letter-spacing="1.2">ILLUSTRATIVE SIGNALS</text>
+    <rect x="708" y="338" width="120" height="31" rx="9" fill="white" fill-opacity=".12"/>
+    <text x="723" y="358" fill="white" font-family="Arial, sans-serif" font-size="11" font-weight="700">Billing</text>
+    <rect x="838" y="338" width="140" height="31" rx="9" fill="white" fill-opacity=".12"/>
+    <text x="853" y="358" fill="white" font-family="Arial, sans-serif" font-size="11" font-weight="700">Possible duplicate</text>
+    <rect x="708" y="380" width="120" height="31" rx="9" fill="white" fill-opacity=".12"/>
+    <text x="723" y="400" fill="white" font-family="Arial, sans-serif" font-size="11" font-weight="700">Needs review</text>
+    <rect x="838" y="380" width="140" height="31" rx="9" fill="white" fill-opacity=".12"/>
+    <text x="853" y="400" fill="white" font-family="Arial, sans-serif" font-size="11" font-weight="700">Customer context</text>
+    <text x="708" y="449" fill="white" fill-opacity=".62" font-family="Arial, sans-serif" font-size="10">AI assists. Your team decides.</text>
+  </g>
+
+  <g filter="url(#flow-shadow)">
+    <rect x="1243" y="105" width="353" height="87" rx="16" fill="white"/>
+    <rect x="1263" y="124" width="38" height="38" rx="12" fill="#FFF0DB"/>
+    <path d="M1274 143h16M1274 148h11" stroke="#B66A1D" stroke-width="1.6" stroke-linecap="round"/>
+    <text x="1314" y="136" fill="#253143" font-family="Arial, sans-serif" font-size="13" font-weight="700">Billing issue to review</text>
+    <text x="1314" y="156" fill="#758194" font-family="Arial, sans-serif" font-size="11">Grouped with related payment reports</text>
+    <rect x="1314" y="166" width="76" height="17" rx="8.5" fill="#FFF5E8"/>
+    <text x="1324" y="178" fill="#A35B12" font-family="Arial, sans-serif" font-size="9" font-weight="700">PRIORITY REVIEW</text>
+
+    <rect x="1243" y="215" width="353" height="87" rx="16" fill="white"/>
+    <rect x="1263" y="234" width="38" height="38" rx="12" fill="#EAF0FF"/>
+    <path d="M1274 247h16M1274 253h12M1274 259h9" stroke="#2454D6" stroke-width="1.6" stroke-linecap="round"/>
+    <text x="1314" y="246" fill="#253143" font-family="Arial, sans-serif" font-size="13" font-weight="700">Account access</text>
+    <text x="1314" y="267" fill="#758194" font-family="Arial, sans-serif" font-size="11">Categorised for the right team</text>
+    <text x="1314" y="285" fill="#2454D6" font-family="Arial, sans-serif" font-size="10" font-weight="700">ASSIGNMENT READY</text>
+
+    <rect x="1243" y="325" width="353" height="87" rx="16" fill="white"/>
+    <rect x="1263" y="344" width="38" height="38" rx="12" fill="#F0EAFE"/>
+    <circle cx="1282" cy="363" r="8" stroke="#7155B8" stroke-width="1.6"/>
+    <path d="M1278 363h8M1282 359v8" stroke="#7155B8" stroke-width="1.5" stroke-linecap="round"/>
+    <text x="1314" y="356" fill="#253143" font-family="Arial, sans-serif" font-size="13" font-weight="700">Recurring service issue</text>
+    <text x="1314" y="377" fill="#758194" font-family="Arial, sans-serif" font-size="11">Related messages visible together</text>
+    <text x="1314" y="395" fill="#7155B8" font-family="Arial, sans-serif" font-size="10" font-weight="700">PATTERN TO INVESTIGATE</text>
+
+    <rect x="1243" y="435" width="353" height="87" rx="16" fill="white"/>
+    <rect x="1263" y="454" width="38" height="38" rx="12" fill="#E8F5EE"/>
+    <path d="m1274 473 5 5 11-12" stroke="#267A54" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="1314" y="466" fill="#253143" font-family="Arial, sans-serif" font-size="13" font-weight="700">Ready for team follow-up</text>
+    <text x="1314" y="487" fill="#758194" font-family="Arial, sans-serif" font-size="11">A person reviews and owns the response</text>
+    <text x="1314" y="505" fill="#267A54" font-family="Arial, sans-serif" font-size="10" font-weight="700">HUMAN-LED RESOLUTION</text>
+  </g>
+
+  <text x="44" y="570" fill="#968872" font-family="Arial, sans-serif" font-size="10">ILLUSTRATIVE WORKFLOW · SAMPLE MESSAGES AND SIGNALS</text>
+</svg>

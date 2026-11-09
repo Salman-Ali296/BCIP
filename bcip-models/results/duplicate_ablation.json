@@ -1,0 +1,36 @@
+{
+  "purpose": "measure dependence on shared references and numeric details",
+  "threshold_fixed_from_validation": true,
+  "metrics": [
+    {
+      "condition": "original",
+      "threshold": 0.41999999999999993,
+      "accuracy": 0.9655555555555555,
+      "precision": 0.9686800894854586,
+      "recall": 0.9622222222222222,
+      "f1": 0.9654403567447045,
+      "roc_auc": 0.9973703703703704,
+      "pr_auc": 0.9974297526816693
+    },
+    {
+      "condition": "references_masked",
+      "threshold": 0.41999999999999993,
+      "accuracy": 0.7744444444444445,
+      "precision": 0.8600583090379009,
+      "recall": 0.6555555555555556,
+      "f1": 0.7440100882723834,
+      "roc_auc": 0.8149382716049381,
+      "pr_auc": 0.8703599829793817
+    },
+    {
+      "condition": "references_and_numbers_masked",
+      "threshold": 0.41999999999999993,
+      "accuracy": 0.5388888888888889,
+      "precision": 0.631578947368421,
+      "recall": 0.18666666666666668,
+      "f1": 0.2881646655231561,
+      "roc_auc": 0.5650641975308641,
+      "pr_auc": 0.5643875210576913
+    }
+  ]
+}

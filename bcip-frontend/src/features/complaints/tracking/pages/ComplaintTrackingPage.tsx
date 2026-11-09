@@ -1,0 +1,3 @@
+import { TrackingDashboard } from "@/features/complaints/tracking/components/TrackingDashboard";
+
+export function ComplaintTrackingPage({ trackingId = "" }: { trackingId?: string }) { return <main className="min-h-screen bg-slate-50 px-6 py-12"><div className="mx-auto max-w-3xl"><p className="text-sm font-semibold uppercase tracking-wide text-blue-700">Complaint tracking</p><h1 className="mt-2 text-3xl font-semibold text-slate-950">Stay informed about your complaint</h1><p className="mt-2 text-slate-600">Enter your tracking ID to see the latest status and resolution timeline.</p><div className="mt-8"><TrackingDashboard initialTrackingId={trackingId} /></div></div></main>; }

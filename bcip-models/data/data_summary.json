@@ -1,0 +1,73 @@
+{
+  "seed": 42,
+  "synthetic": true,
+  "real_customer_data_used": false,
+  "human_labels_verified": false,
+  "incidents": 3000,
+  "complaints": 6000,
+  "duplicate_pairs": 6000,
+  "counts": {
+    "split": {
+      "train": 4200,
+      "test": 900,
+      "val": 900
+    },
+    "language": {
+      "english": 2000,
+      "urdu": 2000,
+      "roman_urdu": 2000
+    },
+    "sector": {
+      "retail": 1200,
+      "food_service": 1200,
+      "logistics": 1200,
+      "healthcare": 1200,
+      "education": 1200
+    },
+    "category": {
+      "billing": 1000,
+      "delivery": 1000,
+      "product_quality": 1000,
+      "customer_service": 1000,
+      "technical_issue": 1000,
+      "refund_return": 1000
+    },
+    "difficulty": {
+      "easy": 3600,
+      "noisy": 1500,
+      "implicit": 900
+    },
+    "with_secondary_issue": 1500,
+    "sentiment": {
+      "negative": 3300,
+      "neutral": 1500,
+      "mixed": 1200
+    },
+    "priority": {
+      "high": 1800,
+      "medium": 1800,
+      "low": 1200,
+      "critical": 1200
+    }
+  },
+  "pair_counts": {
+    "split": {
+      "train": 4200,
+      "test": 900,
+      "val": 900
+    },
+    "label": {
+      "1": 3000,
+      "0": 3000
+    },
+    "pair_type": {
+      "positive_paraphrase": 3000,
+      "hard_negative": 2400,
+      "easy_negative": 600
+    },
+    "language_relation": {
+      "cross": 3119,
+      "same": 2881
+    }
+  }
+}

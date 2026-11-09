@@ -1,0 +1,14 @@
+task,label,precision,recall,f1,support
+category,billing,1.0,1.0,1.0,150.0
+category,customer_service,1.0,1.0,1.0,150.0
+category,delivery,1.0,1.0,1.0,150.0
+category,product_quality,1.0,1.0,1.0,150.0
+category,refund_return,1.0,1.0,1.0,150.0
+category,technical_issue,1.0,1.0,1.0,150.0
+sentiment,mixed,1.0,1.0,1.0,174.0
+sentiment,negative,1.0,1.0,1.0,508.0
+sentiment,neutral,1.0,1.0,1.0,218.0
+priority,critical,1.0,1.0,1.0,192.0
+priority,high,1.0,1.0,1.0,258.0
+priority,low,1.0,1.0,1.0,194.0
+priority,medium,1.0,1.0,1.0,256.0

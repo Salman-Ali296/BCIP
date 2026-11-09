@@ -1,0 +1,38 @@
+{
+  "selection_rule": "highest validation F1 after validation-only threshold tuning",
+  "selected_model": "random_forest",
+  "test": {
+    "threshold": 0.41999999999999993,
+    "accuracy": 0.9655555555555555,
+    "precision": 0.9686800894854586,
+    "recall": 0.9622222222222222,
+    "f1": 0.9654403567447045,
+    "roc_auc": 0.9973703703703704,
+    "pr_auc": 0.9974297526816693
+  },
+  "feature_importance_or_coefficient": {
+    "word_cosine": 0.056053928460810344,
+    "char_cosine": 0.046013992453605435,
+    "token_jaccard": 0.028282181194191996,
+    "token_containment": 0.020427480315981537,
+    "sequence_ratio": 0.027946040103777568,
+    "length_ratio": 0.046645935325109134,
+    "number_jaccard": 0.5155835803190755,
+    "reference_both": 0.03410087894415648,
+    "reference_match": 0.218191379158019,
+    "same_urdu_script": 0.006754603725272937
+  },
+  "gold_metadata_used_as_features": false,
+  "pair_features": [
+    "word_cosine",
+    "char_cosine",
+    "token_jaccard",
+    "token_containment",
+    "sequence_ratio",
+    "length_ratio",
+    "number_jaccard",
+    "reference_both",
+    "reference_match",
+    "same_urdu_script"
+  ]
+}

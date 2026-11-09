@@ -1,0 +1,77 @@
+.customer-portal {
+  --customer-paper: #f7f4fa;
+  --customer-card: #ffffff;
+  --customer-ink: #21133b;
+  --customer-muted: #756d81;
+  --customer-line: #e8e1ed;
+  --customer-accent: #6334a3;
+  min-height: 100vh;
+  background: var(--customer-paper);
+  color: var(--customer-ink);
+}
+
+.customer-portal .customer-sidebar {
+  border-color: #3b2a50;
+  background: #21113b;
+}
+
+.customer-portal .customer-mobile-nav {
+  border-color: var(--customer-line);
+  background: rgb(255 255 255 / 95%);
+}
+
+.customer-portal header {
+  border-color: var(--customer-line);
+  background: rgb(255 255 255 / 96%);
+}
+
+.customer-portal [class~="bg-blue-600"],
+.customer-portal [class~="bg-blue-700"],
+.customer-portal [class~="bg-blue-500"] {
+  background-color: var(--customer-accent);
+}
+
+.customer-portal [class~="hover:bg-blue-700"]:hover,
+.customer-portal [class~="hover:bg-blue-600"]:hover,
+.customer-portal [class~="hover:bg-blue-500"]:hover {
+  background-color: #4c267f;
+}
+
+.customer-portal [class~="text-blue-600"],
+.customer-portal [class~="text-blue-700"] {
+  color: var(--customer-accent);
+}
+
+.customer-portal [class~="text-blue-800"],
+.customer-portal [class~="text-blue-900"] {
+  color: var(--customer-ink);
+}
+
+.customer-portal [class~="text-blue-200"] {
+  color: #e7dcf5;
+}
+
+.customer-portal [class~="bg-blue-50"],
+.customer-portal [class~="bg-blue-50/50"],
+.customer-portal [class~="bg-blue-100"] {
+  background-color: #f0eaff;
+}
+
+.customer-portal [class~="border-blue-200"],
+.customer-portal [class~="border-blue-400/30"] {
+  border-color: #d8c8ee;
+}
+
+.customer-portal [class~="hover:border-blue-200"]:hover {
+  border-color: #c8b1e7;
+}
+
+.customer-portal [class~="focus:border-blue-500"]:focus,
+.customer-portal [class~="focus:ring-blue-500"]:focus {
+  border-color: var(--customer-accent);
+  --tw-ring-color: var(--customer-accent);
+}
+
+.customer-portal [class~="focus-visible:outline-blue-600"]:focus-visible {
+  outline-color: var(--customer-accent);
+}
