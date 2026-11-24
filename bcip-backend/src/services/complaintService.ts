@@ -687,16 +687,9 @@ export class ComplaintService {
         newStatus?: string,
         assignedToId?: string,
         newPriority?: string,
+        actorUserId?: string,
     ) {
         try {
-            const complaint = await prisma.complaint.findUnique({
-                where: { id: complaintId },
-            });
-
-            if (!complaint || complaint.tenantId !== tenantId) {
-                throw Errors.notFound('Complaint');
-            }
-
             if (assignedToId) {
                 const assignee = await prisma.user.findFirst({
                     where: { id: assignedToId, tenantId, isActive: true },
@@ -707,26 +700,59 @@ export class ComplaintService {
                 }
             }
 
-            const updated = await prisma.complaint.update({
-                where: { id: complaintId },
-                data: {
-                    ...(newStatus ? { status: newStatus as ComplaintStatus } : {}),
-                    ...(newPriority ? { priority: newPriority as Priority } : {}),
-                    assignedToId,
-                    ...(newStatus ? { resolvedAt: newStatus === 'RESOLVED' ? new Date() : null } : {}),
-                },
-            });
+            const { complaint, updated } = await prisma.$transaction(async (tx) => {
+                const complaint = await tx.complaint.findFirst({
+                    where: { id: complaintId, tenantId },
+                });
 
-            // Log activity
-            if (newStatus) {
-                await prisma.statusHistory.create({
+                if (!complaint) {
+                    throw Errors.notFound('Complaint');
+                }
+
+                const updated = await tx.complaint.update({
+                    where: { id: complaintId, tenantId },
                     data: {
-                        complaintId,
-                        fromStatus: complaint.status,
-                        toStatus: newStatus as ComplaintStatus,
+                        ...(newStatus ? { status: newStatus as ComplaintStatus } : {}),
+                        ...(newPriority ? { priority: newPriority as Priority } : {}),
+                        assignedToId,
+                        ...(newStatus ? { resolvedAt: newStatus === 'RESOLVED' ? new Date() : null } : {}),
                     },
                 });
-            }
+
+                // Log activity
+                if (newStatus) {
+                    await tx.statusHistory.create({
+                        data: {
+                            complaintId,
+                            fromStatus: complaint.status,
+                            toStatus: newStatus as ComplaintStatus,
+                            changedById: actorUserId ?? null,
+                        },
+                    });
+
+                    await tx.auditLog.create({
+                        data: {
+                            action: 'COMPLAINT_STATUS_UPDATED',
+                            entity: 'Complaint',
+                            entityId: complaintId,
+                            tenantId,
+                            userId: actorUserId ?? null,
+                            oldValue: {
+                                status: complaint.status,
+                                priority: complaint.priority,
+                                assignedToId: complaint.assignedToId,
+                            },
+                            newValue: {
+                                status: updated.status,
+                                priority: updated.priority,
+                                assignedToId: updated.assignedToId,
+                            },
+                        },
+                    });
+                }
+
+                return { complaint, updated };
+            });
 
             logger.info('Complaint status updated', {
                 complaintId,
@@ -797,31 +823,58 @@ export class ComplaintService {
         });
     }
 
-    async escalateComplaint(complaintId: string, tenantId: string, reason?: string) {
-        const complaint = await prisma.complaint.findFirst({
-            where: { id: complaintId, tenantId },
+    async escalateComplaint(
+        complaintId: string,
+        tenantId: string,
+        reason?: string,
+        actorUserId?: string,
+    ) {
+        return prisma.$transaction(async (tx) => {
+            const complaint = await tx.complaint.findFirst({
+                where: { id: complaintId, tenantId },
+            });
+
+            if (!complaint) throw Errors.notFound('Complaint');
+
+            const updated = await tx.complaint.update({
+                where: { id: complaintId, tenantId },
+                data: {
+                    status: 'ESCALATED',
+                    priority: 'CRITICAL',
+                },
+            });
+
+            await tx.statusHistory.create({
+                data: {
+                    complaintId,
+                    fromStatus: complaint.status,
+                    toStatus: 'ESCALATED',
+                    comment: reason || 'Escalated by supervisor for immediate priority review',
+                    changedById: actorUserId ?? null,
+                },
+            });
+
+            await tx.auditLog.create({
+                data: {
+                    action: 'COMPLAINT_ESCALATED',
+                    entity: 'Complaint',
+                    entityId: complaintId,
+                    tenantId,
+                    userId: actorUserId ?? null,
+                    oldValue: {
+                        status: complaint.status,
+                        priority: complaint.priority,
+                    },
+                    newValue: {
+                        status: 'ESCALATED',
+                        priority: 'CRITICAL',
+                        reason: reason ?? null,
+                    },
+                },
+            });
+
+            return updated;
         });
-
-        if (!complaint) throw Errors.notFound('Complaint');
-
-        const updated = await prisma.complaint.update({
-            where: { id: complaintId },
-            data: {
-                status: 'ESCALATED',
-                priority: 'CRITICAL',
-            },
-        });
-
-        await prisma.statusHistory.create({
-            data: {
-                complaintId,
-                fromStatus: complaint.status,
-                toStatus: 'ESCALATED',
-                comment: reason || 'Escalated by supervisor for immediate priority review',
-            },
-        });
-
-        return updated;
     }
 
     private buildSuggestedResponse(category: string, sentiment: string): string {

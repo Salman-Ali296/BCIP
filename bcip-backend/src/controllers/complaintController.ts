@@ -169,6 +169,7 @@ export async function updateComplaintStatus(
             status,
             assignedToId,
             priority,
+            req.user?.id,
         );
 
         res.json({
@@ -331,7 +332,12 @@ export async function escalateComplaint(
         if (typeof complaintId !== 'string') throw Errors.validation('Complaint ID is invalid');
         const { reason } = req.body;
 
-        const escalated = await complaintService.escalateComplaint(complaintId, tenantId, reason);
+        const escalated = await complaintService.escalateComplaint(
+            complaintId,
+            tenantId,
+            reason,
+            req.user?.id,
+        );
         res.json({
             success: true,
             data: escalated,
