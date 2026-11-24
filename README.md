@@ -10,33 +10,33 @@ submit complaints through a dedicated complaint flow, receive a tracking
 reference, and follow progress. Authorized business users manage
 complaints through role-based dashboards and workflows.
 
----
+------------------------------------------------------------------------
 
 ## Table of Contents
 
-- [Project Overview](#project-overview)
-- [Problem Statement](#problem-statement)
-- [Objectives](#objectives)
-- [Core Features](#core-features)
-- [AI and Intelligence Components](#ai-and-intelligence-components)
-- [System Architecture](#system-architecture)
-- [Technology Stack](#technology-stack)
-- [User Roles](#user-roles)
-- [Complaint Lifecycle](#complaint-lifecycle)
-- [Repository Structure](#repository-structure)
-- [Prerequisites](#prerequisites)
-- [Local Development Setup](#local-development-setup)
-- [Environment Configuration](#environment-configuration)
-- [API Services](#api-services)
-- [Security Considerations](#security-considerations)
-- [Testing and Evaluation](#testing-and-evaluation)
-- [Current Development Status](#current-development-status)
-- [Limitations and Future
-  Enhancements](#limitations-and-future-enhancements)
-- [Contributing](#contributing)
-- [Academic Project Notice](#academic-project-notice)
+-   [Project Overview](#project-overview)
+-   [Problem Statement](#problem-statement)
+-   [Objectives](#objectives)
+-   [Core Features](#core-features)
+-   [AI and Intelligence Components](#ai-and-intelligence-components)
+-   [System Architecture](#system-architecture)
+-   [Technology Stack](#technology-stack)
+-   [User Roles](#user-roles)
+-   [Complaint Lifecycle](#complaint-lifecycle)
+-   [Repository Structure](#repository-structure)
+-   [Prerequisites](#prerequisites)
+-   [Local Development Setup](#local-development-setup)
+-   [Environment Configuration](#environment-configuration)
+-   [API Services](#api-services)
+-   [Security Considerations](#security-considerations)
+-   [Testing and Evaluation](#testing-and-evaluation)
+-   [Current Development Status](#current-development-status)
+-   [Limitations and Future
+    Enhancements](#limitations-and-future-enhancements)
+-   [Contributing](#contributing)
+-   [Academic Project Notice](#academic-project-notice)
 
----
+------------------------------------------------------------------------
 
 ## Project Overview
 
@@ -68,13 +68,13 @@ Businesses may receive complaints through email, websites, social media,
 support channels, and other communication methods. When these reports
 are handled separately, organizations can face:
 
-- Fragmented complaint records and limited visibility.
-- Slow manual categorization and assignment.
-- Inconsistent assessment of urgency and business impact.
-- Repeated complaints that are difficult to identify.
-- Delayed escalation of critical customer issues.
-- Limited analytics for identifying recurring operational problems.
-- Weak traceability of actions taken during complaint resolution.
+-   Fragmented complaint records and limited visibility.
+-   Slow manual categorization and assignment.
+-   Inconsistent assessment of urgency and business impact.
+-   Repeated complaints that are difficult to identify.
+-   Delayed escalation of critical customer issues.
+-   Limited analytics for identifying recurring operational problems.
+-   Weak traceability of actions taken during complaint resolution.
 
 BCIP aims to address these challenges through a centralized complaint
 workflow supported by AI-assisted analysis and reporting.
@@ -100,36 +100,36 @@ workflow supported by AI-assisted analysis and reporting.
 
 ### Customer complaint submission
 
-- Dedicated complaint submission flow for a business.
-- Complaint details and relevant category information.
-- Optional evidence or attachment upload, where enabled.
-- Tracking reference for following complaint progress.
-- Status visibility through the customer complaint experience.
+-   Dedicated complaint submission flow for a business.
+-   Complaint details and relevant category information.
+-   Optional evidence or attachment upload, where enabled.
+-   Tracking reference for following complaint progress.
+-   Status visibility through the customer complaint experience.
 
 ### Business complaint management
 
-- Centralized complaint queue.
-- Complaint details, status, category, sentiment, and priority.
-- Assignment to relevant staff members.
-- Complaint response and resolution workflow.
-- Escalation of complaints requiring additional attention.
-- Complaint history and audit-oriented activity tracking.
+-   Centralized complaint queue.
+-   Complaint details, status, category, sentiment, and priority.
+-   Assignment to relevant staff members.
+-   Complaint response and resolution workflow.
+-   Escalation of complaints requiring additional attention.
+-   Complaint history and audit-oriented activity tracking.
 
 ### AI-assisted complaint intelligence
 
-- NLP-based complaint classification.
-- Sentiment analysis.
-- Urgency and priority assessment with an explanation or supporting
-  signals.
-- Semantic similarity checks to identify potential duplicates.
-- AI-assisted summaries and response suggestions, where configured.
+-   NLP-based complaint classification.
+-   Sentiment analysis.
+-   Urgency and priority assessment with an explanation or supporting
+    signals.
+-   Semantic similarity checks to identify potential duplicates.
+-   AI-assisted summaries and response suggestions, where configured.
 
 ### Dashboards and reporting
 
-- Complaint volume and status overview.
-- Priority and category distribution.
-- Operational workload visibility.
-- Complaint trends to support business analysis.
+-   Complaint volume and status overview.
+-   Priority and category distribution.
+-   Operational workload visibility.
+-   Complaint trends to support business analysis.
 
 > Feature availability depends on the currently implemented application
 > modules and configuration. AI-generated classifications and
@@ -140,31 +140,27 @@ workflow supported by AI-assisted analysis and reporting.
 
 BCIP combines task-specific NLP models and decision-support logic.
 
----
+  -----------------------------------------------------------------------
+  Component               Technology / approach   Purpose
+  ----------------------- ----------------------- -----------------------
+  Text classification     DistilBERT-based model  Predict complaint
+                                                  category from complaint
+                                                  text
 
-Component Technology / approach Purpose
+  Semantic similarity     `all-MiniLM-L6-v2` with Identify potentially
+                          sentence embeddings     similar or duplicate
+                                                  complaints
 
----
+  Urgency assessment      CURS (Complaint Urgency Support urgency ranking
+                          Ranking System) and     and operational
+                          Smart Priority logic    prioritization
 
-Text classification DistilBERT-based model Predict complaint
-category from complaint
-text
+  Language processing     NLP preprocessing and   Prepare complaint text
+                          model inference         for analysis
 
-Semantic similarity `all-MiniLM-L6-v2` with Identify potentially
-sentence embeddings similar or duplicate
-complaints
-
-Urgency assessment CURS (Complaint Urgency Support urgency ranking
-Ranking System) and and operational
-Smart Priority logic prioritization
-
-Language processing NLP preprocessing and Prepare complaint text
-model inference for analysis
-
-Generative AI Configurable LLM Support summaries and
-assistance integration response drafting
-
----
+  Generative AI           Configurable LLM        Support summaries and
+  assistance              integration             response drafting
+  -----------------------------------------------------------------------
 
 ### AI processing flow
 
@@ -189,16 +185,16 @@ guaranteed outcome.
 
 BCIP is organized into three primary application layers:
 
-- **Frontend:** Web interface for customer complaint submission and
-  business operations.
-- **Backend API:** Authentication, authorization, tenant-aware
-  business logic, persistence, complaint workflows, and integrations.
-- **AI service:** Dedicated API for NLP inference and semantic
-  analysis.
+-   **Frontend:** Web interface for customer complaint submission and
+    business operations.
+-   **Backend API:** Authentication, authorization, tenant-aware
+    business logic, persistence, complaint workflows, and integrations.
+-   **AI service:** Dedicated API for NLP inference and semantic
+    analysis.
 
 A simplified logical flow:
 
-```text
+``` text
 Customer / Business User
           |
           v
@@ -224,49 +220,45 @@ operations.
 
 ## Technology Stack
 
----
+  -----------------------------------------------------------------------
+  Layer                               Technologies
+  ----------------------------------- -----------------------------------
+  Frontend                            Next.js 16, React 19, TypeScript,
+                                      Tailwind CSS 4
 
-Layer Technologies
+  Backend                             Node.js, Express 5, TypeScript
 
----
+  Validation                          Zod
 
-Frontend Next.js 16, React 19, TypeScript,
-Tailwind CSS 4
+  Database                            PostgreSQL
 
-Backend Node.js, Express 5, TypeScript
+  ORM                                 Prisma
 
-Validation Zod
+  AI / ML API                         Python, FastAPI, Pydantic
 
-Database PostgreSQL
+  NLP / ML                            Transformers, Sentence Transformers
 
-ORM Prisma
+  Semantic model                      `all-MiniLM-L6-v2`
 
-AI / ML API Python, FastAPI, Pydantic
+  Classification model                DistilBERT-based model
 
-NLP / ML Transformers, Sentence Transformers
+  Infrastructure                      Docker, Docker Compose
 
-Semantic model `all-MiniLM-L6-v2`
+  Supporting service                  Redis
 
-Classification model DistilBERT-based model
+  Authentication and security         JWT, bcrypt, Helmet, CORS, rate
+                                      limiting
 
-Infrastructure Docker, Docker Compose
+  Logging                             Pino
 
-Supporting service Redis
+  Email                               Resend integration
 
-Authentication and security JWT, bcrypt, Helmet, CORS, rate
-limiting
+  File handling                       Multer
 
-Logging Pino
-
-Email Resend integration
-
-File handling Multer
-
-External AI integration Configurable provider integration,
-including Azure AI Foundry /
-OpenAI-compatible API configuration
-
----
+  External AI integration             Configurable provider integration,
+                                      including Azure AI Foundry /
+                                      OpenAI-compatible API configuration
+  -----------------------------------------------------------------------
 
 Versions and integrations may differ between branches and deployment
 environments. Confirm the installed package versions and environment
@@ -277,27 +269,23 @@ configuration in the repository before deployment.
 The application is designed around role-based access control. The
 currently defined role names include:
 
----
+  -----------------------------------------------------------------------
+  Role                                Intended responsibility
+  ----------------------------------- -----------------------------------
+  `SUPER_ADMIN`                       Platform-level administration
 
-Role Intended responsibility
+  `BUSINESS_ADMIN`                    Manage a business tenant and its
+                                      users/settings
 
----
+  `MANAGER`                           Monitor operations and manage
+                                      complaint assignments
 
-`SUPER_ADMIN` Platform-level administration
+  `AGENT`                             Handle assigned complaints and
+                                      customer responses
 
-`BUSINESS_ADMIN` Manage a business tenant and its
-users/settings
-
-`MANAGER` Monitor operations and manage
-complaint assignments
-
-`AGENT` Handle assigned complaints and
-customer responses
-
-`ESCALATION_AGENT` Handle complaints escalated for
-additional review
-
----
+  `ESCALATION_AGENT`                  Handle complaints escalated for
+                                      additional review
+  -----------------------------------------------------------------------
 
 Access to each resource must be enforced by the backend. Hiding a
 frontend page or control is not a substitute for server-side
@@ -307,7 +295,7 @@ authorization.
 
 A typical complaint workflow is:
 
-```text
+``` text
 Submitted
    |
    v
@@ -343,7 +331,7 @@ the intended workflow, not a definitive list of database enum values.
 The project is organized into separate frontend, backend, and AI-service
 applications. A representative layout is:
 
-```text
+``` text
 BCIP/
 ├── bcip-frontend/       # Next.js web application
 ├── bcip-backend/        # Express + TypeScript API
@@ -360,13 +348,13 @@ repository.
 
 Install the tools required by the services you intend to run:
 
-- Node.js (use the version specified by the repository's `engines`
-  field or version manager configuration).
-- npm, or the package manager specified by the relevant lockfile.
-- Python 3.10+ (confirm the AI service's supported version).
-- PostgreSQL, or Docker with Docker Compose.
-- Redis, or Docker if the project uses the supplied Redis service.
-- Git.
+-   Node.js (use the version specified by the repository's `engines`
+    field or version manager configuration).
+-   npm, or the package manager specified by the relevant lockfile.
+-   Python 3.10+ (confirm the AI service's supported version).
+-   PostgreSQL, or Docker with Docker Compose.
+-   Redis, or Docker if the project uses the supplied Redis service.
+-   Git.
 
 ## Local Development Setup
 
@@ -376,7 +364,7 @@ service's `package.json`, configuration files, and environment examples.
 
 ### 1. Clone the repository
 
-```bash
+``` bash
 git clone <YOUR_REPOSITORY_URL>
 cd <YOUR_REPOSITORY_DIRECTORY>
 ```
@@ -386,7 +374,7 @@ cd <YOUR_REPOSITORY_DIRECTORY>
 If the repository includes a Docker Compose configuration for PostgreSQL
 and Redis, review it and start the required services:
 
-```bash
+``` bash
 docker compose up -d
 ```
 
@@ -396,7 +384,7 @@ relevant service environment files.
 
 ### 3. Configure and start the backend
 
-```bash
+``` bash
 cd bcip-backend
 npm install
 ```
@@ -409,14 +397,14 @@ Run database migrations using the script defined in the backend
 `package.json`. For example, if the repository defines a Prisma
 migration script:
 
-```bash
+``` bash
 npx prisma migrate dev
 ```
 
 Start the backend using the development script defined by the
 repository. A common convention is:
 
-```bash
+``` bash
 npm run dev
 ```
 
@@ -424,7 +412,7 @@ npm run dev
 
 Open a separate terminal:
 
-```bash
+``` bash
 cd bcip-ai-service
 python -m venv .venv
 ```
@@ -433,20 +421,20 @@ Activate the virtual environment:
 
 **Windows PowerShell**
 
-```powershell
+``` powershell
 .venv\Scripts\Activate.ps1
 ```
 
 **macOS / Linux**
 
-```bash
+``` bash
 source .venv/bin/activate
 ```
 
 Install dependencies using the dependency file provided by the AI
 service. For a `requirements.txt`-based project:
 
-```bash
+``` bash
 pip install -r requirements.txt
 ```
 
@@ -454,7 +442,7 @@ Configure any required model paths, model settings, and service
 variables. Start the FastAPI application using the entry point and
 command specified in the repository. A common convention is:
 
-```bash
+``` bash
 uvicorn main:app --reload
 ```
 
@@ -465,7 +453,7 @@ project.
 
 Open another terminal:
 
-```bash
+``` bash
 cd bcip-frontend
 npm install
 ```
@@ -477,19 +465,19 @@ address where the backend is running.
 Start the frontend using the script defined in its `package.json`. A
 common convention is:
 
-```bash
+``` bash
 npm run dev
 ```
 
 ### 6. Verify the services
 
-- Open the frontend using its configured local development URL.
-- Check the backend health endpoint, if one is implemented.
-- Check the FastAPI documentation endpoint if Swagger UI is enabled.
-- Submit a test complaint and verify persistence, AI analysis, and
-  status handling.
-- Verify that users cannot access another tenant's records or perform
-  actions outside their role.
+-   Open the frontend using its configured local development URL.
+-   Check the backend health endpoint, if one is implemented.
+-   Check the FastAPI documentation endpoint if Swagger UI is enabled.
+-   Submit a test complaint and verify persistence, AI analysis, and
+    status handling.
+-   Verify that users cannot access another tenant's records or perform
+    actions outside their role.
 
 Do not assume default ports or endpoint paths: use the values configured
 in the checked-out code.
@@ -501,33 +489,29 @@ with real credentials. The following table lists configuration
 categories that the application may require; it is not a claim that
 every variable exists under these exact names.
 
----
+  -----------------------------------------------------------------------
+  Configuration category              Typical purpose
+  ----------------------------------- -----------------------------------
+  Database URL                        PostgreSQL connection
 
-Configuration category Typical purpose
+  Redis URL                           Redis connection
 
----
+  JWT secret / token settings         Authentication token signing and
+                                      expiry
 
-Database URL PostgreSQL connection
+  Frontend origin / CORS              Restrict permitted browser origins
 
-Redis URL Redis connection
+  Backend API URL                     Frontend-to-backend communication
 
-JWT secret / token settings Authentication token signing and
-expiry
+  AI service URL                      Backend-to-FastAPI communication
 
-Frontend origin / CORS Restrict permitted browser origins
+  Email provider key                  Transactional email delivery
 
-Backend API URL Frontend-to-backend communication
+  LLM provider endpoint and key       Optional generative AI integration
 
-AI service URL Backend-to-FastAPI communication
-
-Email provider key Transactional email delivery
-
-LLM provider endpoint and key Optional generative AI integration
-
-File storage configuration Complaint evidence and attachment
-storage
-
----
+  File storage configuration          Complaint evidence and attachment
+                                      storage
+  -----------------------------------------------------------------------
 
 Use the exact variable names from the source code and `.env.example`
 files. Never put API keys, passwords, JWT secrets, private certificates,
@@ -540,20 +524,20 @@ inference service.
 
 ### Backend API responsibilities
 
-- Authentication and user management.
-- Tenant and role-aware authorization.
-- Complaint creation, retrieval, updates, and assignment.
-- Complaint status and escalation workflows.
-- Evidence upload handling.
-- Communication and external service integrations.
-- Dashboard and reporting data.
+-   Authentication and user management.
+-   Tenant and role-aware authorization.
+-   Complaint creation, retrieval, updates, and assignment.
+-   Complaint status and escalation workflows.
+-   Evidence upload handling.
+-   Communication and external service integrations.
+-   Dashboard and reporting data.
 
 ### AI service responsibilities
 
-- Complaint text analysis.
-- Category prediction.
-- Sentiment and urgency-related analysis.
-- Semantic embedding and similarity operations.
+-   Complaint text analysis.
+-   Category prediction.
+-   Sentiment and urgency-related analysis.
+-   Semantic embedding and similarity operations.
 
 For the exact endpoint list, request/response schemas, authentication
 requirements, and example payloads, consult the backend route
@@ -564,24 +548,24 @@ definitions and the AI service API documentation in the repository.
 Security is essential because complaint records may contain customer
 information and business-sensitive evidence.
 
-- Enforce authentication and authorization on the server.
-- Scope every tenant-owned database operation to the authenticated
-  tenant.
-- Validate and sanitize incoming request data.
-- Restrict CORS to trusted frontend origins.
-- Apply rate limits to sensitive and public-facing endpoints.
-- Hash passwords using an appropriate password-hashing algorithm.
-- Store secrets in environment variables or a managed secrets service.
-- Validate uploaded file type, size, and content; do not trust the
-  filename or client-provided MIME type alone.
-- Protect customer tracking flows against unauthorized access and
-  enumeration.
-- Avoid logging passwords, tokens, private complaint content, or other
-  sensitive data.
-- Use HTTPS in deployed environments.
-- Review AI-generated content before sending it to customers.
-- Maintain audit records for important administrative and complaint
-  actions.
+-   Enforce authentication and authorization on the server.
+-   Scope every tenant-owned database operation to the authenticated
+    tenant.
+-   Validate and sanitize incoming request data.
+-   Restrict CORS to trusted frontend origins.
+-   Apply rate limits to sensitive and public-facing endpoints.
+-   Hash passwords using an appropriate password-hashing algorithm.
+-   Store secrets in environment variables or a managed secrets service.
+-   Validate uploaded file type, size, and content; do not trust the
+    filename or client-provided MIME type alone.
+-   Protect customer tracking flows against unauthorized access and
+    enumeration.
+-   Avoid logging passwords, tokens, private complaint content, or other
+    sensitive data.
+-   Use HTTPS in deployed environments.
+-   Review AI-generated content before sending it to customers.
+-   Maintain audit records for important administrative and complaint
+    actions.
 
 ## Testing and Evaluation
 
@@ -589,42 +573,38 @@ Testing should cover both functional behavior and AI model quality.
 
 ### Application testing
 
-- Authentication and role-based access.
-- Tenant isolation and authorization boundaries.
-- Complaint submission and validation.
-- Complaint assignment, status changes, and escalation.
-- File upload restrictions.
-- Email and notification behavior.
-- API error handling and rate limiting.
-- Frontend form validation and user experience.
+-   Authentication and role-based access.
+-   Tenant isolation and authorization boundaries.
+-   Complaint submission and validation.
+-   Complaint assignment, status changes, and escalation.
+-   File upload restrictions.
+-   Email and notification behavior.
+-   API error handling and rate limiting.
+-   Frontend form validation and user experience.
 
 ### AI evaluation
 
 Evaluate each AI component independently using a documented,
 representative dataset.
 
----
+  -----------------------------------------------------------------------
+  Evaluation area                     Suggested measures
+  ----------------------------------- -----------------------------------
+  Complaint classification            Accuracy, precision, recall, macro
+                                      F1-score, confusion matrix
 
-Evaluation area Suggested measures
+  Sentiment analysis                  Per-class precision, recall,
+                                      F1-score
 
----
+  Urgency ranking                     Ranking quality, class-wise
+                                      metrics, review of false negatives
 
-Complaint classification Accuracy, precision, recall, macro
-F1-score, confusion matrix
+  Duplicate detection                 Precision, recall, F1-score at a
+                                      documented similarity threshold
 
-Sentiment analysis Per-class precision, recall,
-F1-score
-
-Urgency ranking Ranking quality, class-wise
-metrics, review of false negatives
-
-Duplicate detection Precision, recall, F1-score at a
-documented similarity threshold
-
-Generative AI assistance Human review for factuality,
-relevance, safety, and usefulness
-
----
+  Generative AI assistance            Human review for factuality,
+                                      relevance, safety, and usefulness
+  -----------------------------------------------------------------------
 
 Document dataset composition, preprocessing, train/validation/test
 separation, class distribution, model configuration, thresholds, and
@@ -642,26 +622,26 @@ Implementation status can change as modules are completed and
 integrated. Before presenting this README as a release document, update
 it with:
 
-- Confirmed repository structure and setup commands.
-- Verified environment variable names and service ports.
-- Implemented API endpoint documentation.
-- Completed test results and AI evaluation metrics.
-- Screenshots of the current application, if appropriate.
-- Deployment instructions and known limitations.
+-   Confirmed repository structure and setup commands.
+-   Verified environment variable names and service ports.
+-   Implemented API endpoint documentation.
+-   Completed test results and AI evaluation metrics.
+-   Screenshots of the current application, if appropriate.
+-   Deployment instructions and known limitations.
 
 ## Limitations and Future Enhancements
 
 Potential future improvements include:
 
-- More robust multilingual support for English, Urdu, and Roman Urdu.
-- Expanded model evaluation and monitoring across business domains.
-- Improved explainability for urgency and priority recommendations.
-- More integrations with enterprise support channels.
-- Advanced analytics and configurable business reports.
-- Production-grade object storage and attachment scanning.
-- Background processing for computationally expensive AI tasks.
-- Stronger observability, audit reporting, and operational monitoring.
-- Accessibility and usability improvements based on user testing.
+-   More robust multilingual support for English, Urdu, and Roman Urdu.
+-   Expanded model evaluation and monitoring across business domains.
+-   Improved explainability for urgency and priority recommendations.
+-   More integrations with enterprise support channels.
+-   Advanced analytics and configurable business reports.
+-   Production-grade object storage and attachment scanning.
+-   Background processing for computationally expensive AI tasks.
+-   Stronger observability, audit reporting, and operational monitoring.
+-   Accessibility and usability improvements based on user testing.
 
 These items should be treated as future enhancements unless they are
 already implemented in the current codebase.
@@ -680,7 +660,7 @@ For academic team development:
 
 Suggested commit style:
 
-```text
+``` text
 feat: add complaint assignment workflow
 fix: enforce tenant scope in complaint queries
 docs: update local setup instructions
@@ -695,7 +675,7 @@ actual capabilities should be verified against the current source code
 and tested deployment. AI outputs are decision-support signals and
 should be reviewed by responsible business users.
 
----
+------------------------------------------------------------------------
 
 **Project:** AI-Powered Business Complaint Intelligence Platform (BCIP)\
 **Domain:** Enterprise Complaint Management, NLP, and AI-assisted
