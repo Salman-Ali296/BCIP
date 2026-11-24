@@ -37,3 +37,6 @@ npm-debug.log*
 .claude-flow/
 .DS_Store
 Thumbs.db
+
+# Old nested git repos (local backup only)
+**/.git-old-backup/
