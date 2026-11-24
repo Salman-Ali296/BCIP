@@ -3,7 +3,7 @@
 ## Repository shape
 
 - `bcip-frontend/` is the Next.js 16 App Router frontend. Follow its local [AGENTS.md](bcip-frontend/AGENTS.md) before changing frontend files; it contains generated Next.js guidance that must be preserved.
-- `bcip-backend/` is the TypeScript Express API. Prisma with PostgreSQL is the persistence layer, and the complaint feature also has domain/application/infrastructure boundaries under `src/modules/complaints/`.
+- `bcip-backend/` is the TypeScript Express API. Prisma with PostgreSQL is the persistence layer. Complaints flow through `src/routes/complaints.ts` → `src/controllers/complaintController.ts` → `src/services/complaintService.ts`.
 - `bcip-ai-services/` is the Python FastAPI NLP service. Its API is mounted at `/api/v1`, with `/health` and `/api/v1/analyze` as the key endpoints.
 - `bcip-ai-services/docker-compose.yml` provides local PostgreSQL on `5432` and Redis on `6379`; it does not run the FastAPI service.
 

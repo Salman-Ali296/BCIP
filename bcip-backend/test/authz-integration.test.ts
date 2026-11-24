@@ -424,39 +424,6 @@ test('administrative routes reject missing authentication and non-admin roles', 
     });
 });
 
-test('versioned internal complaint submission requires an authenticated business user', async (t) => {
-    const previousSecret = env.JWT_SECRET;
-    env.JWT_SECRET = TEST_SECRET;
-    t.after(() => { env.JWT_SECRET = previousSecret; });
-    mockAuthenticatedUser(t, 'CUSTOMER');
-
-    await withServer(async (baseUrl) => {
-        const unauthenticated = await fetch(`${baseUrl}/api/v1/complaints`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                customerId: 'f47ac10b-58cc-4372-a567-0e02b2c3d479',
-                title: 'Valid internal complaint title',
-                description: 'Valid complaint description for testing purposes',
-            }),
-        });
-        const customer = await fetch(`${baseUrl}/api/v1/complaints`, {
-            method: 'POST',
-            headers: {
-                Authorization: `Bearer ${token('CUSTOMER')}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                customerId: 'f47ac10b-58cc-4372-a567-0e02b2c3d479',
-                title: 'Valid internal complaint title',
-                description: 'Valid complaint description for testing purposes',
-            }),
-        });
-        assert.equal(unauthenticated.status, 401);
-        assert.equal(customer.status, 403);
-    });
-});
-
 test('public email complaint enumeration is disabled', async () => {
     await withServer(async (baseUrl) => {
         const response = await fetch(
