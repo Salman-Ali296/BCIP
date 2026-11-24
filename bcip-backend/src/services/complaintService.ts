@@ -62,10 +62,12 @@ function acceptingComplaintPortalWhere(now: Date): Prisma.TenantWhereInput {
 export class ComplaintService {
     /**
      * Create complaint with AI processing
-     * 
-     * Transaction ensures atomicity:
-     * - If AI call fails, complaint is still created (graceful degradation)
-     * - If email fails, complaint and AI results still saved
+     *
+     * The transaction contains database work only (usage, customer, complaint,
+     * attachments, assignment, AI quota reservation). AI analysis runs after
+     * commit and is best-effort: on failure the saved complaint is returned and
+     * the AI quota reservation is released.
+     * - If email fails, complaint and AI results are still saved
      */
     async createComplaint(request: CreateComplaintRequest) {
         const {
@@ -110,7 +112,7 @@ export class ComplaintService {
             let aiProcessingDeferred = false;
             let evidenceOmitted = false;
             const usagePeriod = getCurrentUsagePeriod(now);
-            const complaint = await prisma.$transaction(async (tx) => {
+            const { complaint: savedComplaint, hasAiCapacity } = await prisma.$transaction(async (tx) => {
                 const hasComplaintCapacity = await reserveUsageWithinTransaction(
                     tx,
                     tenantId,
@@ -224,8 +226,9 @@ export class ComplaintService {
                         : selected;
                 }, undefined);
 
+                let saved = complaint;
                 if (assignee) {
-                    await tx.complaint.update({
+                    saved = await tx.complaint.update({
                         where: { id: complaint.id },
                         data: { assignedToId: assignee.id },
                     });
@@ -242,68 +245,73 @@ export class ComplaintService {
                     aiProcessingDeferred = true;
                 }
 
-                let result = complaint;
-                if (hasAiCapacity) {
-                    try {
-                        const aiPrediction = await aiService.predict({
-                            text: `${title}\n${sanitizedDescription}`,
-                            complaintId: complaint.id,
-                            candidateTexts: candidates.map((candidate) =>
-                                `${candidate.title}\n${candidate.description}`,
-                            ),
-                            candidateIds: candidates.map((candidate) => candidate.id),
-                        });
+                return { complaint: saved, hasAiCapacity };
+            });
 
-                        result = await tx.complaint.update({
-                            where: { id: complaint.id },
-                            data: {
-                                aiCategory: aiPrediction.category,
-                                aiSentiment: aiPrediction.sentiment as Sentiment,
-                                aiSentimentScore: aiPrediction.sentimentScore,
-                                aiPriority: aiPrediction.priorityLevel as Priority,
-                                priority: aiPrediction.priorityLevel as Priority,
-                                isDuplicate: aiPrediction.isDuplicate,
-                                duplicateOf: aiPrediction.duplicateOf
-                                    ? { connect: { id: aiPrediction.duplicateOf } }
-                                    : undefined,
-                                suggestedResponse: aiPrediction.wasProcessed
-                                    ? this.buildSuggestedResponse(
-                                        aiPrediction.category,
-                                        aiPrediction.sentiment,
-                                    )
-                                    : null,
-                                aiSummary: aiPrediction.wasProcessed
-                                    ? this.summarizeComplaint(title, sanitizedDescription)
-                                    : null,
-                                aiProcessed: aiPrediction.wasProcessed,
-                                aiProcessedAt: aiPrediction.wasProcessed ? new Date() : null,
-                            },
-                        });
+            // AI analysis runs after commit so no locks are held while waiting on the AI service.
+            let complaint = savedComplaint;
+            if (hasAiCapacity) {
+                let releaseAiUsage = false;
+                try {
+                    const aiPrediction = await aiService.predict({
+                        text: `${title}\n${sanitizedDescription}`,
+                        complaintId: complaint.id,
+                        candidateTexts: candidates.map((candidate) =>
+                            `${candidate.title}\n${candidate.description}`,
+                        ),
+                        candidateIds: candidates.map((candidate) => candidate.id),
+                    });
 
-                        if (!aiPrediction.wasProcessed) {
-                            await releaseUsageWithinTransaction(
-                                tx,
-                                tenantId,
-                                'ai_analyses',
-                                usagePeriod,
-                            );
-                        }
-                    } catch (aiError) {
-                        await releaseUsageWithinTransaction(
-                            tx,
-                            tenantId,
-                            'ai_analyses',
-                            usagePeriod,
-                        );
-                        logger.error(
-                            'AI processing failed, continuing with complaint creation',
-                            aiError,
-                        );
-                    }
+                    complaint = await prisma.complaint.update({
+                        where: { id: complaint.id, tenantId },
+                        data: {
+                            aiCategory: aiPrediction.category,
+                            aiSentiment: aiPrediction.sentiment as Sentiment,
+                            aiSentimentScore: aiPrediction.sentimentScore,
+                            aiPriority: aiPrediction.priorityLevel as Priority,
+                            priority: aiPrediction.priorityLevel as Priority,
+                            isDuplicate: aiPrediction.isDuplicate,
+                            duplicateOf: aiPrediction.duplicateOf
+                                ? { connect: { id: aiPrediction.duplicateOf } }
+                                : undefined,
+                            suggestedResponse: aiPrediction.wasProcessed
+                                ? this.buildSuggestedResponse(
+                                    aiPrediction.category,
+                                    aiPrediction.sentiment,
+                                )
+                                : null,
+                            aiSummary: aiPrediction.wasProcessed
+                                ? this.summarizeComplaint(title, sanitizedDescription)
+                                : null,
+                            aiProcessed: aiPrediction.wasProcessed,
+                            aiProcessedAt: aiPrediction.wasProcessed ? new Date() : null,
+                        },
+                    });
+
+                    releaseAiUsage = !aiPrediction.wasProcessed;
+                } catch (aiError) {
+                    releaseAiUsage = true;
+                    logger.warn('AI analysis failed after the complaint was saved; returning the saved complaint', {
+                        complaintId: complaint.id,
+                        tenantId,
+                        error: aiError instanceof Error ? aiError.message : String(aiError),
+                    });
                 }
 
-                return result;
-            });
+                if (releaseAiUsage) {
+                    try {
+                        await prisma.$transaction((tx) =>
+                            releaseUsageWithinTransaction(tx, tenantId, 'ai_analyses', usagePeriod),
+                        );
+                    } catch (releaseError) {
+                        logger.warn('Failed to release AI usage reservation', {
+                            complaintId: complaint.id,
+                            tenantId,
+                            error: releaseError instanceof Error ? releaseError.message : String(releaseError),
+                        });
+                    }
+                }
+            }
 
             if (aiProcessingDeferred || evidenceOmitted) {
                 try {

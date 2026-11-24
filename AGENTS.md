@@ -30,9 +30,8 @@ There is no root build or test command. Install dependencies separately in `bcip
 
 ## Change conventions
 
-- Preserve the existing TypeScript strictness, Prisma schema/migration workflow, domain interfaces, and FastAPI Pydantic schemas. Prefer the nearest existing feature pattern over introducing a new abstraction.
-- Keep persistence details out of complaint domain interfaces; adapters and repositories translate between domain objects and Prisma records.
-- Add or update focused tests for backend use cases and run the narrowest relevant command before broader validation.
+- Preserve the existing TypeScript strictness, Prisma schema/migration workflow, and FastAPI Pydantic schemas. Prefer the nearest existing feature pattern over introducing a new abstraction.
+- Add or update focused tests for backend services and run the narrowest relevant command before broader validation.
 - Do not commit secrets, `.env` files, generated `dist/` output, or dependency directories.
 
 ## Documentation
