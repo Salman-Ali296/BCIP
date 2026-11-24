@@ -6,6 +6,13 @@ import { emailService } from './emailService';
 import { logger } from '../utils/logger';
 import { AppError, Errors } from '../utils/error';
 import { sanitizeText } from '../utils/validators';
+import { BUSINESS_PLAN_IDS } from '../modules/billing/business-plans';
+import { getPlanForTenant } from '../modules/billing/plan-catalog.service';
+import {
+    getCurrentUsagePeriod,
+    releaseUsageWithinTransaction,
+    reserveUsageWithinTransaction,
+} from '../modules/billing/usage.service';
 
 interface CreateComplaintRequest {
     title: string;
@@ -22,6 +29,34 @@ interface ComplaintUploadFile {
     mimetype: string;
     size: number;
     buffer: Buffer;
+}
+
+function acceptingComplaintPortalWhere(now: Date): Prisma.TenantWhereInput {
+    return {
+        isActive: true,
+        businessVerified: true,
+        complaintChannel: 'WEB_PORTAL',
+        onboardingCompletedAt: { not: null },
+        slug: { not: 'bcip-public-consumer-platform' },
+        OR: [
+            {
+                businessTrial: {
+                    is: {
+                        acceptedAt: { lte: now },
+                        expiresAt: { gt: now },
+                    },
+                },
+            },
+            {
+                subscriptionStatus: { in: ['active', 'trialing', 'demo_active'] },
+                subscriptionPlan: { in: [...BUSINESS_PLAN_IDS] },
+                OR: [
+                    { subscriptionCurrentPeriodEnd: null },
+                    { subscriptionCurrentPeriodEnd: { gt: now } },
+                ],
+            },
+        ],
+    };
 }
 
 export class ComplaintService {
@@ -49,23 +84,20 @@ export class ComplaintService {
         logger.info('Creating complaint', { tenantId });
 
         try {
+            const now = new Date();
             const tenant = await prisma.tenant.findFirst({
                 where: {
+                    ...acceptingComplaintPortalWhere(now),
                     id: tenantId,
-                    isActive: true,
-                    businessTrial: {
-                        is: {
-                            complaintChannel: 'WEB_PORTAL',
-                            onboardingCompletedAt: { not: null },
-                            acceptedAt: { lte: new Date() },
-                            expiresAt: { gt: new Date() },
-                        },
-                    },
                 },
                 select: { id: true },
             });
             if (!tenant) {
                 throw Errors.forbidden('This business complaint portal is not accepting complaints');
+            }
+            const plan = await getPlanForTenant(tenantId);
+            if (!plan) {
+                throw Errors.forbidden('This business plan is not available for complaint submissions');
             }
 
             const candidates = await prisma.complaint.findMany({
@@ -75,8 +107,23 @@ export class ComplaintService {
                 take: 100,
             });
 
-            // Start database transaction
+            let aiProcessingDeferred = false;
+            let evidenceOmitted = false;
+            const usagePeriod = getCurrentUsagePeriod(now);
             const complaint = await prisma.$transaction(async (tx) => {
+                const hasComplaintCapacity = await reserveUsageWithinTransaction(
+                    tx,
+                    tenantId,
+                    'complaints',
+                    plan.complaintLimit,
+                    usagePeriod,
+                );
+                if (!hasComplaintCapacity) {
+                    throw Errors.forbidden(
+                        'This business has reached its monthly complaint limit. Please contact the business directly.',
+                    );
+                }
+
                 const customer = await tx.customer.upsert({
                     where: {
                         tenantId_email: {
@@ -110,6 +157,23 @@ export class ComplaintService {
                 });
 
                 if (files.length > 0) {
+                    const requestedStorageBytes = files.reduce((total, file) => total + file.size, 0);
+                    await tx.$queryRaw`
+                        SELECT "id" FROM "tenants" WHERE "id" = ${tenantId} FOR UPDATE
+                    `;
+                    const storage = await tx.complaintAttachment.aggregate({
+                        where: { complaint: { tenantId } },
+                        _sum: { fileSize: true },
+                    });
+                    const existingStorageBytes = storage._sum.fileSize ?? 0;
+                    const storageLimitBytes = plan.storageLimitMb === null
+                        ? null
+                        : plan.storageLimitMb * 1024 * 1024;
+                    const hasStorageCapacity = storageLimitBytes === null ||
+                        requestedStorageBytes <= storageLimitBytes - existingStorageBytes;
+                    if (!hasStorageCapacity) {
+                        evidenceOmitted = true;
+                    } else {
                     await tx.complaintAttachment.createMany({
                         data: files.map((file) => {
                             const originalName = file.originalname
@@ -126,6 +190,7 @@ export class ComplaintService {
                             };
                         }),
                     });
+                    }
                 }
 
                 const teamMembers = await tx.user.findMany({
@@ -166,55 +231,106 @@ export class ComplaintService {
                     });
                 }
 
-                // AI and routing are completed before the customer receives the tracking ID.
-                try {
-                    const aiPrediction = await aiService.predict({
-                        text: `${title}\n${sanitizedDescription}`,
-                        complaintId: complaint.id,
-                        candidateTexts: candidates.map((candidate) =>
-                            `${candidate.title}\n${candidate.description}`,
-                        ),
-                        candidateIds: candidates.map((candidate) => candidate.id),
-                    });
-
-                    // 3. Update complaint with AI results
-                    const updatedComplaint = await tx.complaint.update({
-                        where: { id: complaint.id },
-                        data: {
-                            aiCategory: aiPrediction.category,
-                            aiSentiment: aiPrediction.sentiment as Sentiment,
-                            aiSentimentScore: aiPrediction.sentimentScore,
-                            aiPriority: aiPrediction.priorityLevel as Priority,
-                            priority: aiPrediction.priorityLevel as Priority,
-                            isDuplicate: aiPrediction.isDuplicate,
-                            duplicateOf: aiPrediction.duplicateOf
-                                ? { connect: { id: aiPrediction.duplicateOf } }
-                                : undefined,
-                            suggestedResponse: aiPrediction.wasProcessed
-                                ? this.buildSuggestedResponse(
-                                    aiPrediction.category,
-                                    aiPrediction.sentiment,
-                                )
-                                : null,
-                            aiSummary: aiPrediction.wasProcessed
-                                ? this.summarizeComplaint(title, sanitizedDescription)
-                                : null,
-                            aiProcessed: aiPrediction.wasProcessed,
-                            aiProcessedAt: aiPrediction.wasProcessed ? new Date() : null,
-                        },
-                    });
-
-                    return updatedComplaint;
-                } catch (aiError) {
-                    // Log error but don't fail the transaction
-                    logger.error(
-                        'AI processing failed, continuing with complaint creation',
-                        aiError,
-                    );
-
-                    return complaint;
+                const hasAiCapacity = await reserveUsageWithinTransaction(
+                    tx,
+                    tenantId,
+                    'ai_analyses',
+                    plan.aiAnalysisLimit,
+                    usagePeriod,
+                );
+                if (!hasAiCapacity) {
+                    aiProcessingDeferred = true;
                 }
+
+                let result = complaint;
+                if (hasAiCapacity) {
+                    try {
+                        const aiPrediction = await aiService.predict({
+                            text: `${title}\n${sanitizedDescription}`,
+                            complaintId: complaint.id,
+                            candidateTexts: candidates.map((candidate) =>
+                                `${candidate.title}\n${candidate.description}`,
+                            ),
+                            candidateIds: candidates.map((candidate) => candidate.id),
+                        });
+
+                        result = await tx.complaint.update({
+                            where: { id: complaint.id },
+                            data: {
+                                aiCategory: aiPrediction.category,
+                                aiSentiment: aiPrediction.sentiment as Sentiment,
+                                aiSentimentScore: aiPrediction.sentimentScore,
+                                aiPriority: aiPrediction.priorityLevel as Priority,
+                                priority: aiPrediction.priorityLevel as Priority,
+                                isDuplicate: aiPrediction.isDuplicate,
+                                duplicateOf: aiPrediction.duplicateOf
+                                    ? { connect: { id: aiPrediction.duplicateOf } }
+                                    : undefined,
+                                suggestedResponse: aiPrediction.wasProcessed
+                                    ? this.buildSuggestedResponse(
+                                        aiPrediction.category,
+                                        aiPrediction.sentiment,
+                                    )
+                                    : null,
+                                aiSummary: aiPrediction.wasProcessed
+                                    ? this.summarizeComplaint(title, sanitizedDescription)
+                                    : null,
+                                aiProcessed: aiPrediction.wasProcessed,
+                                aiProcessedAt: aiPrediction.wasProcessed ? new Date() : null,
+                            },
+                        });
+
+                        if (!aiPrediction.wasProcessed) {
+                            await releaseUsageWithinTransaction(
+                                tx,
+                                tenantId,
+                                'ai_analyses',
+                                usagePeriod,
+                            );
+                        }
+                    } catch (aiError) {
+                        await releaseUsageWithinTransaction(
+                            tx,
+                            tenantId,
+                            'ai_analyses',
+                            usagePeriod,
+                        );
+                        logger.error(
+                            'AI processing failed, continuing with complaint creation',
+                            aiError,
+                        );
+                    }
+                }
+
+                return result;
             });
+
+            if (aiProcessingDeferred || evidenceOmitted) {
+                try {
+                    const businessAdmins = await prisma.user.findMany({
+                        where: { tenantId, role: 'BUSINESS_ADMIN', isActive: true },
+                        select: { id: true },
+                    });
+                    if (businessAdmins.length > 0) {
+                        const reasons = [
+                            ...(aiProcessingDeferred ? ['AI analysis deferred at the plan limit'] : []),
+                            ...(evidenceOmitted ? ['attachments were omitted at the storage limit'] : []),
+                        ];
+                        await prisma.notification.createMany({
+                            data: businessAdmins.map(({ id }) => ({
+                                tenantId,
+                                userId: id,
+                                complaintId: complaint.id,
+                                type: 'SYSTEM',
+                                title: 'A plan limit affected a new complaint',
+                                message: `The complaint was retained; ${reasons.join(' and ')}.`,
+                            })),
+                        });
+                    }
+                } catch (notificationError) {
+                    logger.error('Failed to notify business administrators about plan limits', notificationError);
+                }
+            }
 
             // 4. Log activity
             await prisma.statusHistory.create({
@@ -240,6 +356,18 @@ export class ComplaintService {
                 tenantId,
                 priority: complaint.priority,
             });
+
+            if (aiProcessingDeferred || evidenceOmitted) {
+                return {
+                    ...complaint,
+                    ...(aiProcessingDeferred
+                        ? { notice: 'AI analysis was deferred because the business reached its plan limit.' }
+                        : {}),
+                    ...(evidenceOmitted
+                        ? { evidenceNotice: 'The complaint was saved, but attachments exceeded the business storage limit.' }
+                        : {}),
+                };
+            }
 
             return {
                 id: complaint.id,
@@ -285,8 +413,8 @@ export class ComplaintService {
             limit?: number;
         }
     ) {
-        const page = filters.page || 1;
-        const limit = Math.min(filters.limit || 20, 100); // Max 100 per page
+        const page = Math.max(1, Math.floor(filters.page || 1));
+        const limit = Math.min(Math.max(1, Math.floor(filters.limit || 20)), 100); // 1-100 per page
         const skip = (page - 1) * limit;
         const search = filters.search?.trim();
         const statusValues = filters.status
@@ -458,23 +586,92 @@ export class ComplaintService {
             where: { id: complaintId, tenantId },
         });
         if (!complaint) throw Errors.notFound('Complaint');
+        const plan = await getPlanForTenant(tenantId);
+        if (!plan) throw Errors.forbidden('This business plan is not available for evidence uploads');
 
-        return prisma.complaintAttachment.createMany({
-            data: files.map(file => ({
-                complaintId,
-                fileName: file.originalname,
-                originalName: file.originalname,
-                mimeType: file.mimetype,
-                fileSize: file.size,
-                storageProvider: 'local-data-url',
-                fileUrl: `data:${file.mimetype};base64,${file.buffer.toString('base64')}`,
-            })),
+        return prisma.$transaction(async (tx) => {
+            const requestedStorageBytes = files.reduce((total, file) => total + file.size, 0);
+            await tx.$queryRaw`
+                SELECT "id" FROM "tenants" WHERE "id" = ${tenantId} FOR UPDATE
+            `;
+            const currentStorage = await tx.complaintAttachment.aggregate({
+                where: { complaint: { tenantId } },
+                _sum: { fileSize: true },
+            });
+            const existingStorageBytes = currentStorage._sum.fileSize ?? 0;
+            const limitBytes = plan.storageLimitMb === null
+                ? null
+                : plan.storageLimitMb * 1024 * 1024;
+            if (
+                limitBytes !== null &&
+                requestedStorageBytes > limitBytes - existingStorageBytes
+            ) {
+                throw Errors.forbidden(
+                    'The evidence storage limit has been reached. The complaint remains saved; these attachments were not uploaded.',
+                );
+            }
+
+            return tx.complaintAttachment.createMany({
+                data: files.map((file) => ({
+                    complaintId,
+                    fileName: file.originalname,
+                    originalName: file.originalname,
+                    mimeType: file.mimetype,
+                    fileSize: file.size,
+                    storageProvider: 'local-data-url',
+                    fileUrl: `data:${file.mimetype};base64,${file.buffer.toString('base64')}`,
+                })),
+            });
         });
     }
 
+    async listAcceptingComplaintPortals(search?: string) {
+        const now = new Date();
+        const normalizedSearch = search?.trim();
+        try {
+            return await prisma.tenant.findMany({
+                where: {
+                    ...acceptingComplaintPortalWhere(now),
+                    ...(normalizedSearch
+                        ? {
+                              AND: [
+                                  {
+                                      OR: [
+                                          {
+                                              name: {
+                                                  contains: normalizedSearch,
+                                                  mode: 'insensitive',
+                                              },
+                                          },
+                                          {
+                                              slug: {
+                                                  contains: normalizedSearch,
+                                                  mode: 'insensitive',
+                                              },
+                                          },
+                                      ],
+                                  },
+                              ],
+                          }
+                        : {}),
+                },
+                select: { id: true, name: true, slug: true },
+                orderBy: { name: 'asc' },
+                take: 50,
+            });
+        } catch (error) {
+            logger.error('Failed to list public complaint portals', error);
+            throw Errors.databaseError(error);
+        }
+    }
+
     async getTenantBySlug(slug: string) {
+        const now = new Date();
         const tenant = await prisma.tenant.findFirst({
-            where: { slug, isActive: true },
+            where: {
+                ...acceptingComplaintPortalWhere(now),
+                slug,
+            },
             select: { id: true, name: true, slug: true },
         });
         if (!tenant) throw Errors.notFound('Business');

@@ -5,52 +5,110 @@
    BCIP — GLOBAL DESIGN SYSTEM
    Business Complaint Intelligence Platform
    Next.js App Router | Tailwind CSS v4
-   Theme: Dark Navy + Emerald
+   Theme: landing page — white + lilac surfaces, plum ink, violet brand
    ============================================================ */
 
 /* ============================================================
-   1. DESIGN TOKENS
+   0. BRAND TOKENS (single source of truth)
+   Every value is taken from the landing page. Tailwind generates
+   utilities from these (bg-ink, text-brand, border-line, rounded-card,
+   shadow-card, font-sans...) and exposes them as CSS variables
+   (var(--color-ink), var(--radius-card), ...).
+   ============================================================ */
+
+@theme {
+  --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-display: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Text */
+  --color-ink: #201239;
+  --color-ink-soft: #514961;
+  --color-muted: #706b80;
+  --color-subtle: #878193;
+  --color-faint: #a39db0;
+
+  /* Surfaces and lines */
+  --color-surface: #ffffff;
+  --color-wash: #faf9fc;
+  --color-lilac: #f2edff;
+  --color-lilac-soft: #f8f5ff;
+  --color-line: #ebe6f2;
+  --color-line-strong: #cfc1ee;
+
+  /* Brand */
+  --color-brand: #6b42d8;
+  --color-brand-strong: #4f34a3;
+  --color-brand-soft: #e3d8fb;
+  --color-brand-glow: #9069f6;
+  --color-deep: #29104f;
+
+  /* Status */
+  --color-success: #119b75;
+  --color-success-soft: #e7f7f1;
+  --color-warning: #b45309;
+  --color-warning-soft: #fef3c7;
+  --color-danger: #c34255;
+  --color-danger-soft: #fdecef;
+
+  /* Shape */
+  --radius-control: 0.75rem;
+  --radius-card: 1.5rem;
+  --radius-panel: 1.75rem;
+
+  /* Elevation */
+  --shadow-soft: 0 5px 14px rgba(32, 18, 57, 0.14);
+  --shadow-button: 0 8px 20px rgba(32, 18, 57, 0.16);
+  --shadow-card: 0 22px 56px rgba(32, 18, 57, 0.16);
+  --shadow-nav: 0 8px 28px rgba(41, 16, 79, 0.07);
+  --shadow-glow: 0 30px 80px -30px rgba(107, 66, 216, 0.35);
+  --shadow-shell: 0 28px 100px rgba(12, 5, 33, 0.32);
+}
+
+/* ============================================================
+   1. LEGACY TOKEN ALIASES
+   Older components read --bcip-*; they now resolve to the brand tokens.
    ============================================================ */
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 
-  --bcip-bg: #0b1120;
-  --bcip-bg-secondary: #0d1322;
-  --bcip-bg-tertiary: #0a1020;
-  --bcip-surface: #111b2e;
-  --bcip-surface-hover: #17243a;
+  --bcip-bg: var(--color-surface);
+  --bcip-bg-secondary: var(--color-wash);
+  --bcip-bg-tertiary: var(--color-lilac-soft);
+  --bcip-surface: var(--color-surface);
+  --bcip-surface-hover: var(--color-wash);
 
-  --bcip-primary: #10b981;
-  --bcip-primary-hover: #059669;
-  --bcip-primary-light: #34d399;
-  --bcip-primary-muted: rgba(16, 185, 129, 0.1);
-  --bcip-primary-border: rgba(16, 185, 129, 0.24);
+  --bcip-primary: var(--color-brand);
+  --bcip-primary-hover: var(--color-brand-strong);
+  --bcip-primary-light: var(--color-brand-glow);
+  --bcip-primary-muted: rgba(107, 66, 216, 0.08);
+  --bcip-primary-border: rgba(107, 66, 216, 0.24);
 
-  --bcip-text: #f8fafc;
-  --bcip-text-secondary: #cbd5e1;
-  --bcip-text-muted: #94a3b8;
-  --bcip-text-subtle: #64748b;
+  --bcip-text: var(--color-ink);
+  --bcip-text-secondary: var(--color-ink-soft);
+  --bcip-text-muted: var(--color-muted);
+  --bcip-text-subtle: var(--color-subtle);
 
-  --bcip-border: rgba(255, 255, 255, 0.08);
-  --bcip-border-hover: rgba(255, 255, 255, 0.15);
-  --bcip-border-strong: rgba(255, 255, 255, 0.12);
+  --bcip-border: var(--color-line);
+  --bcip-border-hover: var(--color-line-strong);
+  --bcip-border-strong: var(--color-line-strong);
 
-  --bcip-danger: #f87171;
-  --bcip-warning: #fbbf24;
-  --bcip-info: #60a5fa;
-  --bcip-success: #34d399;
+  --bcip-danger: var(--color-danger);
+  --bcip-warning: var(--color-warning);
+  --bcip-info: var(--color-brand);
+  --bcip-success: var(--color-success);
 
   --bcip-radius-sm: 0.5rem;
-  --bcip-radius-md: 0.75rem;
+  --bcip-radius-md: var(--radius-control);
   --bcip-radius-lg: 1rem;
   --bcip-radius-xl: 1.25rem;
 
   --bcip-container: 1280px;
 
-  --bcip-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.12);
-  --bcip-shadow-md: 0 12px 32px rgba(0, 0, 0, 0.24);
-  --bcip-shadow-lg: 0 24px 64px rgba(0, 0, 0, 0.35);
+  --bcip-shadow-sm: var(--shadow-soft);
+  --bcip-shadow-md: var(--shadow-button);
+  --bcip-shadow-lg: var(--shadow-card);
 
   --bcip-transition-fast: 160ms ease;
   --bcip-transition: 220ms ease;
@@ -81,14 +139,7 @@
     margin: 0;
     background: var(--bcip-bg);
     color: var(--bcip-text);
-    font-family:
-      Inter,
-      ui-sans-serif,
-      system-ui,
-      -apple-system,
-      BlinkMacSystemFont,
-      "Segoe UI",
-      sans-serif;
+    font-family: var(--font-sans);
     font-size: 15px;
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
@@ -101,14 +152,7 @@
   input,
   textarea,
   select {
-    font-family:
-      Inter,
-      ui-sans-serif,
-      system-ui,
-      -apple-system,
-      BlinkMacSystemFont,
-      "Segoe UI",
-      sans-serif;
+    font-family: var(--font-sans);
   }
 
   button,
@@ -404,6 +448,31 @@
 .landing-nav__sign-in:hover {
   background: rgba(255, 255, 255, 0.05);
   color: #ffffff;
+}
+
+.landing-nav__customer-portal {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 11px;
+  border: 1px solid rgba(103, 232, 249, 0.28);
+  border-radius: 8px;
+  background: rgba(8, 145, 178, 0.12);
+  color: #a5f3fc;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  transition:
+    border-color var(--bcip-transition-fast),
+    background var(--bcip-transition-fast),
+    color var(--bcip-transition-fast);
+}
+
+.landing-nav__customer-portal:hover {
+  border-color: rgba(103, 232, 249, 0.55);
+  background: rgba(8, 145, 178, 0.2);
+  color: #cffafe;
 }
 
 .landing-nav__cta-btn {
@@ -744,6 +813,27 @@
   padding: 16px 20px max(20px, env(safe-area-inset-bottom));
   border-top: 1px solid var(--bcip-border);
   background: #0b1221;
+}
+
+.landing-mobile-menu__portal {
+  display: inline-flex;
+  grid-column: 1 / -1;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 11px 14px;
+  border: 1px solid rgba(103, 232, 249, 0.32);
+  border-radius: 9px;
+  background: rgba(8, 145, 178, 0.16);
+  color: #a5f3fc;
+  font-size: 13px;
+  font-weight: 700;
+  transition: background var(--bcip-transition-fast);
+}
+
+.landing-mobile-menu__portal:hover {
+  background: rgba(8, 145, 178, 0.26);
 }
 
 .landing-mobile-menu__signin,
@@ -1379,6 +1469,10 @@
     display: none;
   }
 
+  .landing-nav__customer-portal {
+    display: none;
+  }
+
   .landing-nav__hamburger {
     display: inline-flex;
   }
@@ -1629,17 +1723,18 @@ body:has(.landing-page-shell) {
 }
 
 .landing-page-shell {
-  --landing-ink: #201239;
-  --landing-muted: #706b80;
-  --landing-violet: #6b42d8;
-  --landing-lilac: #f2edff;
-  --landing-border: #ebe6f2;
-  --landing-wash: #faf9fc;
-  width: min(calc(100% - 32px), 1540px);
-  margin: 16px auto;
+  --landing-ink: var(--color-ink);
+  --landing-muted: var(--color-muted);
+  --landing-violet: var(--color-brand);
+  --landing-lilac: var(--color-lilac);
+  --landing-border: var(--color-line);
+  --landing-wash: var(--color-wash);
+  width: 100%;
+  min-height: 100dvh;
+  margin: 0 auto;
   overflow: clip;
-  border: 1px solid rgba(255, 255, 255, 0.24);
-  border-radius: 26px;
+  border: 0;
+  border-radius: 0;
   background: #ffffff;
   color: var(--landing-ink);
   box-shadow: 0 28px 100px rgba(12, 5, 33, 0.32);
@@ -1684,6 +1779,20 @@ body:has(.landing-page-shell) {
 .landing-page-shell .landing-nav__sign-in:hover {
   background: #f7f4fd;
   color: var(--landing-ink);
+}
+
+.landing-page-shell .landing-nav__customer-portal,
+.landing-page-shell .landing-mobile-menu__portal {
+  border-color: #ddd2f3;
+  background: #f2edff;
+  color: #4f34a3;
+}
+
+.landing-page-shell .landing-nav__customer-portal:hover,
+.landing-page-shell .landing-mobile-menu__portal:hover {
+  border-color: #c9b8ed;
+  background: #e9e1fb;
+  color: #3c247e;
 }
 
 .landing-page-shell .landing-nav__cta-btn,
@@ -1898,9 +2007,9 @@ body:has(.landing-page-shell) {
 
 @media (max-width: 767px) {
   .landing-page-shell {
-    width: calc(100% - 16px);
-    margin: 8px auto;
-    border-radius: 20px;
+    width: 100%;
+    margin: 0 auto;
+    border-radius: 0;
   }
 
   .landing-page-shell .landing-nav {
@@ -2515,7 +2624,7 @@ body:has(.landing-page-shell) {
 .signin-shell {
   --signin-ink: #171717;
   --signin-muted: #777777;
-  --signin-accent: #2454d6;
+  --signin-accent: #6b42d8;
   --signin-border: #dedede;
   --signin-background: #f3d8b0;
   --signin-photo-background: #da8e20;
@@ -2655,7 +2764,7 @@ body:has(.landing-page-shell) {
 
 .signin-form .signin-field:focus {
   border-color: var(--signin-accent);
-  outline: 2px solid rgb(36 84 214 / 16%);
+  outline: 2px solid rgb(107 66 216 / 16%);
   outline-offset: 1px;
   background: #fff;
   box-shadow: none;

@@ -13,11 +13,26 @@ import { adminBusinessController } from './controllers/admin-business.controller
 import { adminComplaintController } from './controllers/admin-complaint.controller';
 import { adminUserController } from './controllers/admin-user.controller';
 import { adminConfigController } from './controllers/admin-config.controller';
+import {
+    createAdminPlan,
+    getAdminSubscription,
+    listAdminPlans,
+    listAdminSubscriptions,
+    updateAdminPlan,
+    updateAdminPlanStatus,
+} from './controllers/admin-plan.controller';
 
 const router = Router();
 
 // Require SUPER_ADMIN role for all admin routes
 router.use(authMiddleware, requireRoles('SUPER_ADMIN'));
+
+router.get('/plans', listAdminPlans);
+router.post('/plans', createAdminPlan);
+router.put('/plans/:id', updateAdminPlan);
+router.patch('/plans/:id/status', updateAdminPlanStatus);
+router.get('/subscriptions', listAdminSubscriptions);
+router.get('/subscriptions/:id', getAdminSubscription);
 
 // ========================================
 // Dashboard & Analytics

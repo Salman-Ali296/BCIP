@@ -26,7 +26,7 @@ export function DashboardPage() {
   const filtering = useFiltering(initialComplaints);
   const query = useComplaintsList(filtering.filters);
 
-  const complaints: ComplaintListItem[] = query.data?.data ?? [];
+  const complaints = useMemo<ComplaintListItem[]>(() => query.data?.data ?? [], [query.data]);
   const filtered = sortComplaints(complaints, sortKey, direction);
   const total = query.data?.pagination.total ?? filtered.length;
 
@@ -70,7 +70,7 @@ export function DashboardPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#f8fafc] px-4 py-6 sm:px-6 sm:py-8">
+    <main className="min-h-screen bg-wash px-4 py-6 sm:px-6 sm:py-8">
       <div className="mx-auto max-w-[1540px] space-y-6">
         <DashboardHeader
           onRefresh={() => {

@@ -2,21 +2,10 @@
 
 import React, { useState } from "react";
 import {
-  AlertTriangle,
   ArrowDownRight,
   ArrowUpRight,
-  BarChart2,
-  BarChart3,
-  CheckCircle2,
   Clock,
-  Compass,
   FileSearch,
-  Filter,
-  HelpCircle,
-  Layers,
-  LineChart,
-  PieChart,
-  TrendingDown,
   TrendingUp,
   Users,
 } from "lucide-react";
@@ -35,10 +24,10 @@ export function OperationalAnalyticsSection() {
             <span className="status-dot" />
             Decision-Grade Analytics
           </div>
-          <h2 className="heading-xl mt-4 text-[#101d30]">
+          <h2 className="heading-xl mt-4 text-ink">
             Analytics that answer
             <br />
-            <span className="text-[#2454d6]">real business questions.</span>
+            <span className="text-brand">real business questions.</span>
           </h2>
           <p className="mt-4 text-base leading-7 text-slate-600">
             Enterprise leaders don&apos;t need decorative charts. BCIP provides structured operational answers
@@ -82,13 +71,13 @@ export function OperationalAnalyticsSection() {
                 onClick={() => setActiveQuestion(item.id as QuestionKey)}
                 className={`p-4 rounded-xl border text-left transition-all ${
                   isSelected
-                    ? "border-[#2454d6] bg-[#edf2ff] shadow-sm ring-1 ring-[#2454d6]/20"
+                    ? "border-brand bg-lilac shadow-sm ring-1 ring-brand/20"
                     : "border-slate-200 bg-slate-50 hover:bg-white hover:border-slate-300"
                 }`}
               >
                 <div
                   className={`grid h-8 w-8 place-items-center rounded-lg ${
-                    isSelected ? "bg-[#2454d6] text-white" : "bg-slate-200 text-slate-600"
+                    isSelected ? "bg-ink text-white" : "bg-slate-200 text-slate-600"
                   }`}
                 >
                   <Icon className="h-4 w-4" />
@@ -103,7 +92,7 @@ export function OperationalAnalyticsSection() {
         </div>
 
         {/* Dynamic Question Detail Visualizer */}
-        <div className="mt-8 rounded-2xl border border-slate-200 bg-[#f8fafc] p-6 sm:p-8">
+        <div className="mt-8 rounded-2xl border border-slate-200 bg-wash p-6 sm:p-8">
           {activeQuestion === "categories" && (
             <div className="space-y-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-4">
@@ -115,7 +104,7 @@ export function OperationalAnalyticsSection() {
                     Surfacing +14% surge in Billing & Payment disputes following checkout gateway migration.
                   </p>
                 </div>
-                <span className="text-xs font-mono font-bold text-[#2454d6] bg-blue-50 border border-blue-200 px-2.5 py-1 rounded-full">
+                <span className="text-xs font-mono font-bold text-brand bg-blue-50 border border-blue-200 px-2.5 py-1 rounded-full">
                   Total Captured: 1,284 Complaints
                 </span>
               </div>
@@ -302,7 +291,7 @@ export function OperationalAnalyticsSection() {
                     <div className="mt-2 h-2 w-full rounded-full bg-slate-100 overflow-hidden">
                       <div
                         className={`h-full rounded-full ${
-                          team.pct > 75 ? "bg-amber-500" : "bg-[#2454d6]"
+                          team.pct > 75 ? "bg-amber-500" : "bg-ink"
                         }`}
                         style={{ width: `${team.pct}%` }}
                       />

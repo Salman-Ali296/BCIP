@@ -8,9 +8,6 @@ import {
   Search,
   ShieldCheck,
   Zap,
-  TrendingDown,
-  Clock,
-  Sparkles,
 } from "lucide-react";
 
 const outcomes = [
@@ -72,10 +69,10 @@ export function BusinessOutcomesSection() {
               <span className="status-dot" />
               Operational Outcomes
             </div>
-            <h2 className="heading-xl mt-3 text-[#101d30]">
+            <h2 className="heading-xl mt-3 text-ink">
               Measurable impact.
               <br />
-              <span className="text-[#2454d6]">Zero guesswork.</span>
+              <span className="text-brand">Zero guesswork.</span>
             </h2>
           </div>
           <p className="text-sm leading-relaxed text-slate-600 max-w-lg lg:ml-auto">
@@ -90,27 +87,27 @@ export function BusinessOutcomesSection() {
             return (
               <div
                 key={item.number}
-                className="rounded-2xl border border-slate-200 bg-[#f8fafc] p-5 flex flex-col justify-between transition-all hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5"
+                className="rounded-2xl border border-slate-200 bg-wash p-5 flex flex-col justify-between transition-all hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5"
               >
                 <div>
                   <div className="flex items-center justify-between pb-3 border-b border-slate-200/80">
                     <span className="font-mono text-[11px] font-bold text-slate-400">
                       Step {item.number}
                     </span>
-                    <span className="font-mono text-xs font-bold text-[#2454d6] bg-blue-50 border border-blue-200/60 px-2 py-0.5 rounded">
+                    <span className="font-mono text-xs font-bold text-brand bg-blue-50 border border-blue-200/60 px-2 py-0.5 rounded">
                       {item.metric}
                     </span>
                   </div>
 
                   <div className="mt-4 flex items-center gap-2.5">
-                    <div className="grid h-7 w-7 place-items-center rounded-lg bg-[#2454d6] text-white shrink-0">
+                    <div className="grid h-7 w-7 place-items-center rounded-lg bg-ink text-white shrink-0">
                       <Icon className="h-4 w-4" />
                     </div>
                     <div>
                       <h3 className="text-sm font-bold text-slate-900 leading-snug">
                         {item.title}
                       </h3>
-                      <p className="text-[11px] font-semibold text-[#2454d6]">
+                      <p className="text-[11px] font-semibold text-brand">
                         {item.highlight}
                       </p>
                     </div>
@@ -141,9 +138,9 @@ export function BusinessOutcomesSection() {
           })}
 
           {/* Outcome Summary Callout */}
-          <div className="rounded-2xl border border-blue-200 bg-[#edf2ff] p-5 flex flex-col justify-between">
+          <div className="rounded-2xl border border-blue-200 bg-lilac p-5 flex flex-col justify-between">
             <div>
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#2454d6]">
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-brand">
                 Core Safety Guarantee
               </span>
               <h3 className="mt-3 text-base font-bold text-slate-900 leading-snug">
@@ -169,7 +166,7 @@ export function BusinessOutcomesSection() {
               </div>
             </div>
 
-            <div className="mt-5 pt-3 border-t border-blue-200/60 text-xs font-bold text-[#2454d6]">
+            <div className="mt-5 pt-3 border-t border-blue-200/60 text-xs font-bold text-brand">
               Enterprise Trust Model
             </div>
           </div>

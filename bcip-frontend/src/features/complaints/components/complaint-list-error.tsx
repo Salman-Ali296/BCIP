@@ -1,4 +1,3 @@
-import { ComplaintListSkeleton } from "@/features/complaints/components/complaint-list-skeleton";
 interface ComplaintListErrorProps {
     message?: string;
 }

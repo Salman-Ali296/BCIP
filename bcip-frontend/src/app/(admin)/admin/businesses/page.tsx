@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
     Search,
@@ -48,13 +48,7 @@ export default function BusinessesPage() {
         totalPages: 0,
     });
 
-    useEffect(() => {
-        loadIndustries();
-    }, []);
 
-    useEffect(() => {
-        loadBusinesses();
-    }, [filters]);
 
     const loadIndustries = async () => {
         try {
@@ -65,27 +59,27 @@ export default function BusinessesPage() {
         }
     };
 
-    const loadBusinesses = async () => {
+    const loadBusinesses = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
             const result = await getBusinesses(filters);
             setBusinesses(result.data);
             setPagination(result.pagination);
-        } catch (err: any) {
-            setError(err.message || 'Failed to load businesses');
+        } catch (err: unknown) {
+            setError((err instanceof Error && err.message) || 'Failed to load businesses');
             console.error('Load businesses error:', err);
         } finally {
             setLoading(false);
         }
-    };
+    }, [filters]);
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setFilters((prev) => ({ ...prev, search: value, page: 1 }));
     };
 
-    const handleFilterChange = (key: keyof BusinessFilters, value: any) => {
+    const handleFilterChange = (key: keyof BusinessFilters, value: BusinessFilters[keyof BusinessFilters]) => {
         setFilters((prev) => ({ ...prev, [key]: value, page: 1 }));
     };
 
@@ -112,6 +106,14 @@ export default function BusinessesPage() {
         filters.businessVerified !== undefined,
         filters.industry !== undefined,
     ].filter(Boolean).length;
+
+    useEffect(() => {
+        void Promise.resolve().then(() => loadIndustries());
+    }, []);
+
+    useEffect(() => {
+        void Promise.resolve().then(() => loadBusinesses());
+    }, [loadBusinesses]);
 
     return (
         <div className="space-y-6">

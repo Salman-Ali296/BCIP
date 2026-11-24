@@ -1,3 +1,12 @@
 {
-    "python.terminal.useEnvFile": true
+    "python.terminal.useEnvFile": true,
+    "editor.tabCompletion": "on",
+    "editor.snippetSuggestions": "top",
+    "[typescript]": {
+        "editor.quickSuggestions": {
+            "other": true,
+            "comments": true,
+            "strings": true
+        }
+    }
 }

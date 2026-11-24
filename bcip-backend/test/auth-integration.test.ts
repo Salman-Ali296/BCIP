@@ -35,8 +35,8 @@ function makeFakeUser(overrides: Record<string, unknown> = {}) {
         fullName: 'Jane Doe',
         phone: null,
         passwordHash: '$2b$04$fakehashfakehashfakehashfakehashfakehashfakehashfak',
-        role: 'CUSTOMER',
-        accountType: 'CUSTOMER',
+        role: 'BUSINESS_ADMIN',
+        accountType: 'BUSINESS',
         tenantId: 'platform-tenant-id',
         isActive: true,
         emailVerified: true,
@@ -70,29 +70,7 @@ async function withServer(
     }
 }
 
-test('POST /api/v1/auth/register successfully registers a customer and returns 201', async t => {
-    mockPrismaMethod(t, authService, 'register', async () => ({
-        user: {
-            id: 'usr-new-customer',
-            email: 'newcustomer@example.com',
-            fullName: 'New Customer',
-            phone: null,
-            role: 'CUSTOMER',
-            accountType: 'CUSTOMER',
-            emailVerified: false,
-            tenantId: 'platform-tenant-id',
-            tenantName: 'BCIP Platform',
-        },
-        tenant: {
-            id: 'platform-tenant-id',
-            name: 'BCIP Platform',
-            slug: 'bcip-public-consumer-platform',
-            industry: null,
-            website: null,
-        },
-        verificationRequired: true,
-    }));
-
+test('POST /api/v1/auth/register rejects customer signup', async () => {
     await withServer(async baseUrl => {
         const response = await fetch(`${baseUrl}/api/v1/auth/register`, {
             method: 'POST',
@@ -105,46 +83,13 @@ test('POST /api/v1/auth/register successfully registers a customer and returns 2
             }),
         });
 
-        const body = (await response.json()) as {
-            success: boolean;
-            data?: {
-                verificationRequired?: boolean;
-                user?: { email?: string; role?: string; tenantId?: string };
-            };
-        };
-
-        assert.equal(response.status, 201);
-        assert.equal(body.success, true);
-        assert.equal(body.data?.verificationRequired, true);
-        assert.equal(body.data?.user?.email, 'newcustomer@example.com');
-        assert.equal(body.data?.user?.role, 'CUSTOMER');
-        assert.equal(body.data?.user?.tenantId, 'platform-tenant-id');
+        const body = await response.json() as { error?: { code?: string } };
+        assert.equal(response.status, 400);
+        assert.equal(body.error?.code, 'VALIDATION_ERROR');
     });
 });
 
-test('POST /api/auth/register legacy route alias registers successfully', async t => {
-    mockPrismaMethod(t, authService, 'register', async () => ({
-        user: {
-            id: 'usr-legacy-cust',
-            email: 'legacy@example.com',
-            fullName: 'Legacy User',
-            phone: null,
-            role: 'CUSTOMER',
-            accountType: 'CUSTOMER',
-            emailVerified: false,
-            tenantId: 'platform-tenant-id',
-            tenantName: 'BCIP Platform',
-        },
-        tenant: {
-            id: 'platform-tenant-id',
-            name: 'BCIP Platform',
-            slug: 'bcip-public-consumer-platform',
-            industry: null,
-            website: null,
-        },
-        verificationRequired: true,
-    }));
-
+test('POST /api/auth/register legacy route also rejects customer signup', async () => {
     await withServer(async baseUrl => {
         const response = await fetch(`${baseUrl}/api/auth/register`, {
             method: 'POST',
@@ -157,10 +102,9 @@ test('POST /api/auth/register legacy route alias registers successfully', async 
             }),
         });
 
-        assert.equal(response.status, 201);
-        const body = await response.json() as any;
-        assert.equal(body.success, true);
-        assert.equal(body.data?.verificationRequired, true);
+        const body = await response.json() as { error?: { code?: string } };
+        assert.equal(response.status, 400);
+        assert.equal(body.error?.code, 'VALIDATION_ERROR');
     });
 });
 
@@ -185,7 +129,7 @@ test('POST /api/v1/auth/register rejects business registration with personal ema
     });
 });
 
-test('POST /api/v1/auth/login logs in verified user and returns JWT token', async t => {
+test('POST /api/v1/auth/login logs in verified business user and returns JWT token', async t => {
     const password = 'StrongPassword123!';
     const passwordHash = await bcrypt.hash(password, 4);
     const user = makeFakeUser({ passwordHash });
@@ -216,13 +160,13 @@ test('POST /api/v1/auth/login logs in verified user and returns JWT token', asyn
         assert.equal(body.success, true);
         assert.ok(body.data?.token, 'must return a jwt token');
         assert.equal(body.data?.user?.email, 'customer@example.com');
-        assert.equal(body.data?.user?.role, 'CUSTOMER');
+        assert.equal(body.data?.user?.role, 'BUSINESS_ADMIN');
         assert.equal(body.data?.user?.tenantId, 'platform-tenant-id');
         assert.equal(body.data?.user?.tenantName, 'BCIP Platform');
     });
 });
 
-test('POST /api/auth/login legacy route logs in verified user correctly', async t => {
+test('POST /api/auth/login legacy route logs in verified business user correctly', async t => {
     const password = 'StrongPassword123!';
     const passwordHash = await bcrypt.hash(password, 4);
     const user = makeFakeUser({ passwordHash });
@@ -248,6 +192,29 @@ test('POST /api/auth/login legacy route logs in verified user correctly', async 
         assert.equal(response.status, 200);
         assert.equal(body.success, true);
         assert.ok(body.data?.token);
+    });
+});
+
+test('POST /api/v1/auth/login rejects existing customer accounts', async t => {
+    const password = 'StrongPassword123!';
+    const passwordHash = await bcrypt.hash(password, 4);
+    const user = makeFakeUser({
+        passwordHash,
+        accountType: 'CUSTOMER',
+        role: 'CUSTOMER',
+    });
+    mockPrismaMethod(t, prisma.user, 'findUnique', async () => user as never);
+
+    await withServer(async baseUrl => {
+        const response = await fetch(`${baseUrl}/api/v1/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: user.email, password }),
+        });
+        const body = await response.json() as { error?: { code?: string } };
+
+        assert.equal(response.status, 403);
+        assert.equal(body.error?.code, 'FORBIDDEN');
     });
 });
 

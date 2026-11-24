@@ -27,9 +27,6 @@ export default function SystemHealthPage() {
     const [loading, setLoading] = useState(true);
     const [services, setServices] = useState<ServiceStatus[]>([]);
 
-    useEffect(() => {
-        loadHealthStatus();
-    }, []);
 
     const loadHealthStatus = async () => {
         setLoading(true);
@@ -111,6 +108,10 @@ export default function SystemHealthPage() {
     const overallHealth = services.every(s => s.status === 'healthy') ? 'healthy' 
         : services.some(s => s.status === 'down') ? 'down' 
         : 'degraded';
+
+    useEffect(() => {
+        void Promise.resolve().then(() => loadHealthStatus());
+    }, []);
 
     return (
         <motion.div
@@ -201,7 +202,7 @@ export default function SystemHealthPage() {
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.15 + index * 0.05, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                            className="bg-[#0d1322] rounded-2xl border border-white/[0.08] p-6 backdrop-blur-xl hover:border-emerald-400/30 transition"
+                            className="bg-ink rounded-2xl border border-white/[0.08] p-6 backdrop-blur-xl hover:border-emerald-400/30 transition"
                         >
                             <div className="flex items-start justify-between mb-4">
                                 <div className="flex items-center gap-3">
@@ -251,7 +252,7 @@ export default function SystemHealthPage() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                className="bg-[#0d1322] rounded-2xl border border-white/[0.08] p-6 backdrop-blur-xl"
+                className="bg-ink rounded-2xl border border-white/[0.08] p-6 backdrop-blur-xl"
             >
                 <h2 className="text-lg font-semibold text-slate-50 mb-4">System Metrics</h2>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

@@ -101,7 +101,7 @@ function VerifyEmailContent() {
     };
 
     return (
-        <div className="min-h-screen bg-[#29104f]">
+        <div className="min-h-screen bg-deep">
             <EmailVerificationShell
                 heading={
                     isVerified ? (
@@ -304,7 +304,7 @@ export default function VerifyEmailPage() {
     return (
         <Suspense
             fallback={
-                <div className="grid min-h-screen place-items-center bg-[#29104f]">
+                <div className="grid min-h-screen place-items-center bg-deep">
                     <span
                         role="status"
                         aria-label="Loading email verification"

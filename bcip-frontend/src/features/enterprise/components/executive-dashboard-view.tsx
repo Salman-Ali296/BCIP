@@ -2,25 +2,14 @@
 
 import { useState } from "react";
 import {
-    BarChart3,
-    TrendingUp,
-    TrendingDown,
-    AlertTriangle,
-    CheckCircle2,
-    Clock,
-    Users,
-    Building2,
     Sparkles,
-    ShieldAlert,
     ArrowUpRight,
-    ArrowDownRight,
-    Filter,
 } from "lucide-react";
 import { useEnterprise } from "../context/enterprise-context";
 import { RECURRING_CLUSTERS } from "../mock-data";
 
 export function ExecutiveDashboardView() {
-    const { organization, businessUnits, selectedBusinessUnitId } = useEnterprise();
+    const { organization } = useEnterprise();
     const [timeframe, setTimeframe] = useState<"7d" | "30d" | "90d">("7d");
 
     const executiveInsights = [

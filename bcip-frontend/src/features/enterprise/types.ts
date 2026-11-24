@@ -1,3 +1,9 @@
+import type {
+    ComplaintPriority as PlatformComplaintPriority,
+    ComplaintStatus as PlatformComplaintStatus,
+    Priority as PlatformPriority,
+} from "@/features/complaints/types/complaint";
+
 export type EnterpriseRole =
     | "SUPPORT_AGENT"
     | "ESCALATION_MANAGER"
@@ -27,7 +33,33 @@ export type ComplaintCategory =
     | "Account Security"
     | "Compliance & KYC"
     | "Delivery & Logistics"
-    | "Other";
+    | "Other"
+    // Categories produced by the AI service (bcip-ai-services/app/services/nlp.py)
+    | "Billing"
+    | "Delivery"
+    | "Product quality"
+    | "Customer service"
+    | "Technical support"
+    | "Refund"
+    | "General";
+
+export interface BusinessOverviewComplaint {
+    id: string;
+    title: string;
+    status: PlatformComplaintStatus;
+    priority: PlatformComplaintPriority | PlatformPriority;
+    createdAt: string;
+}
+
+export interface BusinessOverviewSnapshot {
+    counts: {
+        total: number;
+        open: number;
+        inProgress: number;
+        resolved: number;
+    };
+    recent: BusinessOverviewComplaint[];
+}
 
 export interface BusinessUnit {
     id: string;

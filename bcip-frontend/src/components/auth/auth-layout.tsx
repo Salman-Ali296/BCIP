@@ -9,7 +9,7 @@ interface AuthLayoutProps {
 
 export function AuthLayout({ children }: AuthLayoutProps) {
     return (
-        <div className="min-h-screen w-full flex flex-col lg:grid lg:grid-cols-12 bg-[#f8fafc] text-slate-900 font-sans antialiased overflow-x-hidden">
+        <div className="min-h-screen w-full flex flex-col lg:grid lg:grid-cols-12 bg-wash text-slate-900 font-sans antialiased overflow-x-hidden">
             {/* Left Column: Brand & Intelligence Visualization Panel */}
             <div className="hidden lg:block lg:col-span-5 xl:col-span-5 2xl:col-span-4 h-full min-h-screen sticky top-0">
                 <BrandPanel />

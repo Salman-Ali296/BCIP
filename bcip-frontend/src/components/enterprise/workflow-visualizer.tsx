@@ -3,15 +3,10 @@
 import React, { useState } from "react";
 import {
   ArrowRight,
-  BrainCircuit,
   CheckCircle2,
-  FileCheck,
-  FileSearch,
   MessageSquare,
-  ShieldCheck,
   Sparkles,
   Users,
-  Zap,
 } from "lucide-react";
 
 interface WorkflowScenario {
@@ -135,7 +130,7 @@ export function WorkflowVisualizer() {
             <span className="status-dot" />
             End-to-End Complaint Intelligence
           </div>
-          <h2 className="heading-xl mt-4 text-[#101d30]">
+          <h2 className="heading-xl mt-4 text-ink">
             From customer voice to team action.
           </h2>
           <p className="mt-4 text-base leading-7 text-slate-600">
@@ -151,7 +146,7 @@ export function WorkflowVisualizer() {
                 onClick={() => setActiveScenarioId(sc.id)}
                 className={`rounded-full px-4 py-1.5 text-xs font-bold transition ${
                   activeScenarioId === sc.id
-                    ? "bg-[#2454d6] text-white shadow-sm"
+                    ? "bg-ink text-white shadow-sm"
                     : "border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 hover:border-slate-300"
                 }`}
               >
@@ -164,7 +159,7 @@ export function WorkflowVisualizer() {
         {/* 3-Column Architecture: CUSTOMER VOICE → COMPLAINT INTELLIGENCE → TEAM ACTION */}
         <div className="mt-12 grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
           {/* Column 1: CUSTOMER VOICE */}
-          <div className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-[#f8fafc] p-6 shadow-2xs">
+          <div className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-wash p-6 shadow-2xs">
             <div>
               <div className="flex items-center justify-between border-b border-slate-200/80 pb-3">
                 <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500">
@@ -200,20 +195,20 @@ export function WorkflowVisualizer() {
               </div>
             </div>
 
-            <div className="mt-6 pt-4 border-t border-slate-200 flex items-center gap-2 text-xs font-semibold text-[#2454d6]">
+            <div className="mt-6 pt-4 border-t border-slate-200 flex items-center gap-2 text-xs font-semibold text-brand">
               <span>Ingested & Queued for AI Enrichment</span>
               <ArrowRight className="h-3.5 w-3.5 ml-auto" />
             </div>
           </div>
 
           {/* Column 2: COMPLAINT INTELLIGENCE (Center) */}
-          <div className="flex flex-col justify-between rounded-2xl border border-[#2454d6]/30 bg-[#edf2ff]/30 p-6 shadow-md relative">
+          <div className="flex flex-col justify-between rounded-2xl border border-brand/30 bg-lilac/30 p-6 shadow-md relative">
             <div>
-              <div className="flex items-center justify-between border-b border-[#2454d6]/20 pb-3">
-                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#2454d6]">
+              <div className="flex items-center justify-between border-b border-brand/20 pb-3">
+                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-brand">
                   Step 02 · Understand
                 </span>
-                <span className="inline-flex items-center gap-1 rounded-full bg-[#2454d6] text-white px-2 py-0.5 text-[10px] font-bold font-mono">
+                <span className="inline-flex items-center gap-1 rounded-full bg-ink text-white px-2 py-0.5 text-[10px] font-bold font-mono">
                   <Sparkles className="h-3 w-3" /> Confidence: {currentScenario.confidence}%
                 </span>
               </div>
@@ -247,13 +242,13 @@ export function WorkflowVisualizer() {
               </div>
             </div>
 
-            <div className="mt-6 pt-4 border-t border-[#2454d6]/20 text-[11px] text-slate-500 italic">
+            <div className="mt-6 pt-4 border-t border-brand/20 text-[11px] text-slate-500 italic">
               AI surfaces signals and duplicate clusters. Teams own final decisions.
             </div>
           </div>
 
           {/* Column 3: TEAM ACTION */}
-          <div className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-[#f8fafc] p-6 shadow-2xs">
+          <div className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-wash p-6 shadow-2xs">
             <div>
               <div className="flex items-center justify-between border-b border-slate-200/80 pb-3">
                 <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500">

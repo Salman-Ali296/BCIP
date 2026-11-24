@@ -7,7 +7,7 @@ import { BCIP_CONTACT_EMAIL, BCIP_SOCIAL_LINKS } from "@/lib/brand";
 
 export function EnterpriseFooter() {
     return (
-        <footer className="relative overflow-hidden bg-[#0c1524] text-white border-t border-white/10">
+        <footer className="relative overflow-hidden bg-ink text-white border-t border-white/10">
             <div className="relative mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
                 <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1fr_1fr]">
                     {/* Brand Column */}

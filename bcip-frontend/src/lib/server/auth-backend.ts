@@ -9,11 +9,17 @@ type AuthEndpoint =
     | "firebase-bootstrap"
     | "firebase-login"
     | "session-upgrade"
-    | "logout";
+    | "logout"
+    | "verification-policy"
+    | "registration/email"
+    | "registration/complete"
+    | "registration/account";
 
-type AuthMethod = "GET" | "POST";
+type AuthMethod = "GET" | "POST" | "PATCH";
 
-const REQUEST_TIMEOUT_MS = 10_000;
+// Must exceed the backend SMTP socket timeout (20s) so slow email delivery
+// returns a real backend error instead of a proxy timeout.
+const REQUEST_TIMEOUT_MS = 30_000;
 
 const AUTH_ENDPOINTS: AuthEndpoint[] = [
     "login",
@@ -25,6 +31,10 @@ const AUTH_ENDPOINTS: AuthEndpoint[] = [
     "firebase-login",
     "session-upgrade",
     "logout",
+    "verification-policy",
+    "registration/email",
+    "registration/complete",
+    "registration/account",
 ];
 
 /**
@@ -172,6 +182,20 @@ export function isSameOrigin(request: NextRequest): boolean {
 }
 
 /**
+ * The address of the browser that called this route. Uses the last entry of
+ * X-Forwarded-For (the one added by the hop directly in front of Next), then
+ * X-Real-IP. Earlier entries can be set by the client, so they're ignored.
+ */
+function getClientIp(request: NextRequest): string | null {
+    const forwarded = request.headers.get("x-forwarded-for");
+    if (forwarded) {
+        const last = forwarded.split(",").map((part) => part.trim()).filter(Boolean).pop();
+        if (last) return last;
+    }
+    return request.headers.get("x-real-ip")?.trim() || null;
+}
+
+/**
  * Returns an error when backend configuration is invalid.
  */
 export function authConfigurationError() {
@@ -227,7 +251,7 @@ export async function forwardAuthRequest(
             Accept: "application/json",
         });
 
-        if (method === "POST") {
+        if (method !== "GET") {
             headers.set("Content-Type", "application/json");
         }
 
@@ -252,10 +276,19 @@ export async function forwardAuthRequest(
             headers.set("X-Correlation-ID", correlationId);
         }
 
+        // Pass the browser's IP on. Without it the backend sees every request
+        // as coming from this Next server, so all users share one rate-limit
+        // bucket and a few logins lock everyone out. The backend trusts one
+        // proxy hop (`trust proxy` 1), so only the last address is sent.
+        const clientIp = getClientIp(request);
+        if (clientIp) {
+            headers.set("X-Forwarded-For", clientIp);
+        }
+
         const upstream = await fetch(backendUrl, {
             method,
             headers,
-            ...(method === "POST"
+            ...(method !== "GET"
                 ? { body: await request.text() }
                 : {}),
             cache: "no-store",

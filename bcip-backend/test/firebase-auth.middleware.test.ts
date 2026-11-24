@@ -28,9 +28,9 @@ const decodedToken: DecodedIdToken = {
 function makeAccount(overrides: Partial<FirebaseAccount> = {}): FirebaseAccount {
     return {
         id: 'account-1',
-        email: 'customer@example.com',
-        role: 'CUSTOMER',
-        accountType: 'CUSTOMER',
+        email: 'owner@example.com',
+        role: 'BUSINESS_ADMIN',
+        accountType: 'BUSINESS',
         tenantId: 'tenant-db',
         emailVerified: true,
         isActive: true,
@@ -104,6 +104,19 @@ test('Firebase middleware verifies tokens with revocation checking enabled', asy
     assert.equal(result.nextError, undefined);
     assert.equal(result.request.user?.id, 'account-1');
     assert.equal(result.request.tenantId, 'tenant-db');
+});
+
+test('Firebase middleware blocks legacy customer accounts', async () => {
+    const result = await runMiddleware(
+        'Bearer firebase-token',
+        makeDependencies(makeAccount({
+            accountType: 'CUSTOMER',
+            role: 'CUSTOMER',
+        })),
+    );
+
+    assert.ok(result.nextError instanceof AppError);
+    assert.equal(result.nextError.code, 'FORBIDDEN');
 });
 
 test('Firebase middleware rejects invalid, expired, or revoked Firebase ID tokens uniformly', async () => {
@@ -199,6 +212,18 @@ test('Firebase middleware applies the authoritative business verification gate',
     assert.equal(result.nextError.code, 'BUSINESS_VERIFICATION_PENDING');
 });
 
+test('Firebase middleware permits an unapproved administrator to establish a plan-review session', async () => {
+    const result = await runMiddleware(
+        'Bearer firebase-token',
+        makeDependencies(makeAccount({
+            tenant: { isActive: false, businessVerified: false },
+        })),
+    );
+
+    assert.equal(result.nextError, undefined);
+    assert.equal(result.request.user?.role, 'BUSINESS_ADMIN');
+});
+
 test('Firebase middleware overwrites client tenant context with the mapped BCIP tenant', async () => {
     const result = await runMiddleware(
         'Bearer firebase-token',
@@ -209,7 +234,7 @@ test('Firebase middleware overwrites client tenant context with the mapped BCIP 
     assert.equal(result.nextError, undefined);
     assert.equal(result.request.tenantId, 'tenant-db');
     assert.equal(result.request.user?.tenantId, 'tenant-db');
-    assert.equal(result.request.user?.role, 'CUSTOMER');
+    assert.equal(result.request.user?.role, 'BUSINESS_ADMIN');
 });
 
 test('Firebase middleware rejects expired and malformed ID tokens', async () => {

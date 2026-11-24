@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, ArrowRight, UploadCloud, Eye } from "lucide-react";
+import { AlertTriangle, UploadCloud, Eye } from "lucide-react";
 import type { CustomerComplaint } from "../types";
 
 interface ActionRequiredCardProps {

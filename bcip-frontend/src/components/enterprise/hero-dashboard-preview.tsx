@@ -4,24 +4,11 @@ import React, { useState } from "react";
 import Image from "next/image";
 import {
   AlertTriangle,
-  ArrowUpRight,
   BarChart3,
-  CheckCircle2,
-  ChevronRight,
-  Clock,
-  Copy,
-  ExternalLink,
-  Eye,
-  FileSearch,
-  Filter,
   Layers,
   LayoutDashboard,
-  MoreHorizontal,
   Radar,
-  RefreshCw,
-  Search,
   Settings,
-  Shield,
   Sparkles,
   Users,
   Zap,
@@ -107,7 +94,7 @@ export function HeroDashboardPreview() {
   const [selectedId, setSelectedId] = useState<string>("BC-10482");
   const [activeTab, setActiveTab] = useState<string>("Overview");
   const [timeRange, setTimeRange] = useState<"7D" | "30D" | "90D">("30D");
-  const [complaintState, setComplaintState] = useState<ComplaintRecord[]>(sampleComplaints);
+  const [complaintState] = useState<ComplaintRecord[]>(sampleComplaints);
   const { toast } = useToast();
 
   const selectedComplaint =
@@ -138,7 +125,7 @@ export function HeroDashboardPreview() {
   };
 
   return (
-    <div className="relative rounded-2xl border border-white/20 bg-[#0c1626] p-2.5 shadow-2xl shadow-black/60 sm:p-3.5 text-slate-100">
+    <div className="relative rounded-2xl border border-white/20 bg-ink p-2.5 shadow-2xl shadow-black/60 sm:p-3.5 text-slate-100">
       {/* Browser Bar / Window Frame */}
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-2.5 px-2">
         <div className="flex items-center gap-2">
@@ -158,7 +145,7 @@ export function HeroDashboardPreview() {
             <button
               onClick={() => setViewMode("visual")}
               className={`px-2 py-0.5 rounded font-semibold transition flex items-center gap-1 ${viewMode === "visual"
-                ? "bg-[#2454d6] text-white shadow-xs"
+                ? "bg-ink text-white shadow-xs"
                 : "text-slate-400 hover:text-white"
                 }`}
             >
@@ -168,7 +155,7 @@ export function HeroDashboardPreview() {
             <button
               onClick={() => setViewMode("interactive")}
               className={`px-2 py-0.5 rounded font-semibold transition ${viewMode === "interactive"
-                ? "bg-[#2454d6] text-white shadow-xs"
+                ? "bg-ink text-white shadow-xs"
                 : "text-slate-400 hover:text-white"
                 }`}
             >
@@ -184,7 +171,7 @@ export function HeroDashboardPreview() {
       </div>
 
       {viewMode === "visual" ? (
-        <div className="relative mt-2 overflow-hidden rounded-xl border border-white/10 bg-[#08101e]">
+        <div className="relative mt-2 overflow-hidden rounded-xl border border-white/10 bg-ink">
           <div className="relative aspect-[16/9] w-full">
             <Image
               src="/images/triage-dashboard-preview.jpg"
@@ -220,7 +207,7 @@ export function HeroDashboardPreview() {
               </div>
               <button
                 onClick={() => setViewMode("interactive")}
-                className="rounded-lg bg-[#2454d6] hover:bg-[#1b43b4] text-white px-2.5 sm:px-3 py-1 sm:py-1.5 text-[11px] sm:text-xs font-bold transition flex items-center gap-1 shadow-md"
+                className="rounded-lg bg-ink hover:bg-brand text-white px-2.5 sm:px-3 py-1 sm:py-1.5 text-[11px] sm:text-xs font-bold transition flex items-center gap-1 shadow-md"
               >
                 Launch Simulator →
               </button>
@@ -254,7 +241,7 @@ export function HeroDashboardPreview() {
                         key={item.name}
                         onClick={() => setActiveTab(item.name)}
                         className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-semibold transition ${isActive
-                          ? "bg-[#2454d6] text-white shadow-sm"
+                          ? "bg-ink text-white shadow-sm"
                           : "text-slate-400 hover:bg-white/5 hover:text-slate-200"
                           }`}
                       >
@@ -409,7 +396,7 @@ export function HeroDashboardPreview() {
                       </span>
                       <div className="w-full bg-white/10 rounded-t h-12 flex items-end">
                         <div
-                          className="w-full bg-[#2454d6] group-hover:bg-[#386df6] transition-all rounded-t"
+                          className="w-full bg-ink group-hover:bg-brand transition-all rounded-t"
                           style={{ height: item.height }}
                         />
                       </div>
@@ -427,7 +414,7 @@ export function HeroDashboardPreview() {
                 </div>
                 <div className="space-y-1.5 mt-2">
                   {[
-                    { name: "Billing & Transactions", pct: 34, color: "bg-[#2454d6]" },
+                    { name: "Billing & Transactions", pct: 34, color: "bg-ink" },
                     { name: "Order & Logistics", pct: 27, color: "bg-emerald-500" },
                     { name: "Account & 2FA Access", pct: 21, color: "bg-indigo-400" },
                     { name: "Platform & Support", pct: 18, color: "bg-slate-400" },
@@ -482,7 +469,7 @@ export function HeroDashboardPreview() {
                             key={complaint.id}
                             onClick={() => setSelectedId(complaint.id)}
                             className={`cursor-pointer transition-colors ${isSelected
-                              ? "bg-[#2454d6]/20 text-white font-semibold"
+                              ? "bg-ink/20 text-white font-semibold"
                               : "hover:bg-white/[0.04] text-slate-300"
                               }`}
                           >
@@ -526,7 +513,7 @@ export function HeroDashboardPreview() {
               </div>
 
               {/* Section 9: Live AI Insight Panel */}
-              <div className="rounded-xl border border-blue-500/30 bg-[#101e38] p-3 flex flex-col justify-between">
+              <div className="rounded-xl border border-blue-500/30 bg-ink p-3 flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between border-b border-white/10 pb-2">
                     <div className="flex items-center gap-1.5 text-xs font-bold text-white">
@@ -571,7 +558,7 @@ export function HeroDashboardPreview() {
                 <div className="mt-3 pt-2.5 border-t border-white/10 flex items-center justify-between gap-2">
                   <button
                     onClick={handleReview}
-                    className="flex-1 rounded-lg bg-[#2454d6] hover:bg-[#1b43b4] text-white py-1.5 text-xs font-bold transition flex items-center justify-center gap-1"
+                    className="flex-1 rounded-lg bg-ink hover:bg-brand text-white py-1.5 text-xs font-bold transition flex items-center justify-center gap-1"
                   >
                     Review
                   </button>

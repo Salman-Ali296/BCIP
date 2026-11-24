@@ -4,7 +4,6 @@ import { useState, useMemo, useRef, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-    AlertTriangle,
     ArrowRight,
     BrainCircuit,
     CheckCircle2,
@@ -12,20 +11,13 @@ import {
     Mic,
     MicOff,
     Paperclip,
-    RotateCcw,
     ShieldCheck,
     Sparkles,
     Upload,
-    Volume2,
     X,
     Zap,
     Clock,
     Search,
-    Building2,
-    Mail,
-    FileCheck,
-    HelpCircle,
-    Info,
 } from "lucide-react";
 import {
     createComplaint,

@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import { useRouter } from "next/navigation";
 import {
     Search,
     X,
     FileText,
-    User,
     Sparkles,
     AlertTriangle,
     Shield,
@@ -15,6 +15,7 @@ import {
 import { useEnterprise } from "../context/enterprise-context";
 
 export function GlobalCommandPalette() {
+    const router = useRouter();
     const {
         commandPaletteOpen,
         setCommandPaletteOpen,
@@ -40,12 +41,16 @@ export function GlobalCommandPalette() {
         return () => window.removeEventListener("keydown", handleKeyDown);
     }, [commandPaletteOpen, setCommandPaletteOpen]);
 
+    const [wasOpen, setWasOpen] = useState(commandPaletteOpen);
+    if (wasOpen !== commandPaletteOpen) {
+        setWasOpen(commandPaletteOpen);
+        if (!commandPaletteOpen) setQuery("");
+    }
+
     useEffect(() => {
-        if (commandPaletteOpen) {
-            setTimeout(() => inputRef.current?.focus(), 50);
-        } else {
-            setQuery("");
-        }
+        if (!commandPaletteOpen) return;
+        const timer = setTimeout(() => inputRef.current?.focus(), 50);
+        return () => clearTimeout(timer);
     }, [commandPaletteOpen]);
 
     if (!commandPaletteOpen) return null;
@@ -163,7 +168,7 @@ export function GlobalCommandPalette() {
                                 type="button"
                                 onClick={() => {
                                     setCommandPaletteOpen(false);
-                                    window.location.href = "/business/trends";
+                                    router.push("/business/trends");
                                 }}
                                 className="flex items-center gap-2.5 rounded-xl p-2.5 text-xs text-slate-700 hover:bg-slate-100 transition"
                             >
@@ -174,7 +179,7 @@ export function GlobalCommandPalette() {
                                 type="button"
                                 onClick={() => {
                                     setCommandPaletteOpen(false);
-                                    window.location.href = "/business/teams";
+                                    router.push("/business/teams");
                                 }}
                                 className="flex items-center gap-2.5 rounded-xl p-2.5 text-xs text-slate-700 hover:bg-slate-100 transition"
                             >
@@ -185,7 +190,7 @@ export function GlobalCommandPalette() {
                                 type="button"
                                 onClick={() => {
                                     setCommandPaletteOpen(false);
-                                    window.location.href = "/admin/audit-logs";
+                                    router.push("/admin/audit-logs");
                                 }}
                                 className="flex items-center gap-2.5 rounded-xl p-2.5 text-xs text-slate-700 hover:bg-slate-100 transition"
                             >

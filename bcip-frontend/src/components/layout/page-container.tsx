@@ -1,6 +1,6 @@
 import type { HTMLAttributes } from "react";
 
-interface PageContainerProps extends HTMLAttributes<HTMLElement> { }
+type PageContainerProps = HTMLAttributes<HTMLElement>;
 
 export function PageContainer({
     className = "",

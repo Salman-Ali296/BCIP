@@ -58,7 +58,7 @@ export function validate<TSchema extends z.ZodTypeAny>(
         return schema.parse(data);
     } catch (error) {
         if (error instanceof z.ZodError) {
-            const messages = error.errors.map(e => ({
+            const messages = error.issues.map((e) => ({
                 field: e.path.join('.'),
                 message: e.message,
             }));

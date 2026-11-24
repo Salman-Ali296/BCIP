@@ -1,12 +1,39 @@
-@"
-*.zip
+# Dependencies
 node_modules/
+
+# Python
 venv/
+.venv/
 env/
-.next/
 __pycache__/
-*.log
-.DS_Store
-"@ | Out-File -FilePath .gitignore -Encoding utf8
+*.pyc
+
+# Build output
+dist/
+.next/
+out/
+build/
+*.tsbuildinfo
+
+# Environment and secrets (commit only *.env.example templates)
 .env
-.env.local
+.env.*
+!.env.example
+*.pem
+*.key
+*serviceAccount*.json
+firebase-adminsdk*.json
+
+# Archives and large binaries
+*.zip
+*.rar
+*.7z
+
+# Logs
+*.log
+npm-debug.log*
+
+# Local tooling state
+.claude-flow/
+.DS_Store
+Thumbs.db

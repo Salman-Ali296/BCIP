@@ -1,3 +1,6 @@
+// HTTP Request Handler
+// Iska main purpose frontend (Next.js/React) aur backend (Express API) ke darmiyan communication manage karna hai.
+// Simple words mein: Jab bhi frontend ko backend se data lena, data send karna, login session verify karna, ya complaint create karni hoti hai, toh yeh function API request handle karta hai.
 interface RequestOptions extends RequestInit {
     token?: string;
     sameOrigin?: boolean;

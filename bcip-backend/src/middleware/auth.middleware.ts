@@ -4,10 +4,16 @@ import { prisma } from '../config/database';
 import { env } from '../config/env';
 import { Errors } from '../utils/error';
 import { AUTH_SESSION_COOKIE } from '../modules/accounts/auth-session-cookie';
+import {
+	isPublicCustomerAccount,
+	PUBLIC_CUSTOMER_ACCESS_MESSAGE,
+} from '../modules/accounts/customer-access.policy';
+import { isUnapprovedBusinessAdministrator } from '../modules/accounts/business-approval.policy';
 
 interface AuthToken {
 	userId?: unknown;
 	tenantId?: unknown;
+	purpose?: unknown;
 }
 
 export async function authMiddleware(
@@ -48,13 +54,21 @@ export async function authMiddleware(
 
 	let payload: AuthToken;
 	try {
-		payload = jwt.verify(token, env.JWT_SECRET) as AuthToken;
+		payload = jwt.verify(token, env.JWT_SECRET, {
+			algorithms: ['HS256'],
+		}) as AuthToken;
 	} catch {
 		next(Errors.unauthorized('Invalid or expired token'));
 		return;
 	}
 
-	if (typeof payload.userId !== 'string' || typeof payload.tenantId !== 'string') {
+	// Purpose-scoped tokens (e.g. registration continuation) share the signing
+	// secret but must never be accepted as session tokens.
+	if (
+		typeof payload.userId !== 'string' ||
+		typeof payload.tenantId !== 'string' ||
+		payload.purpose !== undefined
+	) {
 		next(Errors.unauthorized('Invalid token claims'));
 		return;
 	}
@@ -85,6 +99,12 @@ export async function authMiddleware(
 		next(Errors.unauthorized('Invalid or expired token'));
 		return;
 	}
+	if (isPublicCustomerAccount(user.accountType)) {
+		next(Errors.forbidden(PUBLIC_CUSTOMER_ACCESS_MESSAGE));
+		return;
+	}
+	const unapprovedBusinessAdministrator =
+		isUnapprovedBusinessAdministrator(user);
 	if (!user.isActive) {
 		next(Errors.accountSuspended());
 		return;
@@ -93,18 +113,40 @@ export async function authMiddleware(
 		next(Errors.emailNotVerified());
 		return;
 	}
-	if (user.accountType === 'BUSINESS' && !user.tenant.businessVerified) {
+	if (
+		user.accountType === 'BUSINESS' &&
+		!user.tenant.businessVerified &&
+		!unapprovedBusinessAdministrator
+	) {
 		next(Errors.businessVerificationPending());
 		return;
 	}
-	if (!user.tenant.isActive) {
+	if (!user.tenant.isActive && !unapprovedBusinessAdministrator) {
 		next(Errors.accountSuspended());
+		return;
+	}
+	if (
+		unapprovedBusinessAdministrator &&
+		!isAllowedPreApprovalRequest(req)
+	) {
+		next(Errors.businessVerificationPending());
 		return;
 	}
 
 	req.user = user;
 	req.tenantId = user.tenantId;
 	next();
+}
+
+function isAllowedPreApprovalRequest(req: Request): boolean {
+	const route = req.originalUrl.split('?')[0];
+	return (
+		(req.method === 'GET' &&
+			(route === '/api/auth/me' || route === '/api/v1/auth/me')) ||
+		(req.method === 'POST' &&
+			(route === '/api/auth/session-upgrade' ||
+				route === '/api/v1/auth/session-upgrade'))
+	);
 }
 
 export function requireRoles(...roles: string[]) {

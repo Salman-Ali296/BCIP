@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { adminBusinessService } from '../services/admin-business.service';
 import { Prisma } from '@prisma/client';
+import { AppError } from '../../../utils/error';
 
 export class AdminBusinessController {
     async getBusinesses(req: Request, res: Response): Promise<void> {
@@ -19,8 +20,8 @@ export class AdminBusinessController {
             };
 
             const pagination = {
-                page: Number(req.query.page) || 1,
-                limit: Number(req.query.limit) || 20,
+                page: Math.max(1, Math.floor(Number(req.query.page) || 1)),
+                limit: Math.min(100, Math.max(1, Math.floor(Number(req.query.limit) || 20))),
                 sortBy: (req.query.sortBy as string) || 'createdAt',
                 sortOrder: (req.query.sortOrder as 'asc' | 'desc') || 'desc',
             };
@@ -120,12 +121,29 @@ export class AdminBusinessController {
                 return;
             }
 
-            const data: { isActive?: boolean; businessVerified?: boolean } = {};
-            if (isActive !== undefined) data.isActive = Boolean(isActive);
-            if (businessVerified !== undefined)
-                data.businessVerified = Boolean(businessVerified);
+            if (
+                (isActive !== undefined && typeof isActive !== 'boolean') ||
+                (businessVerified !== undefined && typeof businessVerified !== 'boolean')
+            ) {
+                res.status(400).json({
+                    success: false,
+                    error: {
+                        code: 'INVALID_DATA',
+                        message: 'Status fields must be boolean values',
+                    },
+                });
+                return;
+            }
 
-            const updated = await adminBusinessService.updateBusinessStatus(id, data);
+            const data: { isActive?: boolean; businessVerified?: boolean } = {};
+            if (isActive !== undefined) data.isActive = isActive;
+            if (businessVerified !== undefined) data.businessVerified = businessVerified;
+
+            const updated = await adminBusinessService.updateBusinessStatus(
+                id,
+                data,
+                req.user?.id,
+            );
 
             res.json({
                 success: true,
@@ -134,6 +152,17 @@ export class AdminBusinessController {
             });
         } catch (error) {
             console.error('Admin update business status error:', error);
+
+            if (error instanceof AppError) {
+                res.status(error.statusCode).json({
+                    success: false,
+                    error: {
+                        code: error.code,
+                        message: error.message,
+                    },
+                });
+                return;
+            }
 
             if (
                 error instanceof Prisma.PrismaClientKnownRequestError &&

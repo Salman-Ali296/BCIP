@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
     Inbox,
     Clock,
@@ -10,22 +11,12 @@ import {
     CheckCircle2,
     RefreshCw,
     Search,
-    Filter,
-    ArrowUpRight,
     Sparkles,
     Send,
     Lock,
     FileText,
     Paperclip,
-    Eye,
-    ChevronRight,
     ShieldCheck,
-    User,
-    Building2,
-    Calendar,
-    Hash,
-    Phone,
-    Mail,
     AlertCircle,
 } from "lucide-react";
 import { useEnterprise } from "../context/enterprise-context";
@@ -33,11 +24,10 @@ import type {
     EnterpriseComplaint,
     QueueType,
     ComplaintPriority,
-    SLAState,
-    EnterpriseComplaintStatus,
 } from "../types";
 
 export function ThreePanelWorkspace() {
+    const router = useRouter();
     const {
         complaints,
         selectedComplaintId,
@@ -49,7 +39,11 @@ export function ThreePanelWorkspace() {
         setResolveModalComplaintId,
         addInternalNote,
         sendAgentMessage,
-        assignComplaint,
+        currentUser,
+        isLive,
+        isLoadingComplaints,
+        complaintsError,
+        refreshComplaints,
     } = useEnterprise();
 
     // Filters inside Center panel
@@ -69,7 +63,7 @@ export function ThreePanelWorkspace() {
 
     // Queue counts calculation
     const counts = {
-        MY_WORK: complaints.filter((c) => c.assignedAgent?.id === "usr_agent_sarah").length,
+        MY_WORK: complaints.filter((c) => c.assignedAgent?.id === currentUser.id).length,
         UNASSIGNED: complaints.filter((c) => !c.assignedAgent).length,
         HIGH_PRIORITY: complaints.filter((c) => c.priority === "HIGH" || c.priority === "CRITICAL").length,
         SLA_RISK: complaints.filter((c) => c.sla.status === "AT_RISK" || c.sla.status === "OVERDUE").length,
@@ -82,7 +76,7 @@ export function ThreePanelWorkspace() {
     // Filter center panel complaint list
     const filteredComplaints = complaints.filter((c) => {
         // Queue match
-        if (activeQueue === "MY_WORK" && c.assignedAgent?.id !== "usr_agent_sarah") return false;
+        if (activeQueue === "MY_WORK" && c.assignedAgent?.id !== currentUser.id) return false;
         if (activeQueue === "UNASSIGNED" && c.assignedAgent) return false;
         if (activeQueue === "HIGH_PRIORITY" && !(c.priority === "HIGH" || c.priority === "CRITICAL")) return false;
         if (activeQueue === "SLA_RISK" && !(c.sla.status === "AT_RISK" || c.sla.status === "OVERDUE")) return false;
@@ -276,9 +270,26 @@ export function ThreePanelWorkspace() {
 
                 {/* Complaint Cards Scroll List */}
                 <div className="flex-1 overflow-y-auto divide-y divide-slate-100">
-                    {filteredComplaints.length === 0 ? (
+                    {isLoadingComplaints ? (
+                        <div className="p-8 text-center text-xs text-slate-500" role="status">
+                            Loading complaints…
+                        </div>
+                    ) : complaintsError ? (
+                        <div className="p-8 text-center text-xs text-slate-500" role="alert">
+                            <p>{complaintsError}</p>
+                            <button
+                                type="button"
+                                onClick={refreshComplaints}
+                                className="mt-2 font-semibold text-slate-800 underline underline-offset-4"
+                            >
+                                Try again
+                            </button>
+                        </div>
+                    ) : filteredComplaints.length === 0 ? (
                         <div className="p-8 text-center text-xs text-slate-500">
-                            Your queue is clear. No complaints match current filters.
+                            {isLive && complaints.length === 0
+                                ? "No complaints yet. When a customer files one on your complaint page, it shows up here."
+                                : "Nothing here. Try another queue or clear the filters."}
                         </div>
                     ) : (
                         filteredComplaints.map((item) => {
@@ -407,7 +418,7 @@ export function ThreePanelWorkspace() {
                                 <button
                                     key={tab.key}
                                     type="button"
-                                    onClick={() => setActiveTab(tab.key as any)}
+                                    onClick={() => setActiveTab(tab.key as typeof activeTab)}
                                     className={`py-3 px-3 text-xs font-semibold border-b-2 transition ${
                                         activeTab === tab.key
                                             ? "border-blue-600 text-blue-600"
@@ -606,7 +617,7 @@ export function ThreePanelWorkspace() {
                                             <button
                                                 type="button"
                                                 onClick={() => {
-                                                    window.location.href = "/business/trends";
+                                                    router.push("/business/trends");
                                                 }}
                                                 className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-slate-800"
                                             >

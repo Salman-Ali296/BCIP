@@ -1,7 +1,7 @@
 "use client";
 
 import React, { forwardRef, useState, InputHTMLAttributes, ReactNode } from "react";
-import { Eye, EyeOff, Lock } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 
 export interface PasswordInputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "type"> {
     label: string;

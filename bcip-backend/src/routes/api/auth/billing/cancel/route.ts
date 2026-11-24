@@ -1,17 +1,10 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import { cancelSubscription } from '../../../../../modules/billing/billing.service';
-import { Errors } from '../../../../../utils/error';
+import { cancelBusinessSubscription } from '../../../../../modules/billing/billing.controller';
 
 const router = Router();
 
-router.post('/', async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const tenantId = req.user?.tenantId;
-        if (!tenantId) throw Errors.unauthorized();
-        res.json({ success: true, data: await cancelSubscription(tenantId) });
-    } catch (error) {
-        next(error);
-    }
-});
+router.post('/', (req: Request, res: Response, next: NextFunction) =>
+    cancelBusinessSubscription(req, res, next),
+);
 
 export default router;

@@ -1,17 +1,10 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import { createPortalSession } from '../../../../../modules/billing/billing.service';
-import { Errors } from '../../../../../utils/error';
+import { createBusinessPortal } from '../../../../../modules/billing/billing.controller';
 
 const router = Router();
 
-router.post('/', async (_req: Request, res: Response, next: NextFunction) => {
-    try {
-        const tenantId = _req.user?.tenantId;
-        if (!tenantId) throw Errors.unauthorized();
-        res.json({ success: true, data: await createPortalSession(tenantId) });
-    } catch (error) {
-        next(error);
-    }
-});
+router.post('/', (req: Request, res: Response, next: NextFunction) =>
+    createBusinessPortal(req, res, next),
+);
 
 export default router;

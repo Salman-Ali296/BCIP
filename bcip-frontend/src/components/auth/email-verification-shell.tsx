@@ -65,7 +65,7 @@ export function EmailVerificationShell({
 
                         <ol className="mt-8 space-y-4">
                             {STEPS.map((step, index) => (
-                                <li key={step} className="flex items-center gap-3 text-sm text-[#514961]">
+                                <li key={step} className="flex items-center gap-3 text-sm text-ink-soft">
                                     <span
                                         aria-hidden="true"
                                         className="grid h-7 w-7 shrink-0 place-items-center rounded-full border border-[var(--landing-border)] bg-white text-[10px] font-bold text-[var(--landing-violet)]"

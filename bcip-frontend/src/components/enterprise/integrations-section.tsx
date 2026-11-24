@@ -3,19 +3,15 @@
 import React from "react";
 import {
   ArrowRight,
-  CheckCircle2,
   Code2,
   Database,
-  ExternalLink,
   Layers,
   Mail,
   MessageSquare,
-  Network,
   Radio,
   Server,
   Share2,
   Terminal,
-  Zap,
 } from "lucide-react";
 
 const integrationsList = [
@@ -87,7 +83,7 @@ const integrationsList = [
 
 export function IntegrationsSection() {
   return (
-    <section id="integrations" className="section bg-[#f8fafc] border-b border-slate-200">
+    <section id="integrations" className="section bg-wash border-b border-slate-200">
       <div className="container-x">
         {/* Header */}
         <div className="max-w-3xl">
@@ -95,10 +91,10 @@ export function IntegrationsSection() {
             <span className="status-dot" />
             Enterprise Interoperability
           </div>
-          <h2 className="heading-xl mt-4 text-[#101d30]">
+          <h2 className="heading-xl mt-4 text-ink">
             Connect BCIP to the systems
             <br />
-            <span className="text-[#2454d6]">your teams already use.</span>
+            <span className="text-brand">your teams already use.</span>
           </h2>
           <p className="mt-4 text-base leading-7 text-slate-600">
             BCIP fits seamlessly into your technology stack. Ingest grievances from existing intake points,
@@ -120,7 +116,7 @@ export function IntegrationsSection() {
                     <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
                       {item.category}
                     </span>
-                    <div className="grid h-8 w-8 place-items-center rounded-lg bg-[#2454d6]/10 text-[#2454d6]">
+                    <div className="grid h-8 w-8 place-items-center rounded-lg bg-ink/10 text-brand">
                       <Icon className="h-4 w-4" />
                     </div>
                   </div>
@@ -132,7 +128,7 @@ export function IntegrationsSection() {
                 </div>
 
                 <div className="mt-6 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px]">
-                  <span className="font-mono font-bold text-[#2454d6]">{item.direction}</span>
+                  <span className="font-mono font-bold text-brand">{item.direction}</span>
                   <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-600 font-medium">
                     {item.type}
                   </span>

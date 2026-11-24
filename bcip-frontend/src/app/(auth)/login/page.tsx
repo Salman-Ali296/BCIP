@@ -4,13 +4,14 @@ import Link from "next/link";
 import { FormEvent, Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useAuth, AuthRequestError } from "@/providers/auth-provider";
+import { BrandLogo } from "@/components/brand/brand-logo";
+import { AuthIllustration } from "@/components/auth/auth-illustration";
 import {
     ArrowRight,
     Eye,
     EyeOff,
     LockKeyhole,
     Mail,
-    ShieldCheck,
 } from "lucide-react";
 
 function LoginForm() {
@@ -50,6 +51,8 @@ function LoginForm() {
                     setError("This account is inactive. Contact your organization administrator or BCIP support.");
                 } else if (err.code === "INVALID_CREDENTIALS") {
                     setError("The email address or password is incorrect.");
+                } else if (err.code === "RATE_LIMITED" || err.status === 429) {
+                    setError("Too many wrong attempts from this network. Wait 15 minutes, then try again, or reset your password.");
                 } else {
                     setError(err.message);
                 }
@@ -62,12 +65,12 @@ function LoginForm() {
     }
 
     return (
-        <main className="min-h-screen bg-slate-100 px-4 py-4 font-sans text-slate-900 sm:px-6 sm:py-6 lg:flex lg:items-center lg:justify-center lg:p-10">
-            <div className="mx-auto grid w-full max-w-6xl overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-[0_24px_70px_rgba(15,23,42,0.12)] lg:min-h-[700px] lg:grid-cols-[1.05fr_0.95fr]">
+        <main className="min-h-[100dvh] w-full bg-white font-sans text-slate-900">
+            <div className="grid w-full overflow-hidden bg-white lg:min-h-[100dvh] lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
                 {/* Left: Brand panel */}
                 <section
                     aria-label="BCIP platform information"
-                    className="relative overflow-hidden bg-[#21113b] px-7 py-9 text-white sm:px-10 sm:py-11 lg:flex lg:flex-col lg:px-14 lg:py-14"
+                    className="relative overflow-hidden bg-ink px-6 py-7 text-white sm:px-10 sm:py-11 lg:flex lg:flex-col lg:px-14 lg:py-14"
                 >
                     <div
                         aria-hidden="true"
@@ -89,64 +92,36 @@ function LoginForm() {
                         aria-label="Go to BCIP home page"
                         className="relative z-10 inline-flex w-fit items-center gap-3 rounded-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-violet-300"
                     >
-                        <span className="grid size-11 place-items-center rounded-xl bg-gradient-to-br from-violet-300 to-violet-500 text-lg font-extrabold text-white shadow-lg shadow-violet-950/30">
-                            B
-                        </span>
-
-                        <span>
-                            <strong className="block text-xl font-bold tracking-tight">
-                                BCIP
-                            </strong>
-                            <span className="mt-0.5 block text-xs text-slate-300">
-                                Business Complaint Intelligence Platform
-                            </span>
-                        </span>
+                        <BrandLogo variant="light" height={38} priority />
                     </Link>
 
-                    <div className="relative z-10 mt-14 max-w-md lg:mt-24">
-                        <div className="inline-flex items-center gap-2 rounded-full border border-violet-300/20 bg-violet-400/10 px-3 py-1.5 text-xs font-semibold text-violet-200">
-                            <ShieldCheck className="size-3.5" />
-                            Secure enterprise workspace
-                        </div>
-
-                        <h1 className="mt-6 text-4xl font-bold leading-tight tracking-tight sm:text-5xl">
-                            Every concern,
+                    <div className="relative z-10 mt-7 max-w-md sm:mt-10 lg:mt-16">
+                        <h1 className="text-3xl font-bold leading-tight tracking-tight sm:text-5xl">
+                            Your queue is
                             <br />
-                            clearly understood.
+                            waiting for you.
                         </h1>
 
-                        <p className="mt-5 max-w-sm text-sm leading-7 text-slate-300 sm:text-base">
-                            Access your workspace to manage complaints, track
-                            resolutions, and support better customer outcomes.
+                        <p className="mt-4 max-w-sm text-sm leading-6 text-slate-300 sm:text-base sm:leading-7">
+                            Sign in to see what came in since you left, what&apos;s
+                            urgent, and what&apos;s waiting on your team.
                         </p>
-
-                        <div className="mt-10 space-y-4">
-                            {[
-                                "Centralized complaint management",
-                                "AI-assisted operational intelligence",
-                                "Secure role-based workspace access",
-                            ].map((item) => (
-                                <div
-                                    key={item}
-                                    className="flex items-center gap-3 text-sm text-slate-200"
-                                >
-                                    <span className="size-2 rounded-full bg-violet-400 shadow-[0_0_12px_rgba(167,139,250,0.75)]" />
-                                    {item}
-                                </div>
-                            ))}
-                        </div>
                     </div>
 
-                    <div className="relative z-10 mt-14 flex items-center gap-2 text-xs text-slate-400 lg:mt-auto">
+                    <div className="relative z-10 mt-10 hidden w-full max-w-lg sm:block lg:mt-12">
+                        <AuthIllustration />
+                    </div>
+
+                    <div className="relative z-10 mt-10 hidden items-center gap-2 text-xs text-slate-400 lg:mt-auto lg:flex">
                         <span className="size-2 rounded-full bg-violet-400" />
-                        Clarity for every customer conversation
+                        New complaints get a category and priority before anyone opens them.
                     </div>
                 </section>
 
                 {/* Right: Login form */}
                 <section
                     aria-labelledby="login-heading"
-                    className="flex items-center justify-center bg-white px-6 py-10 sm:px-10 sm:py-14 lg:px-14"
+                    className="flex min-w-0 items-center justify-center bg-white px-5 py-9 sm:px-10 sm:py-14 lg:px-14"
                 >
                     <div className="w-full max-w-md">
                         <Link
@@ -154,10 +129,7 @@ function LoginForm() {
                             aria-label="Go to BCIP home page"
                             className="mb-10 inline-flex items-center gap-2.5 lg:hidden"
                         >
-                            <span className="grid size-9 place-items-center rounded-xl bg-gradient-to-br from-violet-300 to-violet-500 text-sm font-extrabold text-white">
-                                B
-                            </span>
-                            <span className="font-bold tracking-tight">BCIP</span>
+                            <BrandLogo height={30} />
                         </Link>
 
                         <p className="text-sm font-semibold text-violet-700">
@@ -168,12 +140,12 @@ function LoginForm() {
                             id="login-heading"
                             className="mt-2 text-3xl font-bold tracking-tight text-slate-900"
                         >
-                            Sign in to your account
+                            Sign in to BCIP
                         </h2>
 
                         <p className="mt-3 text-sm leading-6 text-slate-500">
-                            Enter your credentials to continue to the BCIP
-                            workspace.
+                            Use the email and password you registered your
+                            business with.
                         </p>
 
                         <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
@@ -283,9 +255,9 @@ function LoginForm() {
                             <button
                                 type="submit"
                                 disabled={isLoading}
-                                className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#28123e] px-5 text-sm font-semibold text-white shadow-lg shadow-violet-950/15 transition hover:bg-[#3b1a5d] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-500 disabled:cursor-not-allowed disabled:opacity-70"
+                                className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-deep px-5 text-sm font-semibold text-white shadow-lg shadow-violet-950/15 transition hover:bg-deep focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-500 disabled:cursor-not-allowed disabled:opacity-70"
                             >
-                                {isLoading ? "Signing in..." : "Sign in securely"}
+                                {isLoading ? "Signing in..." : "Sign in"}
 
                                 {!isLoading && <ArrowRight className="size-4" />}
                             </button>
@@ -297,13 +269,19 @@ function LoginForm() {
                                 href="/register"
                                 className="font-semibold text-violet-700 hover:text-violet-900 hover:underline"
                             >
-                                Create an account
+                                Create a business workspace
                             </Link>
                         </p>
 
                         <p className="mt-10 border-t border-slate-100 pt-5 text-center text-xs leading-5 text-slate-400">
-                            By signing in, you agree to your organization&apos;s
-                            platform-access and security policies.
+                            Filed a complaint as a customer?{" "}
+                            <Link
+                                href="/support/track"
+                                className="font-semibold text-violet-700 hover:underline"
+                            >
+                                Track it here
+                            </Link>
+                            . No account needed.
                         </p>
                     </div>
                 </section>

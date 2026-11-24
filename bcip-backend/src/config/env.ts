@@ -46,6 +46,10 @@ export const env = {
             month: process.env.STRIPE_PRICE_BUSINESS_MONTHLY || '',
             year: process.env.STRIPE_PRICE_BUSINESS_YEARLY || '',
         },
+        enterprise: {
+            month: process.env.STRIPE_PRICE_ENTERPRISE_MONTHLY || '',
+            year: process.env.STRIPE_PRICE_ENTERPRISE_YEARLY || '',
+        },
     },
 
     CORS_ORIGINS: (process.env.CORS_ORIGINS || 'http://localhost:3000')

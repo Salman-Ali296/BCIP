@@ -11,7 +11,7 @@ import {
     CheckCircle2,
     Server,
 } from "lucide-react";
-import { useEnterprise } from "../context/enterprise-context";
+import { EnterpriseProvider, useEnterprise } from "../context/enterprise-context";
 import { BUSINESS_UNITS, PERMISSIONS_LIST, SLA_POLICIES } from "../mock-data";
 
 const ADMIN_SECTIONS = [
@@ -23,6 +23,14 @@ const ADMIN_SECTIONS = [
 ] as const;
 
 export function AdminGovernanceView() {
+    return (
+        <EnterpriseProvider>
+            <AdminGovernanceContent />
+        </EnterpriseProvider>
+    );
+}
+
+function AdminGovernanceContent() {
     const { organization, complaints } = useEnterprise();
     const [activeSection, setActiveSection] = useState<
         "org" | "rbac" | "sla" | "security" | "audit"

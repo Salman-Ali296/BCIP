@@ -15,7 +15,7 @@ interface LegalPageProps {
 
 export function LegalPage({ title, description, sections }: LegalPageProps) {
     return (
-        <main className="bg-[#f6f8fb] text-slate-950">
+        <main className="bg-wash text-slate-950">
             <section className="border-b border-slate-200 bg-white">
                 <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8 lg:py-20">
                     <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[.14em] text-slate-600">

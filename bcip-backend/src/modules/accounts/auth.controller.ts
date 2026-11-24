@@ -10,6 +10,11 @@ import { verifyEmailCodeSchema } from './dto/verify-email.dto';
 import { forgotPasswordSchema } from './dto/forgot-password.dto';
 import { resetPasswordSchema } from './dto/reset-password.dto';
 import {
+    changeRegistrationEmailSchema,
+    completeBusinessRegistrationSchema,
+    updateRegistrationAccountSchema,
+} from './dto/business-registration.dto';
+import {
     firebaseBootstrapLoginSchema,
     firebaseSessionSchema,
 } from './dto/firebase-session.dto';
@@ -17,9 +22,19 @@ import {
     clearAuthSessionCookie,
     setAuthSessionCookie,
 } from './auth-session-cookie';
+import { env } from '../../config/env';
+import { EMAIL_VERIFICATION_CODE_TTL_MINUTES } from '../../services/emailService';
 // import { authMiddleware } from '../../middleware/auth.middleware';
 
 export class AuthController {
+    verificationPolicy(_req: Request, res: Response): void {
+        ApiResponse.success(res, {
+            codeLength: 6,
+            expiresInSeconds: EMAIL_VERIFICATION_CODE_TTL_MINUTES * 60,
+            resendCooldownSeconds: env.EMAIL_VERIFICATION_RESEND_COOLDOWN_SECONDS,
+        }, 'Email verification policy');
+    }
+
     async bootstrapFirebaseLogin(req: Request, res: Response, next: NextFunction) {
         try {
             const credentials = firebaseBootstrapLoginSchema.parse(req.body);
@@ -202,6 +217,75 @@ export class AuthController {
         }
     }
 
+    async changeRegistrationEmail(req: Request, res: Response, next: NextFunction) {
+        try {
+            const data = changeRegistrationEmailSchema.parse(req.body);
+            const result = await authService.changeRegistrationEmail(data);
+            ApiResponse.success(res, result, 'Registration email updated');
+        } catch (error) {
+            if (error instanceof ZodError) {
+                next(Errors.validation('Validation failed', {
+                    fields: error.issues.map(issue => ({
+                        field: issue.path.join('.'),
+                        message: issue.message,
+                    })),
+                }));
+                return;
+            }
+            next(error);
+        }
+    }
+
+    async completeBusinessRegistration(req: Request, res: Response, next: NextFunction) {
+        try {
+            const authorization = req.headers.authorization;
+            const token = authorization?.startsWith('Bearer ')
+                ? authorization.slice('Bearer '.length).trim()
+                : '';
+            if (!token) throw Errors.unauthorized('A verified registration session is required');
+
+            const data = completeBusinessRegistrationSchema.parse(req.body);
+            const result = await authService.completeBusinessRegistration(token, data);
+            ApiResponse.success(res, result, 'Business registration submitted for review', 201);
+        } catch (error) {
+            if (error instanceof ZodError) {
+                next(Errors.validation('Validation failed', {
+                    fields: error.issues.map(issue => ({
+                        field: issue.path.join('.'),
+                        message: issue.message,
+                    })),
+                }));
+                return;
+            }
+            next(error);
+        }
+    }
+
+    async updateRegistrationAccount(req: Request, res: Response, next: NextFunction) {
+        try {
+            const authorization = req.headers.authorization;
+            const token = authorization?.startsWith('Bearer ')
+                ? authorization.slice('Bearer '.length).trim()
+                : '';
+            if (!token) throw Errors.unauthorized('A verified registration session is required');
+
+            const data = updateRegistrationAccountSchema.parse(req.body);
+            await authService.updateRegistrationAccount(token, data);
+            ApiResponse.success(res, { updated: true }, 'Registration account details updated');
+        } catch (error) {
+            if (error instanceof ZodError) {
+                next(Errors.validation('Validation failed', {
+                    fields: error.issues.map(issue => ({
+                        field: issue.path.join('.'),
+                        message: issue.message,
+                    })),
+                }));
+                return;
+            }
+            next(error);
+        }
+    }
+
     async forgotPassword(req: Request, res: Response, next: NextFunction) {
         try {
             const { email } = forgotPasswordSchema.parse(req.body);
@@ -252,50 +336,6 @@ export class AuthController {
             const userId = req.user?.id;
             if (!userId) throw Errors.unauthorized();
             ApiResponse.success(res, await authService.getProfile(userId));
-        } catch (error) {
-            next(error);
-        }
-    }
-
-    async businessTrialStatus(req: Request, res: Response, next: NextFunction) {
-        try {
-            const userId = req.user?.id;
-            if (!userId) throw Errors.unauthorized();
-            ApiResponse.success(res, await authService.getBusinessTrialStatus(userId));
-        } catch (error) {
-            next(error);
-        }
-    }
-
-    async acceptBusinessTrial(req: Request, res: Response, next: NextFunction) {
-        try {
-            const userId = req.user?.id;
-            if (!userId) throw Errors.unauthorized();
-            if (req.body?.accepted !== true) {
-                throw Errors.validation('You must accept the 14-day trial terms to continue');
-            }
-            ApiResponse.success(
-                res,
-                await authService.acceptBusinessTrial(userId),
-                'Your 14-day free trial has started.',
-            );
-        } catch (error) {
-            next(error);
-        }
-    }
-
-    async completeBusinessOnboarding(req: Request, res: Response, next: NextFunction) {
-        try {
-            const userId = req.user?.id;
-            if (!userId) throw Errors.unauthorized();
-            if (req.body?.complaintChannel !== 'WEB_PORTAL') {
-                throw Errors.validation('Select the BCIP customer web portal as your complaint channel');
-            }
-            ApiResponse.success(
-                res,
-                await authService.completeBusinessOnboarding(userId),
-                'Your customer complaint portal is ready.',
-            );
         } catch (error) {
             next(error);
         }

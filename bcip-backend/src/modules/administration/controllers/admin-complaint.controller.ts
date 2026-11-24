@@ -20,8 +20,8 @@ export class AdminComplaintController {
             };
 
             const pagination = {
-                page: Number(req.query.page) || 1,
-                limit: Number(req.query.limit) || 20,
+                page: Math.max(1, Math.floor(Number(req.query.page) || 1)),
+                limit: Math.min(100, Math.max(1, Math.floor(Number(req.query.limit) || 20))),
                 sortBy: (req.query.sortBy as string) || 'createdAt',
                 sortOrder: (req.query.sortOrder as 'asc' | 'desc') || 'desc',
             };

@@ -16,3 +16,5 @@ export abstract class AggregateRoot<TProps> {
         return this.domainEvents;
     }
 }
+
+

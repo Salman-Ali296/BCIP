@@ -11,14 +11,10 @@ import {
     MessageSquare,
     ShieldCheck,
     Clock,
-    FileText,
-    Mic,
-    Zap,
     Scale,
     HelpCircle,
     ArrowRight,
     CheckCircle2,
-    Building2,
     Send,
 } from "lucide-react";
 

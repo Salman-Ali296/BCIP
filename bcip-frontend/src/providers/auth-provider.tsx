@@ -90,11 +90,11 @@ interface AuthContextType {
   token: string | null;
   status: AuthStatus;
   error: string | null;
-  refreshSession: () => Promise<void>;
+  refreshSession: () => Promise<boolean>;
   login: (
     email: string,
     password: string,
-    options?: { rememberMe?: boolean; returnTo?: string | null },
+    options?: { rememberMe?: boolean; returnTo?: string | null; redirect?: boolean },
   ) => Promise<void>;
   logout: () => void;
   isLoading: boolean;
@@ -201,7 +201,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     try {
       const currentUser = await restoreBackendSession();
-      if (operationId.current !== currentOperation) return;
+      if (operationId.current !== currentOperation) return false;
       if (!currentUser.emailVerified) {
         throw new ApiClientError(
           'Email verification is required before signing in.',
@@ -212,8 +212,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(currentUser);
       setToken(null);
       setStatus('authenticated');
+      return true;
     } catch (cause) {
-      if (operationId.current !== currentOperation) return;
+      if (operationId.current !== currentOperation) return false;
       setUser(null);
       setToken(null);
       if (
@@ -232,6 +233,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           'We couldn’t check your sign-in session. Check your connection and try again.',
         );
       }
+      return false;
     }
   }, []);
 
@@ -365,7 +367,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(session.user);
       setStatus('authenticated');
       broadcastSessionChange();
-      router.push(getPostLoginPath(session.user.role, options.returnTo));
+      if (options.redirect !== false) {
+        const requiresBusinessApproval =
+          session.user.accountType === 'BUSINESS' &&
+          session.user.businessVerified === false;
+        router.push(
+          requiresBusinessApproval
+            ? '/business/upgrade'
+            : getPostLoginPath(session.user.role, options.returnTo),
+        );
+      }
     } catch (cause) {
       const authError = toAuthRequestError(cause);
       if (operationId.current === currentOperation) {
@@ -443,4 +454,4 @@ export function useAuth() {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-}
+}

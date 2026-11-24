@@ -3,6 +3,7 @@ import { notifySessionExpired } from "@/lib/api/client";
 export interface BusinessTrial {
     acceptedAt: string;
     expiresAt: string;
+    plan: string;
     active: boolean;
     daysRemaining: number;
 }
@@ -18,6 +19,12 @@ export interface BusinessTrialStatus {
     complaintChannel: "WEB_PORTAL" | null;
     complaintPortalUrl: string | null;
     trial: BusinessTrial | null;
+    access: {
+        active: boolean;
+        plan: string | null;
+        source: "trial" | "subscription" | null;
+        features: Record<string, boolean> | null;
+    };
 }
 
 interface ApiEnvelope {
@@ -83,12 +90,4 @@ export function getBusinessTrialStatus() {
 
 export function acceptBusinessTrial() {
     return requestBusinessTrial("/api/v1/auth/trial/accept", "POST");
-}
-
-export function completeBusinessOnboarding() {
-    return requestBusinessTrial(
-        "/api/v1/auth/trial/onboarding",
-        "POST",
-        { complaintChannel: "WEB_PORTAL" },
-    );
 }

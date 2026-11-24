@@ -1,11 +1,14 @@
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
+import { execFile } from 'node:child_process';
+import { resolveMx, Resolver } from 'node:dns/promises';
 import jwt from 'jsonwebtoken';
 import QRCode from 'qrcode';
+import { promisify } from 'node:util';
 import { Prisma } from '@prisma/client';
 import { prisma } from '../../config/database';
 import { env } from '../../config/env';
-import { Errors } from '../../utils/error';
+import { AppError, ErrorCode, Errors } from '../../utils/error';
 import { getFirebaseAuth } from '../../config/firebase-admin';
 import { logger } from '../../utils/logger';
 import {
@@ -14,7 +17,17 @@ import {
 } from '../../services/emailService';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
-import { createBusinessTrialPeriod, getBusinessTrialState } from './trial-policy';
+import {
+    ChangeRegistrationEmailDto,
+    CompleteBusinessRegistrationDto,
+    UpdateRegistrationAccountDto,
+} from './dto/business-registration.dto';
+import {
+    isPublicCustomerAccount,
+    PUBLIC_CUSTOMER_ACCESS_MESSAGE,
+} from './customer-access.policy';
+import { isDisposableEmailAddress, isPersonalEmailAddress } from './dto/email-policy';
+import { isUnapprovedBusinessAdministrator } from './business-approval.policy';
 
 const verificationCodeLifetimeMs = EMAIL_VERIFICATION_CODE_TTL_MINUTES * 60 * 1000;
 const dummyPasswordHash = bcrypt.hashSync(crypto.randomBytes(32).toString('hex'), 12);
@@ -25,9 +38,9 @@ type PendingEmailVerification = Prisma.UserGetPayload<{
     select: {
         id: true;
         email: true;
-        accountType: true;
-        tenantId: true;
         firebaseUid: true;
+        accountType: true;
+        role: true;
     };
 }>;
 
@@ -41,6 +54,7 @@ interface FirebaseRegistrationAdmin {
     }): Promise<{ uid: string }>;
     deleteUser(uid: string): Promise<void>;
     verifyEmail(uid: string): Promise<void>;
+    updateEmail(uid: string, email: string): Promise<void>;
     updatePassword(uid: string, password: string): Promise<void>;
 }
 
@@ -66,6 +80,9 @@ const firebaseRegistrationAdmin: FirebaseRegistrationAdmin = {
             disabled: false,
         });
     },
+    updateEmail: async (uid, email) => {
+        await getFirebaseAuth().updateUser(uid, { email, emailVerified: false, disabled: true });
+    },
     updatePassword: async (uid, password) => {
         await getFirebaseAuth().updateUser(uid, { password });
     },
@@ -78,6 +95,90 @@ const firebaseLoginAdapter: FirebaseLoginAdmin = {
     deleteUser: (uid) => getFirebaseAuth().deleteUser(uid),
 };
 
+type MailExchangeLookup = (domain: string) => Promise<boolean>;
+const execFileAsync = promisify(execFile);
+
+function getErrorCode(error: unknown): string | undefined {
+    if (
+        typeof error === 'object' &&
+        error !== null &&
+        'code' in error &&
+        typeof error.code === 'string'
+    ) {
+        return error.code;
+    }
+    return undefined;
+}
+
+export function parseSystemMxLookupOutput(output: string): boolean | undefined {
+    if (/timed out|server (?:failure|failed)|servfail|connection refused|refused|no response/i.test(output)) {
+        return undefined;
+    }
+    if (/mail exchanger\s*=|MX preference\s*=/i.test(output)) {
+        return true;
+    }
+    if (/non-existent domain|NXDOMAIN|no answer/i.test(output)) {
+        return false;
+    }
+    if (/\bserver:\s*[^\r\n]+\r?\n\s*address:\s*[^\r\n]+/i.test(output)) {
+        return false;
+    }
+    return undefined;
+}
+
+async function lookupMxWithSystemResolver(domain: string): Promise<boolean | undefined> {
+    try {
+        const { stdout, stderr } = await execFileAsync(
+            'nslookup',
+            ['-type=MX', domain],
+            { timeout: 5_000, windowsHide: true },
+        );
+        return parseSystemMxLookupOutput(`${stdout}\n${stderr}`);
+    } catch (error) {
+        const output = [
+            typeof error === 'object' && error !== null && 'stdout' in error ? error.stdout : '',
+            typeof error === 'object' && error !== null && 'stderr' in error ? error.stderr : '',
+        ].filter((value): value is string => typeof value === 'string').join('\n');
+        return parseSystemMxLookupOutput(output);
+    }
+}
+
+export async function domainHasMailExchangeRecord(domain: string): Promise<boolean> {
+    try {
+        return (await resolveMx(domain)).some(record => record.exchange.length > 0);
+    } catch (error) {
+        if (['ENODATA', 'ENOTFOUND', 'EAI_NODATA', 'EAI_NONAME'].includes(getErrorCode(error) ?? '')) {
+            return false;
+        }
+        if (['ECONNREFUSED', 'ETIMEOUT', 'ESERVFAIL', 'EAI_AGAIN'].includes(getErrorCode(error) ?? '')) {
+            const systemLookup = await lookupMxWithSystemResolver(domain);
+            if (systemLookup !== undefined) {
+                logger.warn('Node DNS MX lookup failed; system resolver fallback was used', {
+                    operation: 'business_email_mx_lookup',
+                    errorCode: getErrorCode(error),
+                });
+                return systemLookup;
+            }
+            try {
+                const publicResolver = new Resolver({ timeout: 4_000, tries: 1 });
+                publicResolver.setServers(['1.1.1.1', '8.8.8.8']);
+                return (await publicResolver.resolveMx(domain)).some(record => record.exchange.length > 0);
+            } catch (publicError) {
+                if (['ENODATA', 'ENOTFOUND'].includes(getErrorCode(publicError) ?? '')) {
+                    return false;
+                }
+            }
+        }
+        // DNS infrastructure is unreachable: do not block legitimate registrations.
+        // Email ownership is still proven by the verification code step.
+        logger.warn('Business email MX lookup unavailable; allowing domain', {
+            operation: 'business_email_mx_lookup',
+            errorCode: getErrorCode(error),
+        });
+        return true;
+    }
+}
+
 function hasFirebaseErrorCode(error: unknown, code: string): boolean {
     return typeof error === 'object' &&
         error !== null &&
@@ -89,6 +190,7 @@ export class AuthService {
     constructor(
         private readonly firebaseAdmin: FirebaseRegistrationAdmin = firebaseRegistrationAdmin,
         private readonly firebaseLoginAdmin: FirebaseLoginAdmin = firebaseLoginAdapter,
+        private readonly mailExchangeLookup: MailExchangeLookup = domainHasMailExchangeRecord,
     ) {}
 
     private generateToken(userId: string, role: string, tenantId: string): string {
@@ -103,9 +205,24 @@ export class AuthService {
         return crypto.createHmac('sha256', env.JWT_SECRET).update(code).digest('hex');
     }
 
+    private createRegistrationContinuationToken(userId: string): string {
+        return jwt.sign(
+            { purpose: 'business_registration_completion', userId },
+            env.JWT_SECRET,
+            { expiresIn: '30m', algorithm: 'HS256' },
+        );
+    }
+
     async register(data: RegisterDto) {
-        if (data.accountType === 'EMPLOYEE' || data.accountType === 'ESCALATION_AGENT') {
-            throw Errors.forbidden('Staff accounts must be created through a tenant invitation');
+        if (data.accountType !== 'BUSINESS') {
+            throw Errors.forbidden(
+                'Only business accounts can register. Customers can use the public complaint portal without an account.',
+            );
+        }
+
+        const emailDomain = data.email.slice(data.email.lastIndexOf('@') + 1);
+        if (!(await this.mailExchangeLookup(emailDomain))) {
+            throw Errors.validation('Business email domain must have valid mail exchange records');
         }
 
         const existingUser = await prisma.user.findUnique({
@@ -137,9 +254,7 @@ export class AuthService {
             );
         }
 
-        // Role is determined server-side only — never from client input.
-        // EMPLOYEE / ESCALATION_AGENT are blocked above; this branch is unreachable for them.
-        const role = data.accountType === 'BUSINESS' ? 'BUSINESS_ADMIN' : 'CUSTOMER';
+        const role = 'BUSINESS_ADMIN';
 
         let result: {
             user: Awaited<ReturnType<typeof prisma.user.create>>;
@@ -147,40 +262,20 @@ export class AuthService {
         };
         try {
             result = await prisma.$transaction(async (tx) => {
-                let tenant = null;
-                if (data.accountType === 'BUSINESS') {
-                    tenant = await tx.tenant.create({
-                        data: {
-                            name: data.workspaceName ?? data.businessName!,
-                            slug: `${data.businessName!.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now()}`,
-                            email: data.email,
-                            phone: data.phone,
-                            industry: data.industry,
-                            teamSize: data.teamSize,
-                            website: data.website,
-                            timezone: data.timezone,
-                            isActive: false,
-                            businessVerified: false,
-                        },
-                    });
-                } else {
-                    // CUSTOMER accounts always join the platform-wide public tenant.
-                    // The tenantId is NEVER accepted from the client — it is resolved server-side.
-                    tenant = await tx.tenant.findUnique({
-                        where: { slug: 'bcip-public-consumer-platform' },
-                    });
-                    if (!tenant) {
-                        tenant = await tx.tenant.create({
-                            data: {
-                                name: 'BCIP Public Consumer Platform',
-                                slug: 'bcip-public-consumer-platform',
-                                email: 'support@bcip.global',
-                                isActive: true,
-                                businessVerified: true,
-                            },
-                        });
-                    }
-                }
+                const tenant = await tx.tenant.create({
+                    data: {
+                        name: data.workspaceName ?? data.businessName ?? 'Business registration pending',
+                        slug: `${(data.businessName ?? data.workspaceName ?? 'business-pending').toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now()}`,
+                        email: data.email,
+                        phone: data.phone,
+                        industry: data.industry,
+                        teamSize: data.teamSize,
+                        website: data.website,
+                        timezone: data.timezone,
+                        isActive: false,
+                        businessVerified: false,
+                    },
+                });
 
                 if (!tenant) throw Errors.notFound('Tenant');
 
@@ -203,6 +298,21 @@ export class AuthService {
                                 tenant: { connect: { id: tenant!.id } },
                             })),
                         } : undefined,
+                    },
+                });
+
+                await tx.auditLog.create({
+                    data: {
+                        action: 'BUSINESS_REGISTRATION_POLICIES_ACCEPTED',
+                        entity: 'Tenant',
+                        entityId: tenant.id,
+                        userId: user.id,
+                        tenantId: tenant.id,
+                        newValue: {
+                            termsAccepted: true,
+                            privacyPolicyAccepted: true,
+                            acceptedAt: new Date().toISOString(),
+                        },
                     },
                 });
 
@@ -275,9 +385,10 @@ export class AuthService {
         });
         if (result.count !== 1) return { accepted: true };
 
-        try {
-            await emailService.sendVerificationCode(user.email, verificationCode);
-        } catch (error) {
+        // Deliver in the background: Gmail SMTP can take 5-12s, which would make
+        // the registration request hit the frontend proxy timeout. On failure the
+        // code is cleared so the user can immediately use "Resend code".
+        void emailService.sendVerificationCode(user.email, verificationCode).catch(async () => {
             try {
                 await prisma.user.updateMany({
                     where: {
@@ -298,9 +409,346 @@ export class AuthService {
                     { operation: 'verification_code_cleanup' },
                 );
             }
+        });
+        return { accepted: true };
+    }
+
+    async changeRegistrationEmail(data: ChangeRegistrationEmailDto) {
+        const user = await prisma.user.findUnique({
+            where: { email: data.email },
+            select: {
+                id: true,
+                email: true,
+                passwordHash: true,
+                firebaseUid: true,
+                accountType: true,
+                role: true,
+                emailVerified: true,
+                emailVerificationSentAt: true,
+                tenantId: true,
+                tenant: {
+                    select: {
+                        isActive: true,
+                        businessVerified: true,
+                        industry: true,
+                    },
+                },
+            },
+        });
+        const passwordMatches = await bcrypt.compare(
+            data.password,
+            user?.passwordHash ?? dummyPasswordHash,
+        );
+        if (!user || !passwordMatches || user.accountType !== 'BUSINESS' || user.role !== 'BUSINESS_ADMIN') {
+            throw Errors.invalidCredentials();
+        }
+        if (
+            user.emailVerified &&
+            (user.tenant.isActive || user.tenant.businessVerified || user.tenant.industry !== null)
+        ) {
+            throw Errors.forbidden('A verified email cannot be changed through registration');
+        }
+        if (data.email === data.newEmail) {
+            throw Errors.validation('Enter a different email address');
+        }
+        if (isDisposableEmailAddress(data.newEmail) || isPersonalEmailAddress(data.newEmail)) {
+            throw Errors.validation('Use a non-disposable business email address');
+        }
+        const emailDomain = data.newEmail.slice(data.newEmail.lastIndexOf('@') + 1);
+        if (!(await this.mailExchangeLookup(emailDomain))) {
+            throw Errors.validation('Business email domain must have valid mail exchange records');
+        }
+
+        const [existingUser, existingTenant] = await Promise.all([
+            prisma.user.findUnique({ where: { email: data.newEmail }, select: { id: true } }),
+            prisma.tenant.findUnique({ where: { email: data.newEmail }, select: { id: true } }),
+        ]);
+        if (existingUser || (existingTenant && existingTenant.id !== user.tenantId)) {
+            throw Errors.duplicateRequest('This email address is already associated with an account');
+        }
+        if (!user.firebaseUid) {
+            throw Errors.internalError('The identity account is unavailable. Please contact support.');
+        }
+
+        try {
+            await this.firebaseAdmin.updateEmail(user.firebaseUid, data.newEmail);
+        } catch {
+            throw Errors.internalError('The email address could not be updated. Please try again.');
+        }
+
+        try {
+            await prisma.$transaction(async transaction => {
+                await transaction.user.update({
+                    where: { id: user.id },
+                    data: {
+                        email: data.newEmail,
+                        emailVerified: false,
+                        emailVerificationTokenHash: null,
+                        emailVerificationExpiresAt: null,
+                        emailVerificationSentAt: null,
+                    },
+                });
+                await transaction.tenant.update({
+                    where: { id: user.tenantId },
+                    data: { email: data.newEmail },
+                });
+            });
+        } catch (error) {
+            try {
+                await this.firebaseAdmin.updateEmail(user.firebaseUid, user.email);
+            } catch {
+                logger.error('Firebase email rollback failed after registration email change', undefined, {
+                    operation: 'registration_email_compensation',
+                });
+                throw Errors.internalError(
+                    'The email change could not be completed. Contact support before trying again.',
+                );
+            }
+            if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+                throw Errors.duplicateRequest('This email address is already associated with an account');
+            }
             throw error;
         }
+
         return { accepted: true };
+    }
+
+    async completeBusinessRegistration(token: string, data: CompleteBusinessRegistrationDto) {
+        let payload: string | jwt.JwtPayload;
+        try {
+            payload = jwt.verify(token, env.JWT_SECRET, { algorithms: ['HS256'] });
+        } catch {
+            throw Errors.unauthorized('The registration session has expired. Verify your email again.');
+        }
+
+        if (
+            typeof payload === 'string' ||
+            payload.purpose !== 'business_registration_completion' ||
+            typeof payload.userId !== 'string'
+        ) {
+            throw Errors.unauthorized('A valid registration session is required');
+        }
+
+        const user = await prisma.user.findUnique({
+            where: { id: payload.userId },
+            select: {
+                id: true,
+                tenantId: true,
+                email: true,
+                emailVerified: true,
+                accountType: true,
+                role: true,
+                tenant: {
+                    select: {
+                        id: true,
+                        name: true,
+                        isActive: true,
+                        businessVerified: true,
+                        phone: true,
+                        country: true,
+                        city: true,
+                        businessAddress: true,
+                        industry: true,
+                        website: true,
+                        teamSize: true,
+                        description: true,
+                    },
+                },
+            },
+        });
+        if (!user || !user.emailVerified || user.accountType !== 'BUSINESS' || user.role !== 'BUSINESS_ADMIN') {
+            throw Errors.forbidden('Verify your business administrator email before completing registration');
+        }
+        if (user.tenant.isActive || user.tenant.businessVerified) {
+            throw Errors.forbidden('This business registration is no longer pending');
+        }
+
+        const normalizedData = {
+            ...data,
+            website: data.website || null,
+            businessAddress: data.businessAddress || null,
+            description: data.description || null,
+            evidenceUrl: data.evidenceUrl || null,
+        };
+        if (user.tenant.industry !== null) {
+            const existingDocument = await prisma.accountDocument.findFirst({
+                where: {
+                    tenantId: user.tenantId,
+                    documentType: 'BUSINESS_REGISTRATION',
+                },
+                select: { fileUrl: true, metadata: true },
+            });
+            const metadata =
+                existingDocument?.metadata &&
+                typeof existingDocument.metadata === 'object' &&
+                !Array.isArray(existingDocument.metadata)
+                    ? existingDocument.metadata
+                    : null;
+            const matchesExisting =
+                user.tenant.name === data.businessName &&
+                user.tenant.industry === data.industry &&
+                user.tenant.website === normalizedData.website &&
+                user.tenant.teamSize === data.teamSize &&
+                user.tenant.phone === data.phone &&
+                user.tenant.country === data.country &&
+                user.tenant.city === data.city &&
+                user.tenant.businessAddress === normalizedData.businessAddress &&
+                user.tenant.description === normalizedData.description &&
+                (normalizedData.evidenceUrl === null
+                    ? existingDocument === null
+                    : existingDocument?.fileUrl === normalizedData.evidenceUrl &&
+                        metadata !== null &&
+                        metadata.registrationNumber === (data.registrationNumber ?? null));
+            if (matchesExisting) {
+                return {
+                    registrationReferenceId: user.tenantId,
+                    emailVerified: user.emailVerified,
+                    businessVerified: user.tenant.businessVerified,
+                    businessApprovalStatus: user.tenant.businessVerified ? 'APPROVED' : 'PENDING_REVIEW',
+                };
+            }
+            throw Errors.duplicateRequest('Business registration details have already been submitted');
+        }
+
+        const submittedAt = new Date();
+        const businessSlugBase = data.businessName
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-|-$/g, '')
+            .slice(0, 100) || 'business';
+        const businessSlug = `${businessSlugBase}-${user.tenantId.slice(-8)}`;
+        const updated = await prisma.$transaction(async transaction => {
+            const result = await transaction.tenant.updateMany({
+                where: {
+                    id: user.tenantId,
+                    isActive: false,
+                    businessVerified: false,
+                    industry: null,
+                },
+                data: {
+                    name: data.businessName,
+                    slug: businessSlug,
+                    phone: data.phone,
+                    country: data.country,
+                    city: data.city,
+                    businessAddress: normalizedData.businessAddress,
+                    industry: data.industry,
+                    website: normalizedData.website,
+                    teamSize: data.teamSize,
+                    description: normalizedData.description,
+                },
+            });
+            if (result.count !== 1) {
+                throw Errors.duplicateRequest('Business registration details have already been submitted');
+            }
+
+            if (normalizedData.evidenceUrl) {
+                await transaction.accountDocument.create({
+                    data: {
+                        tenantId: user.tenantId,
+                        userId: user.id,
+                        documentType: 'BUSINESS_REGISTRATION',
+                        fileName: 'business-registration-evidence-link',
+                        fileUrl: normalizedData.evidenceUrl,
+                        metadata: {
+                            country: data.country,
+                            city: data.city,
+                            businessAddress: normalizedData.businessAddress,
+                            registrationNumber: data.registrationNumber ?? null,
+                        },
+                    },
+                });
+            }
+            await transaction.auditLog.create({
+                data: {
+                    action: 'BUSINESS_REGISTRATION_SUBMITTED',
+                    entity: 'Tenant',
+                    entityId: user.tenantId,
+                    userId: user.id,
+                    tenantId: user.tenantId,
+                    newValue: {
+                        businessApprovalStatus: 'PENDING_REVIEW',
+                        emailVerified: true,
+                        confirmationAccepted: true,
+                        submittedAt: submittedAt.toISOString(),
+                    },
+                },
+            });
+            return transaction.tenant.findUniqueOrThrow({
+                where: { id: user.tenantId },
+                select: { id: true, businessVerified: true },
+            });
+        });
+
+        return {
+            registrationReferenceId: updated.id,
+            emailVerified: user.emailVerified,
+            businessVerified: updated.businessVerified,
+            businessApprovalStatus: updated.businessVerified ? 'APPROVED' : 'PENDING_REVIEW',
+        };
+    }
+
+    async updateRegistrationAccount(token: string, data: UpdateRegistrationAccountDto) {
+        let payload: string | jwt.JwtPayload;
+        try {
+            payload = jwt.verify(token, env.JWT_SECRET, { algorithms: ['HS256'] });
+        } catch {
+            throw Errors.unauthorized('The registration session has expired. Verify your email again.');
+        }
+        if (
+            typeof payload === 'string' ||
+            payload.purpose !== 'business_registration_completion' ||
+            typeof payload.userId !== 'string'
+        ) {
+            throw Errors.unauthorized('A valid registration session is required');
+        }
+        const userId = payload.userId;
+
+        return prisma.$transaction(async transaction => {
+            const user = await transaction.user.findUnique({
+                where: { id: userId },
+                select: {
+                    id: true,
+                    tenantId: true,
+                    fullName: true,
+                    phone: true,
+                    emailVerified: true,
+                    accountType: true,
+                    role: true,
+                    tenant: { select: { isActive: true, industry: true } },
+                },
+            });
+            if (
+                !user ||
+                !user.emailVerified ||
+                user.accountType !== 'BUSINESS' ||
+                user.role !== 'BUSINESS_ADMIN' ||
+                user.tenant.isActive ||
+                user.tenant.industry !== null
+            ) {
+                throw Errors.forbidden('This registration account can no longer be edited');
+            }
+
+            await transaction.user.update({
+                where: { id: user.id },
+                data: { fullName: data.fullName, phone: data.phone },
+            });
+            await transaction.tenant.update({
+                where: { id: user.tenantId },
+                data: { phone: data.phone },
+            });
+            await transaction.auditLog.create({
+                data: {
+                    action: 'BUSINESS_REGISTRATION_ACCOUNT_UPDATED',
+                    entity: 'Tenant',
+                    entityId: user.tenantId,
+                    userId: user.id,
+                    tenantId: user.tenantId,
+                    oldValue: { fullName: user.fullName, phone: user.phone },
+                    newValue: { fullName: data.fullName, phone: data.phone },
+                },
+            });
+        });
     }
 
     async verifyEmail(token: string) {
@@ -312,9 +760,9 @@ export class AuthService {
             select: {
                 id: true,
                 email: true,
-                accountType: true,
-                tenantId: true,
                 firebaseUid: true,
+                accountType: true,
+                role: true,
             },
         });
         if (!user) throw Errors.validation('Verification token is invalid or expired');
@@ -329,9 +777,9 @@ export class AuthService {
             select: {
                 id: true,
                 email: true,
-                accountType: true,
-                tenantId: true,
                 firebaseUid: true,
+                accountType: true,
+                role: true,
                 emailVerified: true,
                 emailVerificationTokenHash: true,
                 emailVerificationExpiresAt: true,
@@ -392,16 +840,17 @@ export class AuthService {
                 throw Errors.validation('Verification token is invalid or expired');
             }
 
-            if (user.accountType === 'BUSINESS') {
-                await transaction.tenant.update({
-                    where: { id: user.tenantId },
-                    data: { isActive: true, businessVerified: true },
-                });
-            }
             return result;
         });
         if (verified.count !== 1) throw Errors.validation('Verification token is invalid or expired');
-        return { id: user.id, email: user.email, emailVerified: true };
+        return {
+            id: user.id,
+            email: user.email,
+            emailVerified: true,
+            ...(user.accountType === 'BUSINESS' && user.role === 'BUSINESS_ADMIN'
+                ? { registrationToken: this.createRegistrationContinuationToken(user.id) }
+                : {}),
+        };
     }
 
     async login(data: LoginDto) {
@@ -573,18 +1022,28 @@ export class AuthService {
         isActive: boolean;
         emailVerified: boolean;
         accountType: string;
+        role: string;
         tenant: { isActive: boolean; businessVerified: boolean };
     }): void {
+        const unapprovedBusinessAdministrator =
+            isUnapprovedBusinessAdministrator(user);
+        if (isPublicCustomerAccount(user.accountType)) {
+            throw Errors.forbidden(PUBLIC_CUSTOMER_ACCESS_MESSAGE);
+        }
         if (!user.isActive) {
             throw Errors.accountSuspended();
         }
         if (!user.emailVerified) {
             throw Errors.emailNotVerified();
         }
-        if (user.accountType === 'BUSINESS' && !user.tenant.businessVerified) {
+        if (
+            user.accountType === 'BUSINESS' &&
+            !user.tenant.businessVerified &&
+            !unapprovedBusinessAdministrator
+        ) {
             throw Errors.businessVerificationPending();
         }
-        if (!user.tenant.isActive) {
+        if (!user.tenant.isActive && !unapprovedBusinessAdministrator) {
             throw Errors.accountSuspended();
         }
     }
@@ -676,127 +1135,6 @@ export class AuthService {
         };
     }
 
-    async getBusinessTrialStatus(userId: string) {
-        const user = await prisma.user.findUnique({
-            where: { id: userId },
-            select: {
-                accountType: true,
-                role: true,
-                tenant: {
-                    select: {
-                        id: true,
-                        name: true,
-                        slug: true,
-                        businessTrial: true,
-                    },
-                },
-            },
-        });
-
-        if (!user) throw Errors.notFound('Account');
-        if (!['BUSINESS_ADMIN', 'MANAGER', 'AGENT', 'ESCALATION_AGENT'].includes(user.role)) {
-            throw Errors.forbidden('Business trial access is only available to business accounts');
-        }
-
-        const trial = user.tenant.businessTrial;
-        return {
-            tenant: {
-                id: user.tenant.id,
-                name: user.tenant.name,
-                slug: user.tenant.slug,
-            },
-            canAcceptTrial: user.accountType === 'BUSINESS' && user.role === 'BUSINESS_ADMIN',
-            onboardingComplete: Boolean(user.tenant.businessTrial?.onboardingCompletedAt),
-            complaintChannel: user.tenant.businessTrial?.complaintChannel ?? null,
-            complaintPortalUrl: user.tenant.businessTrial?.complaintChannel === 'WEB_PORTAL'
-                ? `/support/${encodeURIComponent(user.tenant.slug)}/complaint`
-                : null,
-            trial: trial
-                ? getBusinessTrialState(
-                    { acceptedAt: trial.acceptedAt, expiresAt: trial.expiresAt },
-                )
-                : null,
-        };
-    }
-
-    async acceptBusinessTrial(userId: string) {
-        const user = await prisma.user.findUnique({
-            where: { id: userId },
-            select: { id: true, accountType: true, role: true, tenantId: true },
-        });
-
-        if (!user) throw Errors.notFound('Account');
-        if (user.accountType !== 'BUSINESS' || user.role !== 'BUSINESS_ADMIN') {
-            throw Errors.forbidden('Only a business administrator can accept the trial');
-        }
-        const tenant = await prisma.tenant.findUnique({
-            where: { id: user.tenantId },
-            select: { businessVerified: true, isActive: true },
-        });
-        if (!tenant?.businessVerified || !tenant.isActive) {
-            throw Errors.businessVerificationPending();
-        }
-
-        const existingTrial = await prisma.businessTrial.findUnique({
-            where: { tenantId: user.tenantId },
-            select: { acceptedAt: true, expiresAt: true },
-        });
-        if (existingTrial) {
-            if (getBusinessTrialState(existingTrial).active) {
-                return this.getBusinessTrialStatus(user.id);
-            }
-            throw Errors.forbidden('This business workspace has already used its 14-day trial');
-        }
-
-        const acceptedAt = new Date();
-        const period = createBusinessTrialPeriod(acceptedAt);
-        await prisma.$transaction(async (tx) => {
-            await tx.businessTrial.upsert({
-                where: { tenantId: user.tenantId },
-                create: {
-                    tenantId: user.tenantId,
-                    acceptedByUserId: user.id,
-                    acceptedAt: period.acceptedAt,
-                    expiresAt: period.expiresAt,
-                },
-                update: {},
-            });
-        });
-
-        return this.getBusinessTrialStatus(user.id);
-    }
-
-    async completeBusinessOnboarding(userId: string) {
-        const user = await prisma.user.findUnique({
-            where: { id: userId },
-            select: { id: true, accountType: true, role: true, tenantId: true },
-        });
-        if (!user) throw Errors.notFound('Account');
-        if (user.accountType !== 'BUSINESS' || user.role !== 'BUSINESS_ADMIN') {
-            throw Errors.forbidden('Only a business administrator can configure the complaint channel');
-        }
-
-        const trial = await prisma.businessTrial.findUnique({
-            where: { tenantId: user.tenantId },
-            select: { acceptedAt: true, expiresAt: true, onboardingCompletedAt: true },
-        });
-        if (!trial || !getBusinessTrialState(trial).active) {
-            throw Errors.forbidden('An active business trial is required to complete onboarding');
-        }
-
-        if (!trial.onboardingCompletedAt) {
-            await prisma.businessTrial.update({
-                where: { tenantId: user.tenantId },
-                data: {
-                    complaintChannel: 'WEB_PORTAL',
-                    channelConfiguredAt: new Date(),
-                    onboardingCompletedAt: new Date(),
-                },
-            });
-        }
-        return this.getBusinessTrialStatus(user.id);
-    }
-
     async getProfile(userId: string) {
         const user = await prisma.user.findUnique({ where: { id: userId }, include: { tenant: true, documents: true } });
         if (!user) throw Errors.notFound('Account');
@@ -826,6 +1164,7 @@ export class AuthService {
             slug: string;
             industry: string | null;
             website: string | null;
+            businessVerified: boolean;
         },
         documents?: unknown,
     ) {
@@ -840,6 +1179,7 @@ export class AuthService {
                 emailVerified: user.emailVerified,
                 tenantId: tenant.id,
                 tenantName: tenant.name,
+                businessVerified: tenant.businessVerified,
             },
             tenant: {
                 id: tenant.id,

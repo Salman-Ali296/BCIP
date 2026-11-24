@@ -16,7 +16,7 @@ const enquiryTypes = [
 
 export default function ContactPage() {
     return (
-        <main className="min-h-[70vh] bg-[#f6f8fb] text-slate-950">
+        <main className="min-h-[70vh] bg-wash text-slate-950">
             <section className="mx-auto grid max-w-7xl gap-14 px-6 py-20 lg:grid-cols-[.85fr_1.15fr] lg:px-8 lg:py-28">
                 <div>
                     <span className="inline-flex rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-bold uppercase tracking-[.14em] text-blue-700">
@@ -50,7 +50,7 @@ export default function ContactPage() {
 
                 <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_24px_70px_rgba(16,29,48,.08)] sm:p-9">
                     <div className="flex items-center gap-3 border-b border-slate-100 pb-6">
-                        <span className="grid h-11 w-11 place-items-center rounded-xl bg-[#101d30] text-white"><MessageSquareText size={19} /></span>
+                        <span className="grid h-11 w-11 place-items-center rounded-xl bg-ink text-white"><MessageSquareText size={19} /></span>
                         <div>
                             <h2 className="font-bold">How can we help?</h2>
                             <p className="mt-1 text-sm text-slate-500">Choose a topic to start an email conversation.</p>

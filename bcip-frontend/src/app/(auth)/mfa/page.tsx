@@ -2,8 +2,8 @@
 
 import React, { Suspense, useState } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft, KeyRound, ShieldAlert, Smartphone } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ArrowLeft, KeyRound, Smartphone } from "lucide-react";
 
 import {
     AuthLayout,
@@ -11,17 +11,13 @@ import {
     VerificationCodeInput,
     Checkbox,
     PrimaryButton,
-    SecondaryButton,
     FormError,
     SuccessMessage,
     SecurityNotice,
 } from "@/components/auth";
-import { useAuth } from "@/providers/auth-provider";
 
 function MFAContent() {
     const router = useRouter();
-    const searchParams = useSearchParams();
-    const { user } = useAuth();
 
     const [code, setCode] = useState("");
     const [trustDevice, setTrustDevice] = useState(false);
@@ -199,7 +195,7 @@ export default function MFAPage() {
     return (
         <Suspense
             fallback={
-                <div className="min-h-screen grid place-items-center bg-[#f8fafc]">
+                <div className="min-h-screen grid place-items-center bg-wash">
                     <span className="h-7 w-7 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
                 </div>
             }

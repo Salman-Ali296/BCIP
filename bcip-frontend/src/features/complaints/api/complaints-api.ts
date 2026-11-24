@@ -1,1 +1,0 @@
-export { createComplaint } from "@/features/complaints/api/complaint-api";

@@ -1,12 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import {
     ArrowLeft,
     Building2,
-    Mail,
     Phone,
     Globe,
     MapPin,
@@ -16,7 +15,6 @@ import {
     CheckCircle,
     XCircle,
     AlertCircle,
-    Shield,
     TrendingUp,
 } from 'lucide-react';
 import {
@@ -27,7 +25,6 @@ import {
 
 export default function BusinessDetailPage() {
     const params = useParams();
-    const router = useRouter();
     const businessId = params.id as string;
 
     const [business, setBusiness] = useState<BusinessDetail | null>(null);
@@ -39,25 +36,20 @@ export default function BusinessDetailPage() {
         | null
     >(null);
 
-    useEffect(() => {
-        if (businessId) {
-            loadBusiness();
-        }
-    }, [businessId]);
 
-    const loadBusiness = async () => {
+    const loadBusiness = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
             const data = await getBusinessById(businessId);
             setBusiness(data);
-        } catch (err: any) {
-            setError(err.message || 'Failed to load business details');
+        } catch (err: unknown) {
+            setError((err instanceof Error && err.message) || 'Failed to load business details');
             console.error('Load business error:', err);
         } finally {
             setLoading(false);
         }
-    };
+    }, [businessId]);
 
     const handleStatusChange = async (isActive: boolean) => {
         try {
@@ -65,8 +57,8 @@ export default function BusinessDetailPage() {
             await updateBusinessStatus(businessId, { isActive });
             await loadBusiness();
             setShowConfirm(null);
-        } catch (err: any) {
-            alert(err.message || 'Failed to update business status');
+        } catch (err: unknown) {
+            alert((err instanceof Error && err.message) || 'Failed to update business status');
         } finally {
             setActionLoading(false);
         }
@@ -78,12 +70,18 @@ export default function BusinessDetailPage() {
             await updateBusinessStatus(businessId, { businessVerified });
             await loadBusiness();
             setShowConfirm(null);
-        } catch (err: any) {
-            alert(err.message || 'Failed to update verification status');
+        } catch (err: unknown) {
+            alert((err instanceof Error && err.message) || 'Failed to update verification status');
         } finally {
             setActionLoading(false);
         }
     };
+
+    useEffect(() => {
+        if (businessId) {
+            void Promise.resolve().then(() => loadBusiness());
+        }
+    }, [loadBusiness, businessId]);
 
     if (loading) {
         return (
@@ -112,6 +110,7 @@ export default function BusinessDetailPage() {
             </div>
         );
     }
+
 
     return (
         <div className="space-y-6">
@@ -282,6 +281,22 @@ export default function BusinessDetailPage() {
                                         <div className="font-medium text-gray-900">
                                             {business.phone}
                                         </div>
+                                    </div>
+                                </div>
+                            )}
+                            {(business.city || business.country || business.businessAddress) && (
+                                <div className="flex items-start gap-3">
+                                    <MapPin size={20} className="text-gray-400 mt-0.5" />
+                                    <div>
+                                        <div className="text-sm text-gray-600">Business location</div>
+                                        <div className="font-medium text-gray-900">
+                                            {[business.city, business.country].filter(Boolean).join(", ")}
+                                        </div>
+                                        {business.businessAddress && (
+                                            <div className="mt-1 text-sm text-gray-600">
+                                                {business.businessAddress}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             )}

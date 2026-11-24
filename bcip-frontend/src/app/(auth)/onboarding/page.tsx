@@ -1,9 +1,8 @@
 "use client";
 
 import React, { Suspense, useState } from "react";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowRight, Building2, CheckCircle2, Sparkles, Users } from "lucide-react";
+import { ArrowRight, Sparkles } from "lucide-react";
 
 import {
     AuthLayout,
@@ -16,14 +15,42 @@ import {
 } from "@/components/auth";
 
 const INDUSTRIES = [
-    "Retail",
-    "Banking / Financial Services",
-    "E-commerce",
-    "Healthcare",
-    "Education",
-    "Telecommunications",
-    "Technology",
-    "Other",
+     'Technology',
+        'Software & SaaS',
+        'IT Services',
+        'Healthcare',
+        'Pharmaceuticals',
+        'Fitness & Wellness',
+        'Finance',
+        'Banking',
+        'Insurance',
+        'Real Estate',
+        'Retail',
+        'E-commerce',
+        'Wholesale & Distribution',
+        'Food & Beverage',
+        'Restaurants & Cafes',
+        'Fashion & Apparel',
+        'Beauty & Personal Care',
+        'Education',
+        'Manufacturing',
+        'Construction',
+        'Automotive',
+        'Agriculture',
+        'Energy & Utilities',
+        'Telecommunications',
+        'Media & Entertainment',
+        'Marketing & Advertising',
+        'Logistics',
+        'Transportation',
+        'Hospitality',
+        'Travel & Tourism',
+        'Legal Services',
+        'Consulting & Professional Services',
+        'Security Services',
+        'Government & Public Sector',
+        'Non-Profit',
+        'Other',
 ];
 
 const TEAM_SIZES = [
@@ -197,7 +224,7 @@ export default function OnboardingPage() {
     return (
         <Suspense
             fallback={
-                <div className="min-h-screen grid place-items-center bg-[#f8fafc]">
+                <div className="min-h-screen grid place-items-center bg-wash">
                     <span className="h-7 w-7 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
                 </div>
             }

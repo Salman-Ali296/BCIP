@@ -52,8 +52,8 @@ function makeFakeUser(overrides: Record<string, unknown> = {}) {
         email: 'person@example.com',
         fullName: 'Example Person',
         passwordHash: '',
-        role: 'CUSTOMER',
-        accountType: 'CUSTOMER',
+        role: 'BUSINESS_ADMIN',
+        accountType: 'BUSINESS',
         tenantId: 'tenant-1',
         isActive: true,
         emailVerified: true,
@@ -82,14 +82,20 @@ async function errorCode(promise: Promise<unknown>, code: string) {
 
 test('registration schema rejects client-supplied tenantId', () => {
     const payload = {
-        accountType: 'CUSTOMER',
-        email: 'user@example.com',
+        accountType: 'BUSINESS',
+        businessName: 'Example Business',
+        industry: 'Retail',
+        email: 'owner@example.com',
         password: 'Secure-pass-123',
-        fullName: 'Test User',
+        fullName: 'Business Owner',
+        phone: '+1 555 010 2040',
+        termsAccepted: true,
+        privacyPolicyAccepted: true,
         tenantId: 'deadbeef-dead-4ead-8ead-deadbeefcafe',
     };
 
     const result = registerSchema.safeParse(payload);
+    assert.equal(result.success, true);
     if (result.success) {
         // tenantId has been removed from the schema - it must not appear in parsed output
         assert.equal(
@@ -136,14 +142,30 @@ test('registration schema does not expose a role field - role is server-assigned
     assert.equal('role' in shape, false, 'role must not be in the registration schema');
 
     const parsed = registerSchema.safeParse({
-        accountType: 'CUSTOMER',
-        email: 'customer@example.com',
+        accountType: 'BUSINESS',
+        businessName: 'Example Business',
+        industry: 'Retail',
+        email: 'owner@example.com',
         password: 'Password123!',
-        fullName: 'Test Customer',
+        fullName: 'Business Owner',
+        phone: '+1 555 010 2040',
+        termsAccepted: true,
+        privacyPolicyAccepted: true,
         role: 'ADMIN',
     });
     assert.equal(parsed.success, true);
     assert.equal('role' in (parsed.data as Record<string, unknown>), false, 'role must not be in parsed registration data');
+});
+
+test('customer signup is rejected because customer complaint access is public', () => {
+    const parsed = registerSchema.safeParse({
+        accountType: 'CUSTOMER',
+        email: 'customer@example.com',
+        password: 'Password123!',
+        fullName: 'Test Customer',
+    });
+
+    assert.equal(parsed.success, false);
 });
 
 // ---------------------------------------------------------------------------
@@ -168,6 +190,33 @@ test('login result does not contain passwordHash', async t => {
     const resultStr = JSON.stringify(result);
     assert.equal(resultStr.includes('passwordHash'), false, 'response must not include passwordHash');
     assert.equal(resultStr.includes(password), false, 'response must not include plaintext password');
+});
+
+test('verified unapproved business admins can sign in for plan review', async t => {
+    const password = 'Correct-password-123';
+    const passwordHash = await bcrypt.hash(password, 4);
+    const secretBefore = env.JWT_SECRET;
+    env.JWT_SECRET = TEST_SECRET;
+    t.after(() => { env.JWT_SECRET = secretBefore; });
+
+    mockPrismaMethod(t, prisma.user, 'findUnique', async () =>
+        makeFakeUser({
+            passwordHash,
+            tenant: {
+                ...makeFakeUser().tenant,
+                isActive: false,
+                businessVerified: false,
+            },
+        }) as never,
+    );
+    mockPrismaMethod(t, prisma.user, 'update', async () => ({}) as never);
+
+    const result = await new AuthService().login({
+        email: 'person@example.com',
+        password,
+    });
+
+    assert.equal(result.user.businessVerified, false);
 });
 
 // ---------------------------------------------------------------------------
@@ -332,12 +381,68 @@ test('authMiddleware rejects unverified email users', async t => {
     assert.equal((capturedError as AppError).code, 'EMAIL_NOT_VERIFIED');
 });
 
+test('unapproved business admins can read their profile but cannot access protected routes', async t => {
+    const secretBefore = env.JWT_SECRET;
+    env.JWT_SECRET = TEST_SECRET;
+    t.after(() => { env.JWT_SECRET = secretBefore; });
+
+    const token = jwt.sign(
+        { userId: 'user-1', tenantId: 'tenant-1' },
+        TEST_SECRET,
+        { expiresIn: '1h' },
+    );
+    mockPrismaMethod(t, prisma.user, 'findFirst', async () =>
+        makeFakeUser({
+            tenant: {
+                ...makeFakeUser().tenant,
+                isActive: false,
+                businessVerified: false,
+            },
+        }) as never,
+    );
+
+    const profileRequest = mockRequest({ authorization: `Bearer ${token}` });
+    profileRequest.method = 'GET';
+    profileRequest.originalUrl = '/api/auth/me';
+    let profileError: unknown;
+    await authMiddleware(profileRequest, mockResponse(), (error) => {
+        profileError = error;
+    });
+    assert.equal(profileError, undefined);
+    assert.equal(profileRequest.user?.role, 'BUSINESS_ADMIN');
+
+    const sessionUpgradeRequest = mockRequest({
+        authorization: `Bearer ${token}`,
+    });
+    sessionUpgradeRequest.method = 'POST';
+    sessionUpgradeRequest.originalUrl = '/api/auth/session-upgrade';
+    let sessionUpgradeError: unknown;
+    await authMiddleware(
+        sessionUpgradeRequest,
+        mockResponse(),
+        (error) => {
+            sessionUpgradeError = error;
+        },
+    );
+    assert.equal(sessionUpgradeError, undefined);
+
+    const protectedRequest = mockRequest({ authorization: `Bearer ${token}` });
+    protectedRequest.method = 'POST';
+    protectedRequest.originalUrl = '/api/v1/auth/billing/checkout';
+    let protectedError: unknown;
+    await authMiddleware(protectedRequest, mockResponse(), (error) => {
+        protectedError = error;
+    });
+    assert.ok(protectedError instanceof AppError);
+    assert.equal(protectedError.code, 'BUSINESS_VERIFICATION_PENDING');
+});
+
 test('authMiddleware populates req.user from Prisma - never from JWT claims alone', async t => {
     const secretBefore = env.JWT_SECRET;
     env.JWT_SECRET = TEST_SECRET;
     t.after(() => { env.JWT_SECRET = secretBefore; });
 
-    // JWT claims role=SUPER_ADMIN, but the database record shows CUSTOMER
+    // JWT claims role=SUPER_ADMIN, but the database record shows BUSINESS_ADMIN
     const token = jwt.sign(
         { userId: 'user-1', tenantId: 'tenant-1', role: 'SUPER_ADMIN' },
         TEST_SECRET,
@@ -345,7 +450,7 @@ test('authMiddleware populates req.user from Prisma - never from JWT claims alon
     );
 
     mockPrismaMethod(t, prisma.user, 'findFirst', async () =>
-        makeFakeUser({ role: 'CUSTOMER' }) as never,
+        makeFakeUser({ role: 'BUSINESS_ADMIN' }) as never,
     );
 
     const req = mockRequest({ authorization: `Bearer ${token}` });
@@ -357,7 +462,7 @@ test('authMiddleware populates req.user from Prisma - never from JWT claims alon
 
     assert.equal(nextCalled, true, 'next() should have been called for a valid session');
     // The role must come from Prisma, not the JWT payload
-    assert.equal((req as Request).user?.role, 'CUSTOMER');
+    assert.equal((req as Request).user?.role, 'BUSINESS_ADMIN');
 });
 
 test('authMiddleware accepts the HttpOnly BCIP session cookie and loads authoritative account data', async t => {
@@ -371,7 +476,7 @@ test('authMiddleware accepts the HttpOnly BCIP session cookie and loads authorit
         { expiresIn: '1h' },
     );
     mockPrismaMethod(t, prisma.user, 'findFirst', async () =>
-        makeFakeUser({ role: 'CUSTOMER' }) as never,
+        makeFakeUser({ role: 'BUSINESS_ADMIN' }) as never,
     );
 
     const req = mockRequest({
@@ -384,8 +489,33 @@ test('authMiddleware accepts the HttpOnly BCIP session cookie and loads authorit
     });
 
     assert.equal(nextError, undefined);
-    assert.equal((req as Request).user?.role, 'CUSTOMER');
+    assert.equal((req as Request).user?.role, 'BUSINESS_ADMIN');
     assert.equal((req as Request).tenantId, 'tenant-1');
+});
+
+test('authMiddleware blocks legacy customer sessions from protected APIs', async t => {
+    const secretBefore = env.JWT_SECRET;
+    env.JWT_SECRET = TEST_SECRET;
+    t.after(() => { env.JWT_SECRET = secretBefore; });
+
+    const token = jwt.sign(
+        { userId: 'user-1', tenantId: 'tenant-1', role: 'CUSTOMER' },
+        TEST_SECRET,
+        { expiresIn: '1h' },
+    );
+    mockPrismaMethod(t, prisma.user, 'findFirst', async () =>
+        makeFakeUser({ accountType: 'CUSTOMER', role: 'CUSTOMER' }) as never,
+    );
+
+    let capturedError: unknown;
+    await authMiddleware(
+        mockRequest({ authorization: `Bearer ${token}` }),
+        mockResponse(),
+        (error) => { capturedError = error; },
+    );
+
+    assert.ok(capturedError instanceof AppError);
+    assert.equal(capturedError.code, 'FORBIDDEN');
 });
 
 test('authMiddleware rejects a session token attempting to select another tenant', async t => {
@@ -491,4 +621,50 @@ test('login blocks users when tenant is inactive', async t => {
 
     const service = new AuthService();
     await errorCode(service.login({ email: 'person@example.com', password }), 'ACCOUNT_SUSPENDED');
+});
+
+test('authMiddleware rejects purpose-scoped tokens even when they carry session claims', async () => {
+    const secretBefore = env.JWT_SECRET;
+    env.JWT_SECRET = TEST_SECRET;
+    try {
+        const token = jwt.sign(
+            { purpose: 'business_registration_completion', userId: 'user-1', tenantId: 'tenant-1' },
+            TEST_SECRET,
+            { expiresIn: '30m' },
+        );
+        const req = mockRequest({ authorization: `Bearer ${token}` });
+        const res = mockResponse();
+        let capturedError: unknown;
+        const next: NextFunction = (err) => { capturedError = err; };
+
+        await authMiddleware(req, res, next);
+
+        assert.ok(capturedError instanceof AppError);
+        assert.equal((capturedError as AppError).code, 'UNAUTHORIZED');
+    } finally {
+        env.JWT_SECRET = secretBefore;
+    }
+});
+
+test('authMiddleware rejects tokens signed with a non-HS256 algorithm', async () => {
+    const secretBefore = env.JWT_SECRET;
+    env.JWT_SECRET = TEST_SECRET;
+    try {
+        const token = jwt.sign(
+            { userId: 'user-1', tenantId: 'tenant-1' },
+            TEST_SECRET,
+            { expiresIn: '1h', algorithm: 'HS512' },
+        );
+        const req = mockRequest({ authorization: `Bearer ${token}` });
+        const res = mockResponse();
+        let capturedError: unknown;
+        const next: NextFunction = (err) => { capturedError = err; };
+
+        await authMiddleware(req, res, next);
+
+        assert.ok(capturedError instanceof AppError);
+        assert.equal((capturedError as AppError).code, 'UNAUTHORIZED');
+    } finally {
+        env.JWT_SECRET = secretBefore;
+    }
 });

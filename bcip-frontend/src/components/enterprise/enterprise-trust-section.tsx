@@ -2,17 +2,10 @@
 
 import React, { useState } from "react";
 import {
-  Check,
   CheckCircle2,
   Clock,
   Database,
-  Eye,
-  FileCheck,
-  Key,
   Layers,
-  Lock,
-  Server,
-  Shield,
   ShieldCheck,
   Sparkles,
   Users,
@@ -24,7 +17,7 @@ export function EnterpriseTrustSection() {
   const [activeTab, setActiveTab] = useState<GovernanceTab>("rbac");
 
   return (
-    <section id="trust" className="section bg-[#f8fafc] border-b border-slate-200">
+    <section id="trust" className="section bg-wash border-b border-slate-200">
       <div className="container-x">
         {/* Header */}
         <div className="max-w-3xl">
@@ -32,10 +25,10 @@ export function EnterpriseTrustSection() {
             <span className="status-dot" />
             Governance & Enterprise Trust
           </div>
-          <h2 className="heading-xl mt-4 text-[#101d30]">
+          <h2 className="heading-xl mt-4 text-ink">
             Built for teams accountable
             <br />
-            <span className="text-[#2454d6]">for customer outcomes.</span>
+            <span className="text-brand">for customer outcomes.</span>
           </h2>
           <p className="mt-4 text-base leading-7 text-slate-600">
             BCIP provides rigorous operational boundaries: multi-tenant PostgreSQL data separation,
@@ -89,7 +82,7 @@ export function EnterpriseTrustSection() {
                 key={item.title}
                 className="rounded-2xl border border-slate-200 bg-white p-5 shadow-2xs hover:border-slate-300 transition"
               >
-                <div className="grid h-9 w-9 place-items-center rounded-xl bg-[#2454d6]/10 text-[#2454d6]">
+                <div className="grid h-9 w-9 place-items-center rounded-xl bg-ink/10 text-brand">
                   <Icon className="h-4 w-4" />
                 </div>
                 <h3 className="mt-4 text-sm font-bold text-slate-900">{item.title}</h3>

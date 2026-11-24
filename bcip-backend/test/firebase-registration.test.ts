@@ -1,8 +1,13 @@
 import assert from 'node:assert/strict';
 import test, { type TestContext } from 'node:test';
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 import { prisma } from '../src/config/database';
-import { AuthService } from '../src/modules/accounts/auth.service';
+import { env } from '../src/config/env';
+import {
+    AuthService,
+    parseSystemMxLookupOutput,
+} from '../src/modules/accounts/auth.service';
 import type { RegisterDto } from '../src/modules/accounts/dto/register.dto';
 import { AppError } from '../src/utils/error';
 
@@ -34,6 +39,9 @@ const registration: RegisterDto = {
     email: 'owner@northwind.example',
     password: 'Secure-password-123!',
     fullName: 'Northwind Owner',
+    phone: '+1 555 010 2040',
+    termsAccepted: true,
+    privacyPolicyAccepted: true,
     documents: [],
     policies: [],
 };
@@ -57,6 +65,25 @@ const user = {
     tenantId: tenant.id,
 };
 
+test('system DNS MX lookup results distinguish records, missing records, and resolver failures', () => {
+    assert.equal(
+        parseSystemMxLookupOutput('gmail.com MX preference = 5, mail exchanger = gmail-smtp-in.l.google.com'),
+        true,
+    );
+    assert.equal(
+        parseSystemMxLookupOutput('Server: UnKnown\nAddress: 192.0.2.1'),
+        false,
+    );
+    assert.equal(
+        parseSystemMxLookupOutput('Server: UnKnown\nAddress: 192.0.2.1\nDNS request timed out.'),
+        undefined,
+    );
+    assert.equal(
+        parseSystemMxLookupOutput('Server: UnKnown\nAddress: 192.0.2.1\n*** Server failed'),
+        undefined,
+    );
+});
+
 function makeTransaction(
     onUserCreate: (data: Record<string, unknown>) => void = () => {},
 ) {
@@ -74,6 +101,9 @@ function makeTransaction(
         companyPolicy: {
             createMany: async () => ({ count: 0 }),
         },
+        auditLog: {
+            create: async () => ({ id: 'audit-1' }),
+        },
     };
 }
 
@@ -87,6 +117,7 @@ function makeFirebaseAdmin(options: {
     }) => Promise<{ uid: string }>;
     deleteUser?: (uid: string) => Promise<void>;
     verifyEmail?: (uid: string) => Promise<void>;
+    updateEmail?: (uid: string, email: string) => Promise<void>;
     updatePassword?: (uid: string, password: string) => Promise<void>;
 } = {}) {
     const events: string[] = [];
@@ -110,6 +141,10 @@ function makeFirebaseAdmin(options: {
         verifyEmail: async (uid: string) => {
             events.push(`firebase-verify:${uid}`);
             await options.verifyEmail?.(uid);
+        },
+        updateEmail: async (uid: string, email: string) => {
+            events.push(`firebase-email:${uid}:${email}`);
+            await options.updateEmail?.(uid, email);
         },
         updatePassword: async (uid: string, password: string) => {
             events.push(`firebase-password:${uid}`);
@@ -204,7 +239,7 @@ test('business registration creates a disabled Firebase identity and atomically 
             return { uid: 'firebase-user-1' };
         },
     });
-    const service = new AuthService(firebaseAdmin);
+    const service = new AuthService(firebaseAdmin, undefined, async () => true);
     const result = await service.register(registration);
 
     assert.equal(result.verificationRequired, true);
@@ -216,11 +251,35 @@ test('business registration creates a disabled Firebase identity and atomically 
     assert.deepEqual(firebaseAdmin.events, ['firebase-create']);
 });
 
+test('business registration rejects an email domain without MX records', async (t) => {
+    mockExistingUser(t, null);
+    const firebaseAdmin = makeFirebaseAdmin();
+    let checkedDomain: string | undefined;
+    const service = new AuthService(
+        firebaseAdmin,
+        undefined,
+        async domain => {
+            checkedDomain = domain;
+            return false;
+        },
+    );
+
+    await assert.rejects(
+        service.register(registration),
+        (error: unknown) =>
+            error instanceof AppError &&
+            error.statusCode === 400 &&
+            error.message.includes('mail exchange'),
+    );
+    assert.equal(checkedDomain, 'northwind.example');
+    assert.deepEqual(firebaseAdmin.events, []);
+});
+
 test('duplicate BCIP email does not create a Firebase identity or tenant', async (t) => {
     mockExistingUser(t, { emailVerified: false });
     const firebaseAdmin = makeFirebaseAdmin();
 
-    const result = await new AuthService(firebaseAdmin).register(registration);
+    const result = await new AuthService(firebaseAdmin, undefined, async () => true).register(registration);
 
     assert.equal(result.verificationRequired, true);
     assert.deepEqual(firebaseAdmin.events, []);
@@ -230,7 +289,7 @@ test('already-verified duplicate BCIP account routes to login', async (t) => {
     mockExistingUser(t, { emailVerified: true });
     const firebaseAdmin = makeFirebaseAdmin();
 
-    const result = await new AuthService(firebaseAdmin).register(registration);
+    const result = await new AuthService(firebaseAdmin, undefined, async () => true).register(registration);
 
     assert.equal(result.verificationRequired, false);
     assert.deepEqual(firebaseAdmin.events, []);
@@ -247,7 +306,7 @@ test('Firebase email collision without a BCIP mapping is rejected without automa
     });
 
     await assert.rejects(
-        new AuthService(firebaseAdmin).register(registration),
+        new AuthService(firebaseAdmin, undefined, async () => true).register(registration),
         (error: unknown) =>
             error instanceof AppError &&
             error.statusCode === 409 &&
@@ -259,7 +318,7 @@ test('Firebase email collision without a BCIP mapping is rejected without automa
 test('verification is required after Firebase account creation without sending until requested', async (t) => {
     mockExistingUser(t, null);
     mockTransaction(t, makeTransaction());
-    const result = await new AuthService(makeFirebaseAdmin()).register(registration);
+    const result = await new AuthService(makeFirebaseAdmin(), undefined, async () => true).register(registration);
 
     assert.equal(result.verificationRequired, true);
 });
@@ -278,7 +337,7 @@ test('Firebase creation failure does not create a BCIP user or tenant', async (t
     });
 
     await assert.rejects(
-        new AuthService(firebaseAdmin).register(registration),
+        new AuthService(firebaseAdmin, undefined, async () => true).register(registration),
         (error: unknown) =>
             error instanceof AppError &&
             error.statusCode === 500 &&
@@ -295,7 +354,7 @@ test('database transaction failure compensates by deleting the newly created Fir
     const firebaseAdmin = makeFirebaseAdmin();
 
     await assert.rejects(
-        new AuthService(firebaseAdmin).register(registration),
+        new AuthService(firebaseAdmin, undefined, async () => true).register(registration),
         (error: unknown) =>
             error instanceof AppError &&
             error.statusCode === 500 &&
@@ -323,7 +382,7 @@ test('registration retry succeeds after the failed attempt compensated its Fireb
         },
     );
     const firebaseAdmin = makeFirebaseAdmin();
-    const service = new AuthService(firebaseAdmin);
+    const service = new AuthService(firebaseAdmin, undefined, async () => true);
 
     await assert.rejects(service.register(registration));
     const retried = await service.register(registration);
@@ -561,4 +620,195 @@ test('legacy Firebase bootstrap rejects unverified BCIP accounts before creating
             error.code === 'EMAIL_NOT_VERIFIED',
     );
     assert.deepEqual(firebaseLoginAdmin.events, []);
+});
+
+test('verified registration token submits a business profile under its own tenant', async (t) => {
+    const previousSecret = env.JWT_SECRET;
+    env.JWT_SECRET = 'registration-test-secret-that-is-long-enough';
+    t.after(() => { env.JWT_SECRET = previousSecret; });
+    const token = jwt.sign(
+        { purpose: 'business_registration_completion', userId: user.id },
+        env.JWT_SECRET,
+        { expiresIn: '30m', algorithm: 'HS256' },
+    );
+    mockPrismaMethod(t, prisma.user, 'findUnique', async () => ({
+        id: user.id,
+        tenantId: 'tenant-12345678',
+        email: registration.email,
+        emailVerified: true,
+        accountType: 'BUSINESS',
+        role: 'BUSINESS_ADMIN',
+        tenant: {
+            id: 'tenant-12345678',
+            name: 'Business registration pending',
+            isActive: false,
+            businessVerified: false,
+            phone: registration.phone,
+            industry: null,
+            website: null,
+            teamSize: null,
+            description: null,
+        },
+    }) as never);
+
+    let updatedSlug = '';
+    let updatedLocation: { country: string; city: string; businessAddress: string | null } | undefined;
+    let evidenceCreated = false;
+    let submissionAudited = false;
+    mockPrismaMethod(
+        t,
+        prisma,
+        '$transaction',
+        async (operation: (transaction: never) => Promise<unknown>) => operation({
+            tenant: {
+                updateMany: async (args: {
+                    data: {
+                        slug: string;
+                        country: string;
+                        city: string;
+                        businessAddress: string | null;
+                    };
+                }) => {
+                    updatedSlug = args.data.slug;
+                    updatedLocation = {
+                        country: args.data.country,
+                        city: args.data.city,
+                        businessAddress: args.data.businessAddress,
+                    };
+                    return { count: 1 };
+                },
+                findUniqueOrThrow: async () => ({ id: 'tenant-12345678', businessVerified: false }),
+            },
+            accountDocument: {
+                create: async () => {
+                    evidenceCreated = true;
+                    return { id: 'document-1' };
+                },
+            },
+            auditLog: {
+                create: async () => {
+                    submissionAudited = true;
+                    return { id: 'audit-1' };
+                },
+            },
+        } as never),
+    );
+
+    const result = await new AuthService().completeBusinessRegistration(token, {
+        businessName: 'Northwind Support',
+        industry: 'Retail',
+        website: '',
+        teamSize: '11–50',
+        phone: '+1 555 010 2040',
+        country: 'United States',
+        city: 'Seattle',
+        businessAddress: '123 Registered Road',
+        description: '',
+        confirmationAccepted: true,
+    });
+
+    assert.equal(result.registrationReferenceId, 'tenant-12345678');
+    assert.equal(result.businessApprovalStatus, 'PENDING_REVIEW');
+    assert.equal(updatedSlug, 'northwind-support-12345678');
+    assert.deepEqual(updatedLocation, {
+        country: 'United States',
+        city: 'Seattle',
+        businessAddress: '123 Registered Road',
+    });
+    assert.equal(evidenceCreated, false);
+    assert.equal(submissionAudited, true);
+});
+
+test('business registration completion rejects a token with another purpose', async (t) => {
+    const previousSecret = env.JWT_SECRET;
+    env.JWT_SECRET = 'registration-test-secret-that-is-long-enough';
+    t.after(() => { env.JWT_SECRET = previousSecret; });
+    mockPrismaMethod(t, prisma.user, 'findUnique', async () => {
+        throw new Error('A token with the wrong purpose must not query registration data');
+    });
+    const token = jwt.sign(
+        { purpose: 'business_workspace_access', userId: user.id },
+        env.JWT_SECRET,
+        { expiresIn: '30m', algorithm: 'HS256' },
+    );
+
+    await assert.rejects(
+        new AuthService().completeBusinessRegistration(token, {
+            businessName: 'Northwind Support',
+            industry: 'Retail',
+            website: '',
+            teamSize: '11–50',
+            phone: '+1 555 010 2040',
+            country: 'United States',
+            city: 'Seattle',
+            businessAddress: '123 Registered Road',
+            description: '',
+            registrationNumber: 'REG-123',
+            evidenceUrl: 'https://registry.example/business.pdf',
+            confirmationAccepted: true,
+        }),
+        (error: unknown) =>
+            error instanceof AppError && error.statusCode === 401,
+    );
+});
+
+test('email changes on a pending verified registration require verification again', async (t) => {
+    const passwordHash = await bcrypt.hash(registration.password, 4);
+    const pendingUser = {
+        id: user.id,
+        email: registration.email,
+        passwordHash,
+        firebaseUid: 'firebase-user-1',
+        accountType: 'BUSINESS',
+        role: 'BUSINESS_ADMIN',
+        emailVerified: true,
+        tenantId: tenant.id,
+        tenant: { isActive: false, businessVerified: false, industry: null },
+    };
+    mockPrismaMethod(
+        t,
+        prisma.user,
+        'findUnique',
+        async (args: { where: { email: string } }) =>
+            args.where.email === registration.email ? pendingUser as never : null as never,
+    );
+    mockPrismaMethod(t, prisma.tenant, 'findUnique', async () => null as never);
+
+    let updatedUser: Record<string, unknown> | undefined;
+    mockPrismaMethod(
+        t,
+        prisma,
+        '$transaction',
+        async (operation: (transaction: never) => Promise<unknown>) => operation({
+            user: {
+                update: async (args: { data: Record<string, unknown> }) => {
+                    updatedUser = args.data;
+                    return { id: user.id };
+                },
+            },
+            tenant: { update: async () => ({ id: tenant.id }) },
+        } as never),
+    );
+
+    const firebaseAdmin = makeFirebaseAdmin();
+    const service = new AuthService(firebaseAdmin, undefined, async () => true);
+    let verificationRequested = false;
+    service.resendVerificationEmail = async () => {
+        verificationRequested = true;
+        return { accepted: true };
+    };
+    const result = await service.changeRegistrationEmail({
+        email: registration.email,
+        newEmail: 'owner@newnorthwind.example',
+        password: registration.password,
+    });
+
+    assert.deepEqual(result, { accepted: true });
+    assert.equal(updatedUser?.email, 'owner@newnorthwind.example');
+    assert.equal(updatedUser?.emailVerified, false);
+    assert.equal(updatedUser?.emailVerificationSentAt, null);
+    assert.equal(verificationRequested, false);
+    assert.deepEqual(firebaseAdmin.events, [
+        'firebase-email:firebase-user-1:owner@newnorthwind.example',
+    ]);
 });

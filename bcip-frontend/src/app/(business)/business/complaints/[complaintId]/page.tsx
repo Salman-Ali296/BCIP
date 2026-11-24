@@ -2,22 +2,15 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import {
-  AlertTriangle,
   ArrowLeft,
   CheckCircle2,
   Clock,
   Copy,
-  ExternalLink,
-  History,
   Layers,
   MessageSquare,
-  Send,
-  Shield,
   Sparkles,
-  User,
-  Users,
 } from "lucide-react";
 
 import { useComplaint, useUpdateComplaint } from "@/features/complaints/hooks/use-complaints";
@@ -28,7 +21,6 @@ import type { Complaint } from "@/features/complaints/api/complaint-api";
 
 export default function BusinessComplaintDetailPage() {
   const params = useParams<{ complaintId: string }>();
-  const router = useRouter();
   const complaintId = params?.complaintId || "";
   const query = useComplaint(complaintId);
   const updateMutation = useUpdateComplaint(complaintId);
@@ -61,7 +53,7 @@ export default function BusinessComplaintDetailPage() {
         />
         <Link
           href="/business/complaints"
-          className="inline-flex items-center gap-2 text-xs font-bold text-[#2454d6] hover:underline"
+          className="inline-flex items-center gap-2 text-xs font-bold text-brand hover:underline"
         >
           <ArrowLeft className="h-3.5 w-3.5" /> Return to complaint queue
         </Link>
@@ -78,7 +70,6 @@ export default function BusinessComplaintDetailPage() {
   const category = complaint.category || "General Operations";
   const customerEmail = complaint.customerEmail || "Not provided";
   const customerName = complaint.submittedBy || "Verified Customer";
-  const sentiment = complaint.sentiment || "Negative";
   const isUrgent = priority === "high" || priority === "urgent";
 
   // AI intelligence defaults
@@ -137,12 +128,12 @@ export default function BusinessComplaintDetailPage() {
         <div className="flex items-center gap-2 text-xs text-slate-500">
           <Link
             href="/business/complaints"
-            className="font-medium text-slate-600 hover:text-[#2454d6] flex items-center gap-1"
+            className="font-medium text-slate-600 hover:text-brand flex items-center gap-1"
           >
             <ArrowLeft className="h-3.5 w-3.5" /> Complaints
           </Link>
           <span>/</span>
-          <span className="font-mono font-bold text-[#101d30]">{trackingNumber}</span>
+          <span className="font-mono font-bold text-ink">{trackingNumber}</span>
         </div>
 
         {/* Quick Lifecycle Controls */}
@@ -163,7 +154,7 @@ export default function BusinessComplaintDetailPage() {
               type="button"
               onClick={() => handleStatusChange("resolved")}
               disabled={updateMutation.isPending}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-[#2454d6] px-3.5 py-1.5 text-xs font-bold text-white hover:bg-[#1b43b4] shadow-xs transition"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-ink px-3.5 py-1.5 text-xs font-bold text-white hover:bg-brand shadow-xs transition"
             >
               <CheckCircle2 className="h-3.5 w-3.5" /> Mark Resolved
             </button>
@@ -176,7 +167,7 @@ export default function BusinessComplaintDetailPage() {
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between border-b border-slate-100 pb-5">
           <div className="space-y-1">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="font-mono text-sm font-bold text-[#2454d6]">
+              <span className="font-mono text-sm font-bold text-brand">
                 {trackingNumber}
               </span>
               <StatusBadge status={currentStatus} />
@@ -190,16 +181,16 @@ export default function BusinessComplaintDetailPage() {
                 {priority} priority
               </span>
             </div>
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[#101d30]">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-ink">
               {complaint.title}
             </h1>
-            <p className="text-xs text-[#5e6b7d]">
+            <p className="text-xs text-muted">
               Submitted on {new Date(complaint.createdAt).toLocaleString()} · Multi-channel Intake
             </p>
           </div>
 
           {/* SLA Clock & Ownership Callout */}
-          <div className="rounded-xl border border-slate-100 bg-[#f8fafc] p-3 text-right">
+          <div className="rounded-xl border border-slate-100 bg-wash p-3 text-right">
             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
               SLA Resolution Clock
             </span>
@@ -216,11 +207,11 @@ export default function BusinessComplaintDetailPage() {
           {/* LEFT: Customer Voice, AI Signals, Suggested Response, Audit Trail */}
           <div className="space-y-6">
             {/* Customer Statement */}
-            <div className="rounded-xl border border-slate-200 bg-[#fafbfd] p-4">
+            <div className="rounded-xl border border-slate-200 bg-wash p-4">
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
                 Original Customer Statement
               </span>
-              <p className="mt-2 text-sm leading-relaxed text-[#101d30] whitespace-pre-wrap font-medium">
+              <p className="mt-2 text-sm leading-relaxed text-ink whitespace-pre-wrap font-medium">
                 “{complaint.description}”
               </p>
               <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-slate-200/60 pt-2.5 text-xs text-slate-500">
@@ -230,15 +221,15 @@ export default function BusinessComplaintDetailPage() {
             </div>
 
             {/* AI Intelligence & Assistance Box */}
-            <div className="rounded-xl border border-blue-200 bg-[#edf2ff]/40 p-5 space-y-4">
+            <div className="rounded-xl border border-blue-200 bg-lilac/40 p-5 space-y-4">
               <div className="flex items-center justify-between border-b border-blue-200/60 pb-3">
                 <div className="flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-[#2454d6]" />
-                  <span className="text-xs font-bold text-[#101d30]">
+                  <Sparkles className="h-4 w-4 text-brand" />
+                  <span className="text-xs font-bold text-ink">
                     AI Intelligence Signals
                   </span>
                 </div>
-                <span className="rounded-full bg-blue-100 px-2.5 py-0.5 font-mono text-[10px] font-bold text-[#2454d6]">
+                <span className="rounded-full bg-blue-100 px-2.5 py-0.5 font-mono text-[10px] font-bold text-brand">
                   Confidence: {aiConfidence}%
                 </span>
               </div>
@@ -263,7 +254,7 @@ export default function BusinessComplaintDetailPage() {
 
                   {/* AI Suggested Action */}
                   <div className="rounded-lg border border-blue-200 bg-white p-3">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#2454d6] block">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-brand block">
                       AI Suggested Next Step
                     </span>
                     <p className="mt-1 text-xs font-medium text-slate-800 leading-relaxed">
@@ -279,7 +270,7 @@ export default function BusinessComplaintDetailPage() {
                     <button
                       type="button"
                       onClick={() => handleStatusChange("in_progress")}
-                      className="rounded-lg bg-[#2454d6] hover:bg-[#1b43b4] text-white px-3 py-1.5 text-xs font-bold transition"
+                      className="rounded-lg bg-ink hover:bg-brand text-white px-3 py-1.5 text-xs font-bold transition"
                     >
                       Accept & Assign
                     </button>
@@ -303,13 +294,13 @@ export default function BusinessComplaintDetailPage() {
             <div className="rounded-xl border border-slate-200 bg-white p-4">
               <div className="flex items-center justify-between border-b border-slate-100 pb-2">
                 <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                  <MessageSquare className="h-3.5 w-3.5 text-[#2454d6]" />
+                  <MessageSquare className="h-3.5 w-3.5 text-brand" />
                   Suggested Customer Response Draft
                 </span>
                 <button
                   type="button"
                   onClick={copyDraftToClipboard}
-                  className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#2454d6] hover:underline"
+                  className="inline-flex items-center gap-1 text-[11px] font-semibold text-brand hover:underline"
                 >
                   <Copy className="h-3 w-3" />
                   {copiedDraft ? "Copied to clipboard!" : "Copy Draft"}
@@ -334,7 +325,7 @@ export default function BusinessComplaintDetailPage() {
                   onChange={(e) => setInternalNote(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleAddInternalNote()}
                   placeholder="Record internal investigation notes..."
-                  className="flex-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-900 focus:border-[#2454d6] focus:outline-none"
+                  className="flex-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-900 focus:border-brand focus:outline-none"
                 />
                 <button
                   type="button"
@@ -361,7 +352,7 @@ export default function BusinessComplaintDetailPage() {
                   },
                 ].map((item, idx) => (
                   <div key={idx} className="flex items-start gap-2.5 text-xs">
-                    <span className="h-2 w-2 rounded-full bg-[#2454d6] mt-1.5 shrink-0" />
+                    <span className="h-2 w-2 rounded-full bg-ink mt-1.5 shrink-0" />
                     <div className="flex-1">
                       <div className="flex items-center justify-between">
                         <strong className="text-slate-800">{item.actor}</strong>
@@ -410,7 +401,7 @@ export default function BusinessComplaintDetailPage() {
                   <select
                     value={currentStatus}
                     onChange={(e) => handleStatusChange(e.target.value as Complaint["status"])}
-                    className="mt-1.5 h-9 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-xs text-slate-900 focus:border-[#2454d6] focus:outline-none"
+                    className="mt-1.5 h-9 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-xs text-slate-900 focus:border-brand focus:outline-none"
                   >
                     <option value="submitted">Submitted</option>
                     <option value="acknowledged">Acknowledged</option>
@@ -471,7 +462,7 @@ export default function BusinessComplaintDetailPage() {
               <div className="space-y-2 pt-1">
                 <div className="rounded-lg bg-white p-2.5 border border-purple-100 shadow-2xs">
                   <div className="flex items-center justify-between">
-                    <span className="font-mono text-xs font-bold text-[#2454d6]">BC-10433</span>
+                    <span className="font-mono text-xs font-bold text-brand">BC-10433</span>
                     <span className="font-mono text-[10px] font-bold text-purple-700">94% match</span>
                   </div>
                   <p className="mt-1 text-[11px] text-slate-600 line-clamp-1">
@@ -481,7 +472,7 @@ export default function BusinessComplaintDetailPage() {
 
                 <div className="rounded-lg bg-white p-2.5 border border-purple-100 shadow-2xs">
                   <div className="flex items-center justify-between">
-                    <span className="font-mono text-xs font-bold text-[#2454d6]">BC-10419</span>
+                    <span className="font-mono text-xs font-bold text-brand">BC-10419</span>
                     <span className="font-mono text-[10px] font-bold text-purple-700">88% match</span>
                   </div>
                   <p className="mt-1 text-[11px] text-slate-600 line-clamp-1">

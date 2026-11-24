@@ -3,26 +3,7 @@
 import React, { useState } from "react";
 import {
   Activity,
-  AlertTriangle,
-  ArrowRight,
-  BarChart3,
   CheckCircle2,
-  Clock,
-  Database,
-  Eye,
-  Key,
-  Layers,
-  LayoutDashboard,
-  Lock,
-  MessageSquare,
-  Shield,
-  ShieldAlert,
-  Sparkles,
-  TrendingDown,
-  TrendingUp,
-  UserCheck,
-  Users,
-  Zap,
 } from "lucide-react";
 
 type RoleKey = "agent" | "manager" | "executive" | "admin";
@@ -126,7 +107,7 @@ export function RoleMatrixView() {
   const config = roleConfigs[activeRole];
 
   return (
-    <section id="roles" className="section bg-[#f8fafc] border-b border-slate-200">
+    <section id="roles" className="section bg-wash border-b border-slate-200">
       <div className="container-x">
         {/* Header */}
         <div className="max-w-3xl">
@@ -134,10 +115,10 @@ export function RoleMatrixView() {
             <span className="status-dot" />
             Tailored Enterprise Experiences
           </div>
-          <h2 className="heading-xl mt-4 text-[#101d30]">
+          <h2 className="heading-xl mt-4 text-ink">
             Different roles. Different priorities.
             <br />
-            <span className="text-[#2454d6]">One unified workspace.</span>
+            <span className="text-brand">One unified workspace.</span>
           </h2>
           <p className="mt-4 text-base leading-7 text-slate-600">
             BCIP doesn&apos;t force every user into the same dashboard. Frontline operators get focused triage queues,
@@ -156,7 +137,7 @@ export function RoleMatrixView() {
                 onClick={() => setActiveRole(role)}
                 className={`rounded-xl px-4 py-2.5 text-xs font-bold transition flex items-center gap-2 ${
                   isCurrent
-                    ? "bg-[#2454d6] text-white shadow-sm"
+                    ? "bg-ink text-white shadow-sm"
                     : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-300"
                 }`}
               >
@@ -179,7 +160,7 @@ export function RoleMatrixView() {
             {/* Left: Role Description & Navigation Modules */}
             <div>
               <div className="flex items-center gap-2">
-                <span className="rounded-full bg-blue-50 border border-blue-200 px-3 py-1 text-xs font-bold text-[#2454d6]">
+                <span className="rounded-full bg-blue-50 border border-blue-200 px-3 py-1 text-xs font-bold text-brand">
                   {config.badge}
                 </span>
                 <span className="text-xs font-mono text-slate-400">Persona Profile</span>
@@ -218,7 +199,7 @@ export function RoleMatrixView() {
                 <div className="space-y-2">
                   {config.primaryActions.map((action, idx) => (
                     <div key={idx} className="flex items-center gap-2 text-xs text-slate-700">
-                      <span className="h-1.5 w-1.5 rounded-full bg-[#2454d6]" />
+                      <span className="h-1.5 w-1.5 rounded-full bg-ink" />
                       <span>{action}</span>
                     </div>
                   ))}
@@ -227,10 +208,10 @@ export function RoleMatrixView() {
             </div>
 
             {/* Right: Persona KPI Metric Grid */}
-            <div className="rounded-xl border border-slate-200 bg-[#f8fafc] p-5 space-y-4">
+            <div className="rounded-xl border border-slate-200 bg-wash p-5 space-y-4">
               <div className="flex items-center justify-between border-b border-slate-200/80 pb-3">
                 <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                  <Activity className="h-4 w-4 text-[#2454d6]" /> Key Performance Metrics
+                  <Activity className="h-4 w-4 text-brand" /> Key Performance Metrics
                 </span>
                 <span className="text-[10px] font-mono text-slate-400">Real-time telemetry</span>
               </div>
@@ -254,8 +235,8 @@ export function RoleMatrixView() {
                 ))}
               </div>
 
-              <div className="rounded-lg border border-blue-100 bg-[#edf2ff] p-3 text-xs text-slate-700">
-                <p className="font-semibold text-[#2454d6]">Role Governance Principle</p>
+              <div className="rounded-lg border border-blue-100 bg-lilac p-3 text-xs text-slate-700">
+                <p className="font-semibold text-brand">Role Governance Principle</p>
                 <p className="mt-1 text-[11px] text-slate-600 leading-snug">
                   Role assignments and access scopes are bound to organization-wide SSO and directory groups.
                   Users only access data relevant to their operational responsibility.

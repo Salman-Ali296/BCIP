@@ -18,7 +18,6 @@ import {
     X,
     LogOut,
     ChevronDown,
-    BrainCircuit,
     Activity,
     Download,
     Settings2,
@@ -26,9 +25,11 @@ import {
     KeyRound,
     Clock3,
     Layers3,
+    CreditCard,
     ShieldCheck,
 } from 'lucide-react';
 import { getRoleHome, useAuth } from '@/providers/auth-provider';
+import { BrandMark } from '@/components/brand/brand-logo';
 import '@/app/(admin)/admin-portal.css';
 
 interface NavItem {
@@ -38,25 +39,69 @@ interface NavItem {
     badge?: string;
 }
 
-const NAVIGATION_ITEMS: NavItem[] = [
-    { label: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
-    { label: 'Businesses', href: '/admin/businesses', icon: Building2 },
-    { label: 'Organizations', href: '/admin/organizations', icon: Layers3 },
-    { label: 'Business units', href: '/admin/business-units', icon: Building2 },
-    { label: 'Users', href: '/admin/users', icon: Users },
-    { label: 'Complaints', href: '/admin/complaints', icon: FileText },
-    { label: 'Roles & permissions', href: '/admin/roles', icon: KeyRound },
-    { label: 'SLA policies', href: '/admin/sla-policies', icon: Clock3 },
-    { label: 'AI Configuration', href: '/admin/ai-config', icon: Brain },
-    { label: 'Categories', href: '/admin/categories', icon: Tag },
-    { label: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
-    { label: 'Moderation', href: '/admin/moderation', icon: Flag },
-    { label: 'Audit Logs', href: '/admin/audit-logs', icon: FileSearch },
-    { label: 'System Health', href: '/admin/health', icon: Activity },
-    { label: 'Reports', href: '/admin/reports', icon: Download },
-    { label: 'Notifications', href: '/admin/notifications', icon: Bell },
-    { label: 'Settings', href: '/admin/settings', icon: Settings2 },
+interface NavGroup {
+    label: string;
+    accent?: 'violet';
+    items: NavItem[];
+}
+
+const NAVIGATION_GROUPS: NavGroup[] = [
+    {
+        label: 'Overview',
+        items: [{ label: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard }],
+    },
+    {
+        label: 'Business',
+        items: [
+            { label: 'Businesses', href: '/admin/businesses', icon: Building2 },
+            { label: 'Plans & billing', href: '/admin/plans', icon: CreditCard },
+            { label: 'Organizations', href: '/admin/organizations', icon: Layers3 },
+            { label: 'Business units', href: '/admin/business-units', icon: Building2 },
+            { label: 'Complaints', href: '/admin/complaints', icon: FileText },
+        ],
+    },
+    {
+        label: 'AI & Intelligence',
+        accent: 'violet',
+        items: [
+            { label: 'AI Configuration', href: '/admin/ai-config', icon: Brain },
+            { label: 'Categories', href: '/admin/categories', icon: Tag },
+            { label: 'Moderation', href: '/admin/moderation', icon: Flag },
+        ],
+    },
+    {
+        label: 'Roles & Policies',
+        items: [
+            { label: 'Users', href: '/admin/users', icon: Users },
+            { label: 'Roles & permissions', href: '/admin/roles', icon: KeyRound },
+            { label: 'SLA policies', href: '/admin/sla-policies', icon: Clock3 },
+            { label: 'Security', href: '/admin/security', icon: ShieldCheck },
+        ],
+    },
+    {
+        label: 'Activity',
+        items: [
+            { label: 'Audit Logs', href: '/admin/audit-logs', icon: FileSearch },
+            { label: 'System Health', href: '/admin/health', icon: Activity },
+        ],
+    },
+    {
+        label: 'Settings & Notifications',
+        items: [
+            { label: 'Settings', href: '/admin/settings', icon: Settings2 },
+            { label: 'Notifications', href: '/admin/notifications', icon: Bell },
+        ],
+    },
+    {
+        label: 'Reports & Analytics',
+        items: [
+            { label: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
+            { label: 'Reports', href: '/admin/reports', icon: Download },
+        ],
+    },
 ];
+
+const NAVIGATION_ITEMS = NAVIGATION_GROUPS.flatMap((group) => group.items);
 
 export function AdminShell({ children }: { children: ReactNode }) {
     const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -144,15 +189,13 @@ export function AdminShell({ children }: { children: ReactNode }) {
                             href="/admin/dashboard"
                             className="flex items-center gap-3 group"
                         >
-                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400/20 to-emerald-600/10 border border-emerald-400/20 flex items-center justify-center group-hover:border-emerald-400/40 transition-colors">
-                                <BrainCircuit className="w-5 h-5 text-emerald-400" />
-                            </div>
+                            <BrandMark size={36} />
                             <div>
                                 <div className="text-base font-semibold text-white tracking-tight">
                                     BCIP Admin
                                 </div>
                                 <div className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">
-                                    Intelligence Platform
+                                    Platform control
                                 </div>
                             </div>
                         </Link>
@@ -180,56 +223,84 @@ export function AdminShell({ children }: { children: ReactNode }) {
                 </div>
 
                 {/* Navigation */}
-                <nav aria-label="Admin navigation" className="min-h-0 flex-1 space-y-1 overflow-y-auto px-3 py-6">
-                    {NAVIGATION_ITEMS.map((item) => {
-                        const isActive =
-                            pathname === item.href || pathname.startsWith(item.href + '/');
-                        const Icon = item.icon;
-
-                        return (
-                            <Link
-                                key={item.href}
-                                href={item.href}
-                                onClick={() => setMobileMenuOpen(false)}
-                                aria-label={item.label}
-                                aria-current={isActive ? 'page' : undefined}
-                                title={!sidebarOpen ? item.label : undefined}
-                                className="block"
+                <nav aria-label="Admin navigation" className="min-h-0 flex-1 space-y-3 overflow-y-auto px-3 py-5">
+                    {NAVIGATION_GROUPS.map((group, groupIndex) => (
+                        <section
+                            key={group.label}
+                            aria-label={group.label}
+                            className={groupIndex > 0 ? 'border-t border-white/[0.06] pt-3' : ''}
+                        >
+                            <h2
+                                className={
+                                    sidebarOpen
+                                        ? `px-3.5 pb-2 text-[10px] font-semibold uppercase tracking-[0.16em] ${
+                                              group.accent === 'violet'
+                                                  ? 'text-violet-300/80'
+                                                  : 'text-slate-500'
+                                          }`
+                                        : 'sr-only'
+                                }
                             >
-                                <motion.div
-                                    initial={false}
-                                    whileHover={{ x: sidebarOpen ? 4 : 0 }}
-                                    transition={{ duration: 0.2 }}
-                                    className={`
-                                        flex items-center gap-3 px-3.5 py-3 rounded-xl
-                                        transition-all duration-200
-                                        ${
-                                            isActive
-                                                ? 'bg-emerald-400/10 border border-emerald-400/20 text-emerald-300'
-                                                : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.04] border border-transparent hover:border-white/[0.08]'
-                                        }
-                                    `}
-                                >
-                                    <Icon
-                                        size={18}
-                                        className={`flex-shrink-0 ${
-                                            isActive ? 'text-emerald-300' : ''
-                                        }`}
-                                    />
-                                    {sidebarOpen && (
-                                        <span className="font-medium text-[13px]">
-                                            {item.label}
-                                        </span>
-                                    )}
-                                    {sidebarOpen && item.badge && (
-                                        <span className="ml-auto bg-red-500/20 border border-red-500/30 text-red-400 text-[10px] font-semibold px-2 py-0.5 rounded-full">
-                                            {item.badge}
-                                        </span>
-                                    )}
-                                </motion.div>
-                            </Link>
-                        );
-                    })}
+                                {group.label}
+                            </h2>
+                            <div className="space-y-1">
+                                {group.items.map((item) => {
+                                    const isActive =
+                                        pathname === item.href ||
+                                        pathname.startsWith(`${item.href}/`);
+                                    const Icon = item.icon;
+                                    const activeColor =
+                                        group.accent === 'violet'
+                                            ? 'bg-violet-400/10 border-violet-400/20 text-violet-300'
+                                            : 'bg-emerald-400/10 border-emerald-400/20 text-emerald-300';
+                                    const activeIconColor =
+                                        group.accent === 'violet'
+                                            ? 'text-violet-300'
+                                            : 'text-emerald-300';
+
+                                    return (
+                                        <Link
+                                            key={item.href}
+                                            href={item.href}
+                                            onClick={() => setMobileMenuOpen(false)}
+                                            aria-label={item.label}
+                                            aria-current={isActive ? 'page' : undefined}
+                                            title={!sidebarOpen ? item.label : undefined}
+                                            className="block"
+                                        >
+                                            <motion.div
+                                                initial={false}
+                                                whileHover={{ x: sidebarOpen ? 4 : 0 }}
+                                                transition={{ duration: 0.2 }}
+                                                className={`flex items-center gap-3 rounded-xl border px-3.5 py-3 transition-all duration-200 ${
+                                                    isActive
+                                                        ? activeColor
+                                                        : 'border-transparent text-slate-400 hover:border-white/[0.08] hover:bg-white/[0.04] hover:text-slate-200'
+                                                }`}
+                                            >
+                                                <Icon
+                                                    size={18}
+                                                    className={`flex-shrink-0 ${
+                                                        isActive ? activeIconColor : ''
+                                                    }`}
+                                                />
+                                                {sidebarOpen && (
+                                                    <span className="font-medium text-[13px]">
+                                                        {item.label}
+                                                    </span>
+                                                )}
+                                                {sidebarOpen && item.badge && (
+                                                    <span className="ml-auto rounded-full border border-red-500/30 bg-red-500/20 px-2 py-0.5 text-[10px] font-semibold text-red-400">
+                                                        {item.badge}
+                                                    </span>
+                                                )}
+                                            </motion.div>
+                                        </Link>
+                                    );
+                                })}
+                            </div>
+                        </section>
+                    ))}
                 </nav>
 
                 {/* User Section */}
@@ -261,7 +332,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
                 }`}
             >
                 {/* Top Bar */}
-                <header className="h-20 bg-[#0d1322]/80 backdrop-blur-xl border-b border-white/[0.08] sticky top-0 z-30">
+                <header className="h-20 bg-ink/80 backdrop-blur-xl border-b border-white/[0.08] sticky top-0 z-30">
                     <div className="h-full flex items-center justify-between px-6 lg:px-8">
                         {/* Mobile Menu Button */}
                         <button
@@ -322,7 +393,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
                                                 animate={{ opacity: 1, y: 0, scale: 1 }}
                                                 exit={{ opacity: 0, y: -10, scale: 0.95 }}
                                                 transition={{ duration: 0.15 }}
-                                                className="absolute right-0 mt-2 w-64 bg-[#111b2e] border border-white/[0.12] rounded-2xl shadow-2xl shadow-black/50 py-2 z-50 overflow-hidden"
+                                                className="absolute right-0 mt-2 w-64 bg-ink border border-white/[0.12] rounded-2xl shadow-2xl shadow-black/50 py-2 z-50 overflow-hidden"
                                             >
                                                 <div className="px-4 py-3 border-b border-white/[0.08]">
                                                     <div className="font-medium text-sm text-white">

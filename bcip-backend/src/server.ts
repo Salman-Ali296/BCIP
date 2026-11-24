@@ -2,6 +2,7 @@ import { validateEnv, env } from './config/env';
 import { createApp } from './app';
 import { prisma } from './config/database';
 import { logger } from './utils/logger';
+import { emailService } from './services/emailService';
 
 async function startServer(): Promise<void> {
     try {
@@ -19,6 +20,7 @@ async function startServer(): Promise<void> {
             logger.info(`Server running on http://localhost:${env.PORT}`, {
                 environment: env.NODE_ENV,
             });
+            void emailService.warmUp();
         });
 
         let shuttingDown = false;

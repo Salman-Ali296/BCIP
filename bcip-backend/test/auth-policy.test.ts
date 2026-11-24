@@ -75,7 +75,6 @@ test('every user role must verify email before login', async t => {
         ['BUSINESS_ADMIN', 'BUSINESS'],
         ['MANAGER', 'EMPLOYEE'],
         ['AGENT', 'EMPLOYEE'],
-        ['CUSTOMER', 'CUSTOMER'],
         ['ESCALATION_AGENT', 'ESCALATION_AGENT'],
     ] as const;
     let currentAccount = account({ passwordHash });
@@ -93,7 +92,12 @@ test('verified users authenticate and receive a signed access token', async t =>
     env.JWT_SECRET = 'test-secret-that-is-longer-than-thirty-two-characters';
     t.after(() => { env.JWT_SECRET = secretBefore; });
     mockPrismaMethod(t, prisma.user, 'findUnique', async () =>
-        account({ passwordHash, emailVerified: true }) as never,
+        account({
+            passwordHash,
+            emailVerified: true,
+            role: 'BUSINESS_ADMIN',
+            accountType: 'BUSINESS',
+        }) as never,
     );
     mockPrismaMethod(t, prisma.user, 'update', async () => ({}) as never);
 
@@ -102,13 +106,30 @@ test('verified users authenticate and receive a signed access token', async t =>
     assert.equal((jwt.verify(result.token, env.JWT_SECRET) as jwt.JwtPayload).userId, 'user-1');
 });
 
-test('business accounts remain blocked until separate business approval', async t => {
+test('customer accounts cannot sign in because the complaint portal is public', async t => {
+    const passwordHash = await bcrypt.hash(password, 4);
+    mockPrismaMethod(t, prisma.user, 'findUnique', async () =>
+        account({
+            passwordHash,
+            role: 'CUSTOMER',
+            accountType: 'CUSTOMER',
+            emailVerified: true,
+        }) as never,
+    );
+
+    await errorCode(
+        service.login({ email: 'person@example.com', password }),
+        'FORBIDDEN',
+    );
+});
+
+test('non-admin business accounts remain blocked until separate business approval', async t => {
     const passwordHash = await bcrypt.hash(password, 4);
     mockPrismaMethod(t, prisma.user, 'findUnique', async () =>
         account({
             passwordHash,
             accountType: 'BUSINESS',
-            role: 'BUSINESS_ADMIN',
+            role: 'MANAGER',
             emailVerified: true,
             tenant: { ...account().tenant, isActive: false, businessVerified: false },
         }) as never,
@@ -126,11 +147,17 @@ test('invalid credentials and suspended accounts receive distinct safe error cod
     mockPrismaMethod(t, prisma.user, 'findUnique', async () => currentAccount as never);
 
     await errorCode(service.login({ email: 'person@example.com', password: 'wrong-password' }), 'INVALID_CREDENTIALS');
-    currentAccount = account({ passwordHash, isActive: false, emailVerified: true });
+    currentAccount = account({
+        passwordHash,
+        isActive: false,
+        emailVerified: true,
+        role: 'BUSINESS_ADMIN',
+        accountType: 'BUSINESS',
+    });
     await errorCode(service.login({ email: 'person@example.com', password }), 'ACCOUNT_SUSPENDED');
 });
 
-test('verification tokens are hashed, single-use, and rejected when expired or reused', async t => {
+test('email verification does not approve the business and tokens remain single-use', async t => {
     const token = 'a'.repeat(64);
     let updateCount = 1;
     let tokenFound = true;
@@ -163,7 +190,7 @@ test('verification tokens are hashed, single-use, and rejected when expired or r
         async (_args: Parameters<typeof prisma.user.updateMany>[0]) =>
             ({ count: updateCount-- }) as never,
     );
-    const activateTenant = mockPrismaMethod(
+    const approveTenant = mockPrismaMethod(
         t,
         prisma.tenant,
         'update',
@@ -172,11 +199,7 @@ test('verification tokens are hashed, single-use, and rejected when expired or r
 
     const verified = await service.verifyEmail(token);
     assert.equal(verified.emailVerified, true);
-    assert.equal(activateTenant.callCount(), 1);
-    assert.deepEqual(activateTenant.calls[0]?.[0], {
-        where: { id: businessAccount.tenantId },
-        data: { isActive: true, businessVerified: true },
-    });
+    assert.equal(approveTenant.callCount(), 0);
     const writtenHash = findToken.calls[0]?.[0].where.emailVerificationTokenHash;
     assert.equal(
         writtenHash,

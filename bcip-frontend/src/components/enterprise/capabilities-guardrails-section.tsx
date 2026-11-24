@@ -13,7 +13,6 @@ import {
   ArrowRight,
   Eye,
   Sliders,
-  AlertTriangle,
   Scale,
   FileCheck2,
 } from "lucide-react";
@@ -108,10 +107,10 @@ export function CapabilitiesGuardrailsSection() {
               <span className="status-dot" />
               Operational Transparency
             </div>
-            <h2 className="heading-xl mt-3 text-[#101d30]">
+            <h2 className="heading-xl mt-3 text-ink">
               What BCIP does.
               <br />
-              <span className="text-[#2454d6]">And what it never will.</span>
+              <span className="text-brand">And what it never will.</span>
             </h2>
             <p className="mt-3 text-sm leading-relaxed text-slate-600 max-w-xl">
               High-velocity operational intelligence with strict safety guardrails. We accelerate frontline triage without ever delegating binding customer authority to AI.

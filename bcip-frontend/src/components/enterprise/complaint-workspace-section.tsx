@@ -2,33 +2,12 @@
 
 import React, { useState, useMemo } from "react";
 import {
-  AlertCircle,
-  AlertTriangle,
   ArrowRight,
-  ArrowUpDown,
-  Check,
-  CheckCircle2,
   Clock,
-  Copy,
-  ExternalLink,
-  Eye,
-  FileSearch,
   Filter,
-  History,
-  Info,
-  Layers,
-  MessageSquare,
-  MoreVertical,
-  Plus,
-  RefreshCw,
   Search,
-  Send,
-  Shield,
   Sparkles,
-  User,
-  Users,
   X,
-  Zap,
 } from "lucide-react";
 import { useToast } from "./toast-system";
 
@@ -349,7 +328,7 @@ export function ComplaintWorkspaceSection() {
   };
 
   return (
-    <section id="workspace" className="section bg-[#f8fafc] border-b border-slate-200">
+    <section id="workspace" className="section bg-wash border-b border-slate-200">
       <div className="container-x">
         {/* Section Header */}
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pb-6 border-b border-slate-200/60">
@@ -358,10 +337,10 @@ export function ComplaintWorkspaceSection() {
               <span className="status-dot" />
               Interactive Triage Console
             </div>
-            <h2 className="heading-xl mt-3 text-[#101d30]">
+            <h2 className="heading-xl mt-3 text-ink">
               Fast triage. Clear context.
               <br />
-              <span className="text-[#2454d6]">Zero guesswork.</span>
+              <span className="text-brand">Zero guesswork.</span>
             </h2>
             <p className="mt-2 text-xs sm:text-sm text-slate-600 leading-relaxed">
               Scan queues instantly with AI duplicate clusters, live SLA countdowns, and accountable human decision actions.
@@ -369,7 +348,7 @@ export function ComplaintWorkspaceSection() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
-            <span className="rounded-lg bg-blue-50 border border-blue-200 text-[#2454d6] px-3 py-1 font-mono text-[11px]">
+            <span className="rounded-lg bg-blue-50 border border-blue-200 text-brand px-3 py-1 font-mono text-[11px]">
               Interactive Prototype
             </span>
             <span className="rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 px-3 py-1 font-mono text-[11px]">
@@ -389,7 +368,7 @@ export function ComplaintWorkspaceSection() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search by ID, customer name, keyword or team..."
-                className="w-full rounded-xl border border-slate-200 bg-slate-50/50 pl-10 pr-4 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-[#2454d6] focus:outline-none focus:ring-2 focus:ring-[#2454d6]/10 transition"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50/50 pl-10 pr-4 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/10 transition"
               />
               {searchQuery && (
                 <button
@@ -409,7 +388,7 @@ export function ComplaintWorkspaceSection() {
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-800 focus:border-[#2454d6] focus:outline-none"
+                  className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-800 focus:border-brand focus:outline-none"
                 >
                   <option value="All">All Statuses</option>
                   <option value="Needs Review">Needs Review</option>
@@ -424,7 +403,7 @@ export function ComplaintWorkspaceSection() {
                 <select
                   value={priorityFilter}
                   onChange={(e) => setPriorityFilter(e.target.value)}
-                  className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-800 focus:border-[#2454d6] focus:outline-none"
+                  className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-800 focus:border-brand focus:outline-none"
                 >
                   <option value="All">All Priorities</option>
                   <option value="Critical">Critical</option>
@@ -440,7 +419,7 @@ export function ComplaintWorkspaceSection() {
                 <select
                   value={categoryFilter}
                   onChange={(e) => setCategoryFilter(e.target.value)}
-                  className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-800 focus:border-[#2454d6] focus:outline-none"
+                  className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-800 focus:border-brand focus:outline-none"
                 >
                   <option value="All">All Categories</option>
                   <option value="Billing">Billing</option>
@@ -489,7 +468,7 @@ export function ComplaintWorkspaceSection() {
               </p>
               <button
                 onClick={resetFilters}
-                className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-[#2454d6] px-3.5 py-2 text-xs font-bold text-white hover:bg-[#1b43b4] transition"
+                className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-ink px-3.5 py-2 text-xs font-bold text-white hover:bg-brand transition"
               >
                 Clear all filters
               </button>
@@ -520,7 +499,7 @@ export function ComplaintWorkspaceSection() {
                       }`}
                     >
                       {/* ID */}
-                      <td className="py-3.5 px-4 font-mono font-bold text-[#2454d6] whitespace-nowrap">
+                      <td className="py-3.5 px-4 font-mono font-bold text-brand whitespace-nowrap">
                         {item.id}
                       </td>
 
@@ -631,7 +610,7 @@ export function ComplaintWorkspaceSection() {
                             e.stopPropagation();
                             setSelectedComplaint(item);
                           }}
-                          className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-bold text-slate-700 hover:border-[#2454d6] hover:text-[#2454d6] shadow-2xs transition"
+                          className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-bold text-slate-700 hover:border-brand hover:text-brand shadow-2xs transition"
                         >
                           Inspect <ArrowRight className="h-3 w-3" />
                         </button>
@@ -653,7 +632,7 @@ export function ComplaintWorkspaceSection() {
             <div className="border-b border-slate-200 p-5 flex items-center justify-between bg-slate-50/70">
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="font-mono text-base font-bold text-[#2454d6]">
+                  <span className="font-mono text-base font-bold text-brand">
                     {selectedComplaint.id}
                   </span>
                   <span
@@ -702,12 +681,12 @@ export function ComplaintWorkspaceSection() {
               </div>
 
               {/* Section 9: AI Intelligence Breakdown */}
-              <div className="rounded-xl border border-blue-200 bg-[#edf2ff]/40 p-4">
+              <div className="rounded-xl border border-blue-200 bg-lilac/40 p-4">
                 <div className="flex items-center justify-between border-b border-blue-200/60 pb-2">
-                  <span className="inline-flex items-center gap-1.5 font-bold text-[#2454d6]">
+                  <span className="inline-flex items-center gap-1.5 font-bold text-brand">
                     <Sparkles className="h-4 w-4" /> AI Assisted Signals
                   </span>
-                  <span className="font-mono text-[10px] font-bold rounded-full bg-blue-100 text-[#2454d6] px-2 py-0.5">
+                  <span className="font-mono text-[10px] font-bold rounded-full bg-blue-100 text-brand px-2 py-0.5">
                     Confidence: {selectedComplaint.aiConfidence}%
                   </span>
                 </div>
@@ -736,7 +715,7 @@ export function ComplaintWorkspaceSection() {
                           className="flex items-center justify-between rounded-lg bg-white p-2 border border-blue-100"
                         >
                           <div className="overflow-hidden pr-2">
-                            <span className="font-mono font-bold text-[#2454d6] text-[10px]">
+                            <span className="font-mono font-bold text-brand text-[10px]">
                               {dup.id}
                             </span>
                             <p className="truncate text-[11px] text-slate-600">{dup.summary}</p>
@@ -759,7 +738,7 @@ export function ComplaintWorkspaceSection() {
                 <div className="space-y-3">
                   {selectedComplaint.auditHistory.map((item, idx) => (
                     <div key={idx} className="flex items-start gap-2.5">
-                      <div className="h-2 w-2 rounded-full bg-[#2454d6] mt-1 shrink-0" />
+                      <div className="h-2 w-2 rounded-full bg-ink mt-1 shrink-0" />
                       <div className="flex-1">
                         <div className="flex items-center justify-between text-[11px]">
                           <strong className="text-slate-800">{item.actor}</strong>
@@ -784,7 +763,7 @@ export function ComplaintWorkspaceSection() {
                     onChange={(e) => setInternalNote(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleAddNote()}
                     placeholder="Enter resolution notes or internal findings..."
-                    className="flex-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-900 focus:border-[#2454d6] focus:outline-none"
+                    className="flex-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-900 focus:border-brand focus:outline-none"
                   />
                   <button
                     onClick={handleAddNote}

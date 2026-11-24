@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
-import { HelpdeskLogo } from "@/components/brand/helpdesk-logo";
+import { BrandLogo } from "@/components/brand/brand-logo";
 import {
   Menu,
   X,
@@ -13,15 +13,14 @@ import {
   GitMerge,
   Search,
   BarChart3,
-  Bell,
   Users,
   Headphones,
   Building2,
   MessageSquare,
   AlertTriangle,
   Copy,
-  Route,
-  Lightbulb,
+  PenLine,
+  ShieldAlert,
 } from "lucide-react";
 
 /* ------------------------------------------------------------------
@@ -42,75 +41,59 @@ interface NavDropdown {
 
 /* ------------------------------------------------------------------
    DROPDOWN DATA
+   Hrefs point at section ids that exist on the landing page
+   (#capabilities, #how-it-works, #industries) or at real routes.
    ------------------------------------------------------------------ */
 
-const PLATFORM_ITEMS: DropdownItem[] = [
+const PRODUCT_ITEMS: DropdownItem[] = [
   {
-    label: "Complaint Management",
-    desc: "Manage complaints throughout their lifecycle",
+    label: "Complaint inbox",
+    desc: "Every complaint in one list, with status and owner",
     icon: Inbox,
-    href: "#product",
+    href: "#capabilities",
   },
   {
-    label: "AI Classification & Prioritization",
-    desc: "Categorize complaints and assess their urgency",
-    icon: BrainCircuit,
-    href: "#ai-intelligence",
-  },
-  {
-    label: "Duplicate & Related-Issue Detection",
-    desc: "Identify semantically similar complaints",
-    icon: GitMerge,
-    href: "#product",
-  },
-  {
-    label: "Complaint Tracking",
-    desc: "Track complaint status and resolution progress",
+    label: "Customer tracking page",
+    desc: "Customers check progress with their tracking ID",
     icon: Search,
-    href: "#product",
+    href: "#capabilities",
   },
   {
-    label: "Analytics & Insights",
-    desc: "Explore complaint trends and performance metrics",
+    label: "Escalations",
+    desc: "Hand serious cases to a senior person quickly",
+    icon: ShieldAlert,
+    href: "#capabilities",
+  },
+  {
+    label: "Team and roles",
+    desc: "Admins, managers, agents and escalation staff",
+    icon: Users,
+    href: "#capabilities",
+  },
+  {
+    label: "Reports",
+    desc: "Volume, categories and resolution time",
     icon: BarChart3,
-    href: "#ai-intelligence",
-  },
-  {
-    label: "Root-Cause Insights",
-    desc: "Identify recurring complaint patterns and potential causes",
-    icon: GitMerge,
-    href: "#ai-intelligence",
-  },
-  {
-    label: "Notifications & Escalations",
-    desc: "Keep teams informed about updates and priority issues",
-    icon: Bell,
-    href: "#product",
+    href: "#capabilities",
   },
 ];
 
-const SOLUTIONS_ITEMS: DropdownItem[] = [
+const AUDIENCE_ITEMS: DropdownItem[] = [
   {
-    label: "Customer Experience Teams",
-    desc: "Improve customer satisfaction and service quality",
-    icon: Users,
-    href: "#industries",
-  },
-  {
-    label: "Customer Support Teams",
-    desc: "Help teams manage and resolve complaints efficiently",
+    label: "Support teams",
+    desc: "Work the queue without sorting it by hand",
     icon: Headphones,
     href: "#industries",
   },
   {
-    label: "Operations & Business Leaders",
-    desc: "Gain visibility into complaint trends and operations",
+    label: "Operations heads",
+    desc: "See which problems keep coming back",
     icon: BarChart3,
     href: "#industries",
   },
   {
-    label: "Enterprise Risk & Quality Teams",
-    desc: "Monitor recurring issues and support quality improvement",
+    label: "Business owners",
+    desc: "Know what's open, what's late and who has it",
     icon: Building2,
     href: "#industries",
   },
@@ -118,68 +101,72 @@ const SOLUTIONS_ITEMS: DropdownItem[] = [
 
 const AI_ITEMS: DropdownItem[] = [
   {
-    label: "AI Complaint Classification",
-    desc: "Categorize complaints by type and topic",
+    label: "Automatic categories",
+    desc: "Billing, delivery, refund, technical and more",
     icon: BrainCircuit,
-    href: "#ai-intelligence",
+    href: "#capabilities",
   },
   {
-    label: "Sentiment Analysis",
-    desc: "Analyze customer sentiment and emotional tone",
-    icon: MessageSquare,
-    href: "#ai-intelligence",
-  },
-  {
-    label: "Urgency & Priority Scoring",
-    desc: "Identify urgent complaints and assess priority",
+    label: "Priority scoring",
+    desc: "Low to Critical, based on what the customer wrote",
     icon: AlertTriangle,
-    href: "#ai-intelligence",
+    href: "#capabilities",
   },
   {
-    label: "Duplicate & Related-Issue Detection",
-    desc: "Find semantically similar complaints",
+    label: "Sentiment",
+    desc: "Flags angry or upset customers",
+    icon: MessageSquare,
+    href: "#capabilities",
+  },
+  {
+    label: "Duplicate check",
+    desc: "Links complaints about the same problem",
     icon: Copy,
-    href: "#ai-intelligence",
-  },
-  {
-    label: "Intelligent Routing",
-    desc: "Recommend appropriate teams for complaint handling",
-    icon: Route,
     href: "#how-it-works",
   },
   {
-    label: "AI-Assisted Response Suggestions",
-    desc: "Generate response drafts to support complaint resolution",
-    icon: Lightbulb,
-    href: "#ai-intelligence",
+    label: "Reply drafts",
+    desc: "A first draft your agent edits before sending",
+    icon: PenLine,
+    href: "#capabilities",
+  },
+  {
+    label: "Related complaints",
+    desc: "Groups complaints that share a cause",
+    icon: GitMerge,
+    href: "#how-it-works",
   },
 ];
 
 const NAV_LINKS = [
   {
-    label: "Platform",
+    label: "Product",
     dropdown: {
-      label: "Platform",
-      items: PLATFORM_ITEMS,
+      label: "Product",
+      items: PRODUCT_ITEMS,
     },
   },
   {
-    label: "Solutions",
+    label: "AI features",
     dropdown: {
-      label: "Solutions",
-      items: SOLUTIONS_ITEMS,
+      label: "AI features",
+      items: AI_ITEMS,
     },
   },
   {
-    label: "How It Works",
+    label: "Who it's for",
+    dropdown: {
+      label: "Who it's for",
+      items: AUDIENCE_ITEMS,
+    },
+  },
+  {
+    label: "How it works",
     href: "#how-it-works",
   },
   {
-    label: "AI Intelligence",
-    dropdown: {
-      label: "AI Intelligence",
-      items: AI_ITEMS,
-    },
+    label: "Pricing",
+    href: "/pricing",
   },
   {
     label: "About",
@@ -344,12 +331,8 @@ export function LandingNavbar() {
       >
         <div className="landing-nav__inner">
           {/* Brand */}
-          <Link href="/" className="landing-nav__brand" aria-label="BCIP Helpdesk home">
-            <HelpdeskLogo
-              size="lg"
-              theme="light"
-              className="landing-nav__brand-logo"
-            />
+          <Link href="/" className="landing-nav__brand" aria-label="BCIP home">
+            <BrandLogo height={34} priority />
           </Link>
 
           {/* Desktop Links */}
@@ -403,10 +386,10 @@ export function LandingNavbar() {
           {/* Right Actions */}
           <div className="landing-nav__actions">
             <Link href="/login" className="landing-nav__sign-in">
-              Sign In
+              Sign in
             </Link>
             <Link href="/register" className="landing-nav__cta-btn">
-              Get Started
+              Start free trial
               <ArrowRight className="landing-nav__cta-arrow" />
             </Link>
 
@@ -519,14 +502,14 @@ export function LandingNavbar() {
                 onClick={() => setMobileOpen(false)}
                 className="landing-mobile-menu__signin"
               >
-                Sign In
+                Sign in
               </Link>
               <Link
                 href="/register"
                 onClick={() => setMobileOpen(false)}
                 className="landing-mobile-menu__cta"
               >
-                Get Started
+                Start free trial
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </div>

@@ -5,6 +5,11 @@ import type { Prisma } from '@prisma/client';
 import { getFirebaseAuth } from '../config/firebase-admin';
 import { prisma } from '../config/database';
 import { Errors } from '../utils/error';
+import {
+    isPublicCustomerAccount,
+    PUBLIC_CUSTOMER_ACCESS_MESSAGE,
+} from '../modules/accounts/customer-access.policy';
+import { isUnapprovedBusinessAdministrator } from '../modules/accounts/business-approval.policy';
 
 const accountSelect = {
     id: true,
@@ -97,7 +102,13 @@ export function createFirebaseAuthMiddleware(
             next(unauthorized());
             return;
         }
-        if (!account.isActive || !account.tenant.isActive) {
+        if (isPublicCustomerAccount(account.accountType)) {
+            next(Errors.forbidden(PUBLIC_CUSTOMER_ACCESS_MESSAGE));
+            return;
+        }
+        const unapprovedBusinessAdministrator =
+            isUnapprovedBusinessAdministrator(account);
+        if (!account.isActive || (!account.tenant.isActive && !unapprovedBusinessAdministrator)) {
             next(Errors.accountSuspended());
             return;
         }
@@ -107,7 +118,8 @@ export function createFirebaseAuthMiddleware(
         }
         if (
             account.accountType === 'BUSINESS' &&
-            !account.tenant.businessVerified
+            !account.tenant.businessVerified &&
+            !unapprovedBusinessAdministrator
         ) {
             next(Errors.businessVerificationPending());
             return;

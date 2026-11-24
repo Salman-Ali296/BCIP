@@ -1,0 +1,824 @@
+{
+  "BCIP Async Controller": {
+    "prefix": ["bc-controller-async", "bccontroller"],
+    "scope": "typescript",
+    "description": "Express controller using the BCIP service and centralized error middleware",
+    "body": [
+      "import { NextFunction, Request, Response } from 'express';",
+      "import { Errors } from '../utils/error';",
+      "",
+      "export async function ${1:action}(",
+      "    req: Request,",
+      "    res: Response,",
+      "    next: NextFunction,",
+      "): Promise<void> {",
+      "    try {",
+      "        const tenantId = req.tenantId;",
+      "        if (!tenantId) throw Errors.unauthorized('Tenant context missing');",
+      "",
+      "        const result = await ${2:service}.${3:operation}(${4:input});",
+      "        res.status(${5|200,201|}).json({",
+      "            success: true,",
+      "            data: result,",
+      "            message: '${6:Operation completed successfully}',",
+      "        });",
+      "    } catch (error) {",
+      "        next(error);",
+      "    }",
+      "}",
+      ""
+    ]
+  },
+  "BCIP Public Controller": {
+    "prefix": ["bc-controller-public", "bcpubliccontroller"],
+    "scope": "typescript",
+    "description": "Public Express controller; do not add tenant or auth assumptions to public flows",
+    "body": [
+      "import { NextFunction, Request, Response } from 'express';",
+      "import { Errors } from '../utils/error';",
+      "",
+      "export async function ${1:action}(",
+      "    req: Request,",
+      "    res: Response,",
+      "    next: NextFunction,",
+      "): Promise<void> {",
+      "    try {",
+      "        const ${2:record} = await ${3:service}.${4:operation}(${5:input});",
+      "        res.json({ success: true, data: ${2:record} });",
+      "    } catch (error) {",
+      "        next(error instanceof Error ? error : Errors.internalError());",
+      "    }",
+      "}",
+      ""
+    ]
+  },
+  "BCIP Auth Controller Method": {
+    "prefix": ["bc-auth-controller", "bcauthcontroller"],
+    "scope": "typescript",
+    "description": "AuthController method using a DTO schema, authService, ApiResponse and centralized errors",
+    "body": [
+      "async ${1:action}(req: Request, res: Response, next: NextFunction): Promise<void> {",
+      "    try {",
+      "        const input = ${2:requestSchema}.parse(req.body);",
+      "        const result = await authService.${3:serviceMethod}(input);",
+      "        ApiResponse.success(res, result, '${4:Operation completed successfully}');",
+      "    } catch (error) {",
+      "        if (error instanceof ZodError) {",
+      "            next(Errors.validation('Validation failed', {",
+      "                fields: error.issues.map(issue => ({",
+      "                    field: issue.path.join('.'),",
+      "                    message: issue.message,",
+      "                })),",
+      "            }));",
+      "            return;",
+      "        }",
+      "        next(error);",
+      "    }",
+      "}",
+      ""
+    ]
+  },
+  "BCIP Service Class": {
+    "prefix": ["bc-service", "bcservice"],
+    "scope": "typescript",
+    "description": "Service class using the common Prisma client and BCIP Errors",
+    "body": [
+      "import { prisma } from '../config/database';",
+      "import { Errors } from '../utils/error';",
+      "import { logger } from '../utils/logger';",
+      "",
+      "export class ${1:Feature}Service {",
+      "    async ${2:listForTenant}(tenantId: string) {",
+      "        try {",
+      "            return await prisma.complaint.findMany({",
+      "                where: { tenantId },",
+      "                orderBy: { createdAt: 'desc' },",
+      "            });",
+      "        } catch (error) {",
+      "            logger.error('${1:Feature} query failed', error, { tenantId });",
+      "            throw Errors.databaseError(error);",
+      "        }",
+      "    }",
+      "}",
+      ""
+    ]
+  },
+  "BCIP Protected Complaint Route": {
+    "prefix": ["bc-route-protected", "bcroute"],
+    "scope": "typescript",
+    "description": "BCIP complaint route using auth, tenant, roles and plan-feature middleware in the existing order",
+    "body": [
+      "import { Router } from 'express';",
+      "import { authMiddleware, requireRoles } from '../middleware/auth.middleware';",
+      "import { tenantMiddleware } from '../middleware/tenant.middleware';",
+      "import { requireBusinessFeature } from '../middleware/business-plan.middleware';",
+      "import { ${1:listComplaints} } from '../controllers/complaintController';",
+      "",
+      "const router = Router();",
+      "",
+      "router.${2|get,post,put,patch,delete|}(",
+      "    '${3:/complaints}',",
+      "    authMiddleware,",
+      "    tenantMiddleware,",
+      "    requireRoles('SUPER_ADMIN', 'BUSINESS_ADMIN', 'MANAGER', 'AGENT', 'ESCALATION_AGENT'),",
+      "    requireBusinessFeature('complaint_management'),",
+      "    async (req, res, next) => {",
+      "        await ${1:listComplaints}(req, res, next);",
+      "    },",
+      ");",
+      ""
+    ]
+  },
+  "BCIP Public Complaint Route": {
+    "prefix": ["bc-route-public", "bcpublicroute"],
+    "scope": "typescript",
+    "description": "Public complaint route forwarding to an existing controller handler",
+    "body": [
+      "router.${1|get,post|}(",
+      "    '${2:/track/:trackingId}',",
+      "    ${3:publicTrackingLimiter},",
+      "    async (req, res, next) => {",
+      "        await ${4:trackComplaint}(req, res, next);",
+      "    },",
+      ");",
+      ""
+    ]
+  },
+  "BCIP Auth Route": {
+    "prefix": ["bc-auth-route", "bcauthroute"],
+    "scope": "typescript",
+    "description": "Auth route using the existing AuthController bind pattern",
+    "body": [
+      "router.${1|post,get,patch,put|}(",
+      "    '${2:/login}',",
+      "    ${3:loginLimiter},",
+      "    authController.${4:login}.bind(authController),",
+      ");",
+      ""
+    ]
+  },
+  "BCIP Auth and Role Middleware Chain": {
+    "prefix": ["bc-auth-roles", "bcrole"],
+    "scope": "typescript",
+    "description": "Existing BCIP auth and role middleware; tenantMiddleware follows auth where tenant context is required",
+    "body": [
+      "authMiddleware,",
+      "${1:tenantMiddleware,}",
+      "requireRoles(${2|'BUSINESS_ADMIN','MANAGER','AGENT','ESCALATION_AGENT'|}),"
+    ]
+  },
+  "BCIP Tenant Middleware": {
+    "prefix": ["bc-tenant-middleware", "bctenant"],
+    "scope": "typescript",
+    "description": "Tenant context derives from the authenticated user and rejects mismatched x-tenant-id",
+    "body": [
+      "import { AsyncLocalStorage } from 'async_hooks';",
+      "import { Request, Response, NextFunction } from 'express';",
+      "",
+      "export const tenantContext = new AsyncLocalStorage<{ tenantId: string }>();",
+      "",
+      "export function tenantMiddleware(req: Request, res: Response, next: NextFunction): void {",
+      "    const tenantId = req.user?.tenantId;",
+      "    if (!tenantId) {",
+      "        res.status(401).json({ error: 'Authentication required' });",
+      "        return;",
+      "    }",
+      "",
+      "    const requestedTenantId = req.headers['x-tenant-id'] as string | undefined;",
+      "    if (requestedTenantId && requestedTenantId !== tenantId) {",
+      "        res.status(403).json({ error: 'Tenant does not match authenticated account' });",
+      "        return;",
+      "    }",
+      "",
+      "    req.tenantId = tenantId;",
+      "    tenantContext.run({ tenantId }, () => next());",
+      "}",
+      ""
+    ]
+  },
+  "BCIP Require Roles Middleware": {
+    "prefix": ["bc-auth-require-roles", "bcauth"],
+    "scope": "typescript",
+    "description": "Existing requireRoles middleware from auth.middleware.ts",
+    "body": [
+      "requireRoles(${1|'SUPER_ADMIN','BUSINESS_ADMIN','MANAGER','AGENT','CUSTOMER','ESCALATION_AGENT'|}),"
+    ]
+  },
+  "BCIP Zod Request Validation": {
+    "prefix": ["bc-validation-zod", "bcvalidate"],
+    "scope": "typescript",
+    "description": "Parse a request with Zod and map Zod issues to the existing Errors.validation shape",
+    "body": [
+      "import { ZodError, z } from 'zod';",
+      "import { Errors } from '../utils/error';",
+      "",
+      "const ${1:request}Schema = z.object({",
+      "    ${2:field}: z.string().trim().min(1).max(255),",
+      "});",
+      "",
+      "try {",
+      "    const input = ${1:request}Schema.parse(req.${3|body,params,query|});",
+      "    ${4:// Use the validated input}",
+      "} catch (error) {",
+      "    if (error instanceof ZodError) {",
+      "        next(Errors.validation('Validation failed', {",
+      "            fields: error.issues.map(issue => ({",
+      "                field: issue.path.join('.'),",
+      "                message: issue.message,",
+      "            })),",
+      "        }));",
+      "        return;",
+      "    }",
+      "    next(error);",
+      "}",
+      ""
+    ]
+  },
+  "BCIP Complaint Validation Schema": {
+    "prefix": ["bc-validation-complaint", "bccomplaintvalidate"],
+    "scope": "typescript",
+    "description": "Complaint request fields and enum values from the actual Prisma schema",
+    "body": [
+      "import { z } from 'zod';",
+      "import { ComplaintStatus, Priority } from '@prisma/client';",
+      "",
+      "export const ${1:updateComplaint}Schema = z.object({",
+      "    status: z.nativeEnum(ComplaintStatus).optional(),",
+      "    priority: z.nativeEnum(Priority).optional(),",
+      "    assignedToId: z.string().uuid().optional(),",
+      "}).refine(data => Boolean(data.status || data.priority || data.assignedToId), {",
+      "    message: 'At least one complaint field must be updated',",
+      "});",
+      ""
+    ]
+  },
+  "BCIP Paginated Tenant Query": {
+    "prefix": ["bc-prisma-paginated", "bcpagination", "bcprismafind"],
+    "scope": "typescript",
+    "description": "Tenant-scoped Complaint list and matching count with the service's 100-record page cap",
+    "body": [
+      "const page = Math.max(1, Number(${1:filters}.page) || 1);",
+      "const limit = Math.min(Math.max(1, Number(${1:filters}.limit) || 20), 100);",
+      "const skip = (page - 1) * limit;",
+      "const where: Prisma.ComplaintWhereInput = {",
+      "    tenantId,",
+      "    ${2:// Add validated filters}",
+      "};",
+      "",
+      "const [data, total] = await Promise.all([",
+      "    prisma.complaint.findMany({",
+      "        where,",
+      "        skip,",
+      "        take: limit,",
+      "        orderBy: { createdAt: 'desc' },",
+      "    }),",
+      "    prisma.complaint.count({ where }),",
+      "]);",
+      "",
+      "return {",
+      "    data,",
+      "    pagination: { total, page, limit, pages: Math.ceil(total / limit) },",
+      "};",
+      ""
+    ]
+  },
+  "BCIP Tenant Complaint Lookup": {
+    "prefix": ["bc-prisma-find-tenant", "bcprismaone"],
+    "scope": "typescript",
+    "description": "Find a complaint by both ID and authenticated tenant ID",
+    "body": [
+      "const ${1:complaint} = await prisma.complaint.findFirst({",
+      "    where: {",
+      "        id: ${2:complaintId},",
+      "        tenantId,",
+      "    },",
+      "});",
+      "if (!${1:complaint}) throw Errors.notFound('Complaint');",
+      ""
+    ]
+  },
+  "BCIP Complaint Create": {
+    "prefix": ["bc-complaint-create", "bccomplaintcreate"],
+    "scope": "typescript",
+    "description": "Create a complaint using actual required Prisma fields and lifecycle enum values",
+    "body": [
+      "const complaint = await prisma.complaint.create({",
+      "    data: {",
+      "        tenantId,",
+      "        trackingId: ${1:trackingId},",
+      "        title: ${2:title},",
+      "        description: ${3:description},",
+      "        status: 'OPEN',",
+      "        priority: 'MEDIUM',",
+      "        aiCategory: 'PENDING',",
+      "        aiSentiment: 'NEUTRAL',",
+      "        aiPriority: 'MEDIUM',",
+      "        isDuplicate: false,",
+      "    },",
+      "});",
+      ""
+    ]
+  },
+  "BCIP Prisma Create": {
+    "prefix": ["bc-prisma-create", "bcprismacreate"],
+    "scope": "typescript",
+    "description": "Tenant-owned complaint create operation using config/database.ts",
+    "body": [
+      "const ${1:record} = await prisma.complaint.create({",
+      "    data: {",
+      "        tenantId,",
+      "        trackingId: ${2:trackingId},",
+      "        title: ${3:title},",
+      "        description: ${4:description},",
+      "    },",
+      "});",
+      ""
+    ]
+  },
+  "BCIP Tenant-Scoped Complaint Update": {
+    "prefix": ["bc-prisma-update-tenant", "bcprismaupdate"],
+    "scope": "typescript",
+    "description": "Atomic tenant-scoped complaint update using updateMany and checking affected row count",
+    "body": [
+      "const result = await prisma.complaint.updateMany({",
+      "    where: {",
+      "        id: ${1:complaintId},",
+      "        tenantId,",
+      "    },",
+      "    data: {",
+      "        ${2:priority}: '${3|LOW,MEDIUM,HIGH,CRITICAL|}',",
+      "    },",
+      "});",
+      "if (result.count !== 1) throw Errors.notFound('Complaint');",
+      ""
+    ]
+  },
+  "BCIP Tenant-Scoped Complaint Delete": {
+    "prefix": ["bc-prisma-delete-tenant", "bcprismadelete"],
+    "scope": "typescript",
+    "description": "Atomic tenant-scoped Complaint deleteMany pattern; deletion is not currently exposed by a BCIP complaint route",
+    "body": [
+      "const result = await prisma.complaint.deleteMany({",
+      "    where: {",
+      "        id: ${1:complaintId},",
+      "        tenantId,",
+      "    },",
+      "});",
+      "if (result.count !== 1) throw Errors.notFound('Complaint');",
+      ""
+    ]
+  },
+  "BCIP Prisma Transaction": {
+    "prefix": ["bc-prisma-transaction", "bctransaction"],
+    "scope": "typescript",
+    "description": "BCIP Prisma callback transaction for related tenant-owned writes",
+    "body": [
+      "const result = await prisma.$transaction(async tx => {",
+      "    const existing = await tx.complaint.findFirst({",
+      "        where: { id: ${1:complaintId}, tenantId },",
+      "        select: { id: true },",
+      "    });",
+      "    if (!existing) throw Errors.notFound('Complaint');",
+      "",
+      "    ${2:// Perform related reads and writes through tx}",
+      "    return existing;",
+      "});",
+      ""
+    ]
+  },
+  "BCIP Complaint Status and History": {
+    "prefix": ["bc-workflow-status", "bcstatus"],
+    "scope": "typescript",
+    "description": "Call the existing tenant-checked status service, which records StatusHistory",
+    "body": [
+      "const updated = await complaintService.updateStatus(",
+      "    ${1:complaintId},",
+      "    tenantId,",
+      "    '${2|PENDING,AI_PROCESSING,OPEN,IN_PROGRESS,WAITING_FOR_CUSTOMER,ESCALATED,RESOLVED,CLOSED,REOPENED|}',",
+      "    ${3:undefined},",
+      "    ${4:undefined},",
+      ");",
+      ""
+    ]
+  },
+  "BCIP Complaint Escalation": {
+    "prefix": ["bc-workflow-escalate", "bcescalate"],
+    "scope": "typescript",
+    "description": "Call the existing tenant-scoped ComplaintService escalation workflow",
+    "body": [
+      "const updated = await complaintService.escalateComplaint(",
+      "    ${1:complaintId},",
+      "    tenantId,",
+      "    ${2:reason},",
+      ");",
+      ""
+    ]
+  },
+  "BCIP Public Complaint Tracking": {
+    "prefix": ["bc-complaint-track", "bctracking"],
+    "scope": "typescript",
+    "description": "Public tracking by the unique trackingId using the existing complaint service",
+    "body": [
+      "const trackingId = req.params.trackingId;",
+      "if (typeof trackingId !== 'string') {",
+      "    throw Errors.validation('Tracking ID is invalid');",
+      "}",
+      "",
+      "const complaint = await complaintService.getComplaintByTrackingId(trackingId);",
+      "res.json({",
+      "    success: true,",
+      "    data: {",
+      "        id: complaint.id,",
+      "        trackingId: complaint.trackingId,",
+      "        title: complaint.title,",
+      "        status: complaint.status,",
+      "        priority: complaint.priority,",
+      "        aiCategory: complaint.aiCategory,",
+      "        createdAt: complaint.createdAt,",
+      "        updatedAt: complaint.updatedAt,",
+      "    },",
+      "});",
+      ""
+    ]
+  },
+  "BCIP Complaint CSAT Feedback": {
+    "prefix": ["bc-complaint-feedback", "bcfeedback"],
+    "scope": "typescript",
+    "description": "Upsert CSATFeedback by the complaint's unique tracking ID",
+    "body": [
+      "const complaint = await prisma.complaint.findUnique({",
+      "    where: { trackingId: ${1:trackingId} },",
+      "    select: { id: true },",
+      "});",
+      "if (!complaint) throw Errors.notFound('Complaint');",
+      "",
+      "const feedback = await prisma.cSATFeedback.upsert({",
+      "    where: { complaintId: complaint.id },",
+      "    update: {",
+      "        rating: ${2:rating},",
+      "        comments: ${3:comments}?.trim() || null,",
+      "        submittedAt: new Date(),",
+      "    },",
+      "    create: {",
+      "        complaintId: complaint.id,",
+      "        rating: ${2:rating},",
+      "        comments: ${3:comments}?.trim() || null,",
+      "    },",
+      "});",
+      ""
+    ]
+  },
+  "BCIP Complaint Service Create": {
+    "prefix": ["bc-complaint-service-create", "bccomplaintservice"],
+    "scope": "typescript",
+    "description": "Call the existing ComplaintService.createComplaint input contract",
+    "body": [
+      "const complaint = await complaintService.createComplaint({",
+      "    title: ${1:title},",
+      "    description: ${2:description},",
+      "    customerEmail: ${3:customerEmail},",
+      "    customerName: ${4:customerName},",
+      "    tenantId,",
+      "    files: ${5:files},",
+      "});",
+      ""
+    ]
+  },
+  "BCIP AI Complaint Analysis": {
+    "prefix": ["bc-ai-predict", "bcai"],
+    "scope": "typescript",
+    "description": "Use the existing AIService.predict contract; it already handles FastAPI failure with fallback results",
+    "body": [
+      "const prediction = await aiService.predict({",
+      "    text: `${1:title}\\n${2:description}`,",
+      "    complaintId: ${3:complaintId},",
+      "    candidateTexts: ${4:candidateTexts},",
+      "    candidateIds: ${5:candidateIds},",
+      "});",
+      "",
+      "const updated = await prisma.complaint.updateMany({",
+      "    where: { id: ${3:complaintId}, tenantId },",
+      "    data: {",
+      "        aiCategory: prediction.category,",
+      "        aiCategoryConfidence: prediction.categoryConfidence,",
+      "        aiSentiment: prediction.sentiment as Sentiment,",
+      "        aiSentimentScore: prediction.sentimentScore,",
+      "        aiPriority: prediction.priorityLevel as Priority,",
+      "        aiProcessed: prediction.wasProcessed,",
+      "        aiProcessedAt: prediction.wasProcessed ? new Date() : null,",
+      "        isDuplicate: prediction.isDuplicate,",
+      "        duplicateSimilarity: prediction.duplicateSimilarity,",
+      "        suggestedResponse: prediction.suggestedResponse,",
+      "        aiSummary: prediction.suggestedSummary,",
+      "    },",
+      "});",
+      "if (updated.count !== 1) throw Errors.notFound('Complaint');",
+      ""
+    ]
+  },
+  "BCIP AI FastAPI Client": {
+    "prefix": ["bc-ai-client", "bcaiservice"],
+    "scope": "typescript",
+    "description": "Existing AIService request path, payload, timeout and response validation",
+    "body": [
+      "const response = await this.client.post('/api/v1/analyze', {",
+      "    text: ${1:text},",
+      "    locale: 'en_PK',",
+      "    candidate_texts: ${2:candidateTexts},",
+      "    candidate_ids: ${3:candidateIds},",
+      "});",
+      "",
+      "const data = response.data;",
+      "if (",
+      "    typeof data?.category !== 'string' ||",
+      "    typeof data.priority_score !== 'number' ||",
+      "    typeof data.sentiment_score !== 'number'",
+      ") {",
+      "    throw new Error('AI service returned an invalid complaint analysis');",
+      "}",
+      ""
+    ]
+  },
+  "BCIP Business Onboarding Service Call": {
+    "prefix": ["bc-business-onboarding", "bconboarding"],
+    "scope": "typescript",
+    "description": "Existing business onboarding controller call with user identity from authenticated request",
+    "body": [
+      "const userId = req.user?.id;",
+      "if (!userId) throw Errors.unauthorized();",
+      "const { version, data } = ${1:saveStepSchema}.parse(req.body);",
+      "",
+      "const result = await businessOnboardingService.saveStep(",
+      "    userId,",
+      "    Number(req.params.step),",
+      "    version,",
+      "    data,",
+      ");",
+      "res.json({ success: true, data: result, message: 'Workspace step saved.' });",
+      ""
+    ]
+  },
+  "BCIP Business Invitation Service Call": {
+    "prefix": ["bc-employee-invite", "bcinvite"],
+    "scope": "typescript",
+    "description": "Use the existing BusinessInvitationService; it enforces inviter role, tenant, plan limit, audit and email",
+    "body": [
+      "const userId = req.user?.id;",
+      "if (!userId) throw Errors.unauthorized();",
+      "const input = createBusinessInvitationSchema.parse(req.body);",
+      "const invitation = await businessInvitationService.create(userId, input);",
+      "res.status(201).json({",
+      "    success: true,",
+      "    data: invitation,",
+      "    message: 'Invitation sent.',",
+      "});",
+      ""
+    ]
+  },
+  "BCIP Business Trial Access": {
+    "prefix": ["bc-trial-access", "bctrial"],
+    "scope": "typescript",
+    "description": "Use the existing access service for subscription or trial entitlements",
+    "body": [
+      "const access = await getBusinessPlanAccess(${1:tenantId});",
+      "if (!access.active) {",
+      "    throw Errors.forbidden('An active business trial or subscription is required');",
+      "}",
+      ""
+    ]
+  },
+  "BCIP Billing Transaction": {
+    "prefix": ["bc-billing-demo-checkout", "bcdemocheckout"],
+    "scope": "typescript",
+    "description": "Call the existing development-only demo checkout, which owns transaction and entitlement updates",
+    "body": [
+      "const result = await createDemoCheckout(getTenantId(req), {",
+      "    plan: ${1:input}.plan,",
+      "    interval: ${1:input}.interval,",
+      "});",
+      "res.status(200).json({ success: true, data: result });",
+      ""
+    ]
+  },
+  "BCIP Usage Reservation": {
+    "prefix": ["bc-billing-usage", "bcusage"],
+    "scope": "typescript",
+    "description": "Reserve usage within a caller's Prisma transaction using the existing quota service",
+    "body": [
+      "const hasCapacity = await reserveUsageWithinTransaction(",
+      "    tx,",
+      "    ${1:tenantId},",
+      "    '${2:complaints}',",
+      "    ${3:planLimit},",
+      "    ${4:period},",
+      ");",
+      "if (!hasCapacity) {",
+      "    throw Errors.forbidden('The business has reached its current plan limit');",
+      "}",
+      ""
+    ]
+  },
+  "BCIP Complaint Attachment Upload": {
+    "prefix": ["bc-complaint-upload", "bcupload"],
+    "scope": "typescript",
+    "description": "Existing Multer memory upload limits and permitted MIME types from routes/complaints.ts",
+    "body": [
+      "const upload = multer({",
+      "    storage: multer.memoryStorage(),",
+      "    limits: { fileSize: 5 * 1024 * 1024, files: 3, fieldSize: 10 * 1024, fields: 5, parts: 8 },",
+      "    fileFilter: (_req, file, callback) => {",
+      "        if (!['image/jpeg', 'image/png', 'application/pdf'].includes(file.mimetype)) {",
+      "            callback(Errors.validation('Only JPEG, PNG, and PDF attachments are allowed'));",
+      "            return;",
+      "        }",
+      "        callback(null, true);",
+      "    },",
+      "});",
+      ""
+    ]
+  },
+  "BCIP Email Service Call": {
+    "prefix": ["bc-email-send", "bcemail"],
+    "scope": "typescript",
+    "description": "Send an existing BCIP verification code email; never log the code",
+    "body": [
+      "await emailService.sendVerificationCode(${1:recipient}, ${2:verificationCode});",
+      ""
+    ]
+  },
+  "BCIP Audit Log Entry": {
+    "prefix": ["bc-audit-log", "bcaudit"],
+    "scope": "typescript",
+    "description": "Create an audit record with actual AuditLog fields through a transaction client",
+    "body": [
+      "await tx.auditLog.create({",
+      "    data: {",
+      "        tenantId,",
+      "        userId: ${1:actorUserId},",
+      "        action: '${2:ACTION_NAME}',",
+      "        entity: '${3:EntityName}',",
+      "        entityId: ${4:entityId},",
+      "        newValue: { ${5:field}: ${6:value} },",
+      "    },",
+      "});",
+      ""
+    ]
+  },
+  "BCIP Centralized Error": {
+    "prefix": ["bc-error", "bcerror"],
+    "scope": "typescript",
+    "description": "Use the existing AppError factory functions from utils/error.ts",
+    "body": [
+      "throw ${1:Errors.notFound('Complaint')};"
+    ]
+  },
+  "BCIP Success Response": {
+    "prefix": ["bc-response-success", "bcresponse"],
+    "scope": "typescript",
+    "description": "Existing JSON success response shape used by controllers",
+    "body": [
+      "res.status(${1|200,201|}).json({",
+      "    success: true,",
+      "    data: ${2:result},",
+      "    message: '${3:Operation completed successfully}',",
+      "});"
+    ]
+  },
+  "BCIP Auth ApiResponse": {
+    "prefix": ["bc-response-api", "bcapiresponse"],
+    "scope": "typescript",
+    "description": "Existing ApiResponse.success helper used by AuthController",
+    "body": [
+      "ApiResponse.success(res, ${1:result}, '${2:Operation completed successfully}'${3:, 201});"
+    ]
+  },
+  "BCIP Structured Log": {
+    "prefix": ["bc-log", "bclog"],
+    "scope": "typescript",
+    "description": "Use the project Pino logger with structured context; do not include secrets or complaint text",
+    "body": [
+      "logger.info('${1:Operation completed}', {",
+      "    requestId: req.requestId,",
+      "    tenantId: req.tenantId,",
+      "    ${2:resourceId},",
+      "});"
+    ]
+  },
+  "BCIP Auth Session Cookie": {
+    "prefix": ["bc-auth-session-cookie", "bcsessioncookie"],
+    "scope": "typescript",
+    "description": "Set or clear the existing HttpOnly BCIP auth session cookie",
+    "body": [
+      "${1:setAuthSessionCookie(res, token, rememberMe)};"
+    ]
+  },
+  "BCIP Business Dashboard Controller": {
+    "prefix": ["bc-analytics-dashboard", "bcdashboard"],
+    "scope": "typescript",
+    "description": "Delegate to the existing business dashboard controller implementation",
+    "body": [
+      "await getBusinessDashboard(req, res, next);"
+    ]
+  },
+  "BCIP AI Suggested Response": {
+    "prefix": "bc-ai-suggest-response",
+    "scope": "typescript",
+    "description": "Call the existing AIService response suggestion with supported tone values",
+    "body": [
+      "const suggestion = await aiService.suggestResponse({",
+      "    title: ${1:complaint.title},",
+      "    description: ${2:complaint.description},",
+      "    category: ${3:complaint.aiCategory ?? 'GENERAL'},",
+      "    sentiment: ${4:complaint.aiSentiment ?? 'NEGATIVE'},",
+      "    tone: '${5|empathetic,professional,urgent,apologetic|}',",
+      "    customerName: ${6:customerName},",
+      "    businessName: ${7:businessName},",
+      "});",
+      ""
+    ]
+  },
+  "BCIP Health Endpoint": {
+    "prefix": ["bc-api-health", "bchealth"],
+    "scope": "typescript",
+    "description": "Existing public GET /health response shape from createApp",
+    "body": [
+      "app.get('/health', (_req, res) => {",
+      "    res.status(200).json({",
+      "        status: 'ok',",
+      "        timestamp: new Date().toISOString(),",
+      "        environment: env.NODE_ENV,",
+      "    });",
+      "});",
+      ""
+    ]
+  },
+  "BCIP Versioned API Mount": {
+    "prefix": ["bc-api-mount", "bcapiroutes"],
+    "scope": "typescript",
+    "description": "Existing /api/v1 mounts in routes/index.ts; notification router is currently empty",
+    "body": [
+      "router.use('/auth', authRoutes);",
+      "router.use('/complaints', complaintRoutes);",
+      "router.use('/analytics', analyticsRoutes);",
+      "router.use('/admin', adminRoutes);",
+      "router.use('/notifications', notificationRoutes);",
+      ""
+    ]
+  },
+  "BCIP Environment Validation": {
+    "prefix": ["bc-config-env-validation", "bcenv"],
+    "scope": "typescript",
+    "description": "Existing manual validateEnv checks for required environment settings",
+    "body": [
+      "if (!env.${1:DATABASE_URL}) {",
+      "    throw new Error('${1:DATABASE_URL} is required');",
+      "}",
+      "if (env.${2:JWT_SECRET}.length < 32) {",
+      "    throw new Error('${2:JWT_SECRET} must be at least 32 characters');",
+      "}",
+      ""
+    ]
+  },
+  "BCIP Node Unit Test": {
+    "prefix": ["bc-test-unit", "bctest"],
+    "scope": "typescript",
+    "description": "Unit test using the built-in node:test runner",
+    "body": [
+      "import assert from 'node:assert/strict';",
+      "import test from 'node:test';",
+      "",
+      "test('${1:describes expected behavior}', async () => {",
+      "    const actual = ${2:await operation()};",
+      "    assert.equal(actual, ${3:expected});",
+      "});",
+      ""
+    ]
+  },
+  "BCIP Express Integration Test": {
+    "prefix": ["bc-test-http", "bcapitest"],
+    "scope": "typescript",
+    "description": "Integration test using createApp, an ephemeral Node server, and fetch (no supertest dependency)",
+    "body": [
+      "import assert from 'node:assert/strict';",
+      "import test from 'node:test';",
+      "import { createApp } from '../src/app';",
+      "",
+      "test('${1:HTTP behavior}', async () => {",
+      "    const server = createApp().listen(0);",
+      "    await new Promise<void>(resolve => server.once('listening', resolve));",
+      "",
+      "    try {",
+      "        const address = server.address();",
+      "        assert.ok(address && typeof address !== 'string');",
+      "        const response = await fetch(`http://127.0.0.1:\\${address.port}${2:/health}`);",
+      "        assert.equal(response.status, ${3:200});",
+      "    } finally {",
+      "        await new Promise<void>((resolve, reject) => {",
+      "            server.close(error => error ? reject(error) : resolve());",
+      "        });",
+      "    }",
+      "});",
+      ""
+    ]
+  }
+}

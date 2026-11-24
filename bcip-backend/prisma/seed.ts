@@ -1,5 +1,6 @@
 import bcrypt from 'bcrypt';
 import { prisma } from '../src/config/database';
+import { env } from '../src/config/env';
 import { createBusinessTrialPeriod } from '../src/modules/accounts/trial-policy';
 import { logger } from '../src/utils/logger';
 
@@ -13,6 +14,7 @@ import { logger } from '../src/utils/logger';
  * - DEV_BUSINESS_NAME (default: 'Apex Enterprise Solutions')
  * - DEV_AUTH_EMAIL    (default: 'dev.admin@bcip.local')
  * - DEV_AUTH_PASSWORD (default: 'DevPassword123!')
+ * - DEV_SUPER_ADMIN_EMAIL and DEV_SUPER_ADMIN_PASSWORD (optional; development only)
  */
 export async function seedDevelopmentData(): Promise<void> {
     const devBusinessName = process.env.DEV_BUSINESS_NAME || 'Apex Enterprise Solutions';
@@ -35,6 +37,55 @@ export async function seedDevelopmentData(): Promise<void> {
             businessVerified: true,
         },
     });
+
+    const superAdminEmail = process.env.DEV_SUPER_ADMIN_EMAIL?.trim().toLowerCase();
+    const superAdminPassword = process.env.DEV_SUPER_ADMIN_PASSWORD;
+    if (Boolean(superAdminEmail) !== Boolean(superAdminPassword)) {
+        throw new Error('Set both DEV_SUPER_ADMIN_EMAIL and DEV_SUPER_ADMIN_PASSWORD to bootstrap a Super Admin');
+    }
+    if (superAdminEmail && superAdminPassword) {
+        if (env.NODE_ENV !== 'development') {
+            throw new Error('Super Admin bootstrap is available only in development');
+        }
+        if (superAdminPassword.length < 12) {
+            throw new Error('DEV_SUPER_ADMIN_PASSWORD must be at least 12 characters');
+        }
+
+        const existingSuperAdmin = await prisma.user.findUnique({
+            where: { email: superAdminEmail },
+            select: {
+                role: true,
+                accountType: true,
+                isActive: true,
+                emailVerified: true,
+            },
+        });
+        if (existingSuperAdmin) {
+            if (
+                existingSuperAdmin.role !== 'SUPER_ADMIN' ||
+                existingSuperAdmin.accountType !== 'EMPLOYEE' ||
+                !existingSuperAdmin.isActive ||
+                !existingSuperAdmin.emailVerified
+            ) {
+                throw new Error('DEV_SUPER_ADMIN_EMAIL already belongs to an incompatible account');
+            }
+            logger.info('Development Super Admin account already exists; credentials were not changed');
+        } else {
+            await prisma.user.create({
+                data: {
+                    email: superAdminEmail,
+                    passwordHash: await bcrypt.hash(superAdminPassword, 12),
+                    fullName: process.env.DEV_SUPER_ADMIN_NAME?.trim() || 'Platform Administrator',
+                    accountType: 'EMPLOYEE',
+                    role: 'SUPER_ADMIN',
+                    tenantId: platformTenant.id,
+                    isActive: true,
+                    emailVerified: true,
+                },
+            });
+            logger.info('Development Super Admin account provisioned');
+        }
+    }
 
     // 2. Provision Development Business Tenant
     const businessTenant = await prisma.tenant.upsert({

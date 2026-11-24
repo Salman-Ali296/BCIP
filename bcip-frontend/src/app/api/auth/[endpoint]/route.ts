@@ -20,7 +20,8 @@ type AuthEndpoint =
     | "firebase-bootstrap"
     | "firebase-login"
     | "session-upgrade"
-    | "logout";
+    | "logout"
+    | "verification-policy";
 
 function isAuthEndpoint(endpoint: string): endpoint is AuthEndpoint {
     return endpoint === "login" ||
@@ -31,7 +32,8 @@ function isAuthEndpoint(endpoint: string): endpoint is AuthEndpoint {
         endpoint === "firebase-bootstrap" ||
         endpoint === "firebase-login" ||
         endpoint === "session-upgrade" ||
-        endpoint === "logout";
+        endpoint === "logout" ||
+        endpoint === "verification-policy";
 }
 
 interface RouteContext {

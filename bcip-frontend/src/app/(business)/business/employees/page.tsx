@@ -1,8 +1,5 @@
+import { TeamWorkspaceView } from "@/features/business-dashboard/components/team-workspace-view";
+
 export default function BusinessEmployeesPage() {
-    return (
-        <main className="min-h-screen">
-            <h1>Employees</h1>
-            <p>Manage employees and complaint assignments.</p>
-        </main>
-    );
+    return <TeamWorkspaceView mode="people" />;
 }

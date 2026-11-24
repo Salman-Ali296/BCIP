@@ -5,25 +5,13 @@ import Link from "next/link";
 import {
     User,
     Building2,
-    Mail,
-    Phone,
-    MapPin,
     ShieldCheck,
-    Clock,
-    Award,
     CheckCircle2,
-    KeyRound,
     Smartphone,
-    Globe,
     Bell,
-    FileText,
     ArrowRight,
     Save,
-    ExternalLink,
-    Lock,
     Laptop,
-    Download,
-    ChevronRight,
 } from "lucide-react";
 
 export function CustomerProfileView() {
@@ -38,7 +26,6 @@ export function CustomerProfileView() {
     const [company, setCompany] = useState("Apex Global Logistics Inc.");
     const [department, setDepartment] = useState("Corporate Supply Chain");
     const [timezone, setTimezone] = useState("America/New_York (UTC-05:00)");
-    const [language, setLanguage] = useState("English (US)");
     const [saveToast, setSaveToast] = useState("");
 
     // Notification toggles
@@ -46,7 +33,6 @@ export function CustomerProfileView() {
     const [slaAlerts, setSlaAlerts] = useState(true);
     const [smsMilestones, setSmsMilestones] = useState(true);
     const [weeklyDigest, setWeeklyDigest] = useState(false);
-    const [prefChannel, setPrefChannel] = useState("In-Portal Messaging");
 
     const handleSaveProfile = (e: React.FormEvent) => {
         e.preventDefault();

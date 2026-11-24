@@ -44,7 +44,6 @@ export function ComplaintProgressTracker({
                     {PROGRESS_STEPS.map((step, index) => {
                         const isCompleted = index < currentStep;
                         const isCurrent = index === currentStep;
-                        const isUpcoming = index > currentStep;
 
                         return (
                             <li key={step.id} className="relative flex flex-col items-center text-center px-1">
@@ -111,7 +110,6 @@ export function ComplaintProgressTracker({
                     {PROGRESS_STEPS.map((step, index) => {
                         const isCompleted = index < currentStep;
                         const isCurrent = index === currentStep;
-                        const isUpcoming = index > currentStep;
 
                         return (
                             <li key={step.id} className="relative">

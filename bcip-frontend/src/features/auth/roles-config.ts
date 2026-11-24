@@ -59,10 +59,10 @@ export const ROLES_CONFIG: Record<AuthRole, RoleConfig> = {
         description:
             "Deploy AI complaint triage, configure automated SLA response timers, assign employee handlers, and track operational performance metrics.",
         dashboardUrl: "/business/dashboard",
-        accentColor: "#2454d6", // Royal Blue
-        badgeClass: "border-blue-400/30 bg-blue-50 text-[#2454d6]",
+        accentColor: "#6b42d8", // Royal Blue
+        badgeClass: "border-blue-400/30 bg-blue-50 text-brand",
         borderClass: "border-blue-500/40 focus:border-blue-500 ring-blue-500/20",
-        activeTabClass: "bg-[#2454d6] text-white shadow-md shadow-blue-900/30",
+        activeTabClass: "bg-ink text-white shadow-md shadow-blue-900/30",
         gradientClass: "from-indigo-500/20 via-blue-500/10 to-transparent",
         features: [
             "AI-powered automatic complaint categorization & urgency rating",

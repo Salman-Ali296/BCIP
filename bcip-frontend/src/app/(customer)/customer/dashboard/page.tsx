@@ -235,12 +235,12 @@ export default function CustomerDashboardPage() {
             {/* 1. PRIMARY ACTION HERO (Visible without scrolling) */}
             <section
                 aria-label="Submit complaint primary action"
-                className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-gradient-to-r from-[#0f172a] via-[#1e293b] to-[#0f172a] p-6 text-white shadow-md sm:p-8"
+                className="cp-hero-banner relative overflow-hidden rounded-2xl border border-slate-200/80 bg-gradient-to-r from-ink via-ink to-ink p-6 text-white shadow-md sm:p-8"
             >
                 <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
                     <div className="max-w-2xl">
-                        <div className="inline-flex items-center gap-2 rounded-full border border-blue-400/30 bg-blue-500/10 px-3 py-1 text-xs font-semibold text-blue-200">
-                            <span className="h-2 w-2 rounded-full bg-blue-400 animate-pulse" />
+                        <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/25 bg-emerald-400/[0.07] px-3 py-1 text-xs font-semibold text-emerald-300">
+                            <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
                             Customer Resolution Center
                         </div>
                         <h2 className="mt-3 text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
@@ -255,7 +255,7 @@ export default function CustomerDashboardPage() {
                         <button
                             type="button"
                             onClick={() => setQuickSubmitOpen(true)}
-                            className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-3.5 text-sm font-bold text-white shadow-lg shadow-blue-600/30 transition hover:bg-blue-500 active:scale-98 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-400"
+                            className="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-5 py-3.5 text-sm font-bold text-ink shadow-lg shadow-emerald-950/40 transition hover:bg-emerald-400 active:scale-98 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-300"
                         >
                             <PlusCircle className="h-5 w-5" aria-hidden="true" />
                             + Submit a Complaint

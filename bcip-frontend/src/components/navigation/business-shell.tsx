@@ -47,13 +47,13 @@ export default function BusinessShell({ children }: { children: React.ReactNode 
 
   if (status === "error") {
     return (
-      <main className="grid min-h-screen place-items-center bg-[#f6f8fb] px-6">
+      <main className="grid min-h-screen place-items-center bg-wash px-6">
         <div className="max-w-md text-center">
-          <p className="text-sm text-[#5e6b7d]" role="alert">{error}</p>
+          <p className="text-sm text-muted" role="alert">{error}</p>
           <button
             type="button"
             onClick={() => void refreshSession()}
-            className="mt-4 rounded-lg bg-[#2454d6] px-4 py-2 text-sm font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2454d6]"
+            className="mt-4 rounded-lg bg-ink px-4 py-2 text-sm font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
           >
             Retry session check
           </button>
@@ -64,10 +64,10 @@ export default function BusinessShell({ children }: { children: React.ReactNode 
 
   if (status !== "authenticated" || !user || !user.role) {
     return (
-      <div className="grid min-h-screen place-items-center bg-[#f6f8fb]">
+      <div className="grid min-h-screen place-items-center bg-wash">
         <div className="flex flex-col items-center gap-4" role="status" aria-live="polite">
-          <span className="h-11 w-11 animate-spin rounded-full border-[3px] border-[#2454d6] border-t-transparent" />
-          <p className="text-sm font-medium text-[#5e6b7d]">Loading your workspace…</p>
+          <span className="h-11 w-11 animate-spin rounded-full border-[3px] border-brand border-t-transparent" />
+          <p className="text-sm font-medium text-muted">Loading your workspace…</p>
         </div>
       </div>
     );
@@ -86,25 +86,25 @@ export default function BusinessShell({ children }: { children: React.ReactNode 
     .slice(0, 2);
 
   return (
-    <div className="min-h-screen bg-[#f6f8fb] text-[#101d30] md:flex">
+    <div className="min-h-screen bg-wash text-ink md:flex">
       {sidebarOpen && (
         <button
           type="button"
           aria-label="Close business navigation"
-          className="fixed inset-0 z-40 bg-[#101d30]/45 md:hidden"
+          className="fixed inset-0 z-40 bg-ink/45 md:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r border-white/10 bg-[#101d30] text-white transition-transform duration-200 md:sticky md:top-0 md:h-screen md:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r border-white/10 bg-ink text-white transition-transform duration-200 md:sticky md:top-0 md:h-screen md:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         <div className="flex h-[76px] items-center gap-3 border-b border-white/10 px-5">
           <Link
             href="/business/dashboard"
-            className="flex min-w-0 flex-1 items-center gap-3 rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8daeff]"
+            className="flex min-w-0 flex-1 items-center gap-3 rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-glow"
             onClick={() => setSidebarOpen(false)}
           >
             <HelpdeskLogo size="md" showText={true} theme="dark" />
@@ -131,9 +131,9 @@ export default function BusinessShell({ children }: { children: React.ReactNode 
                 href={href}
                 aria-current={active ? "page" : undefined}
                 onClick={() => setSidebarOpen(false)}
-                className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8daeff] ${
+                className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-glow ${
                   active
-                    ? "bg-[#2454d6] text-white shadow-md shadow-blue-950/20"
+                    ? "bg-ink text-white shadow-md shadow-blue-950/20"
                     : "text-slate-300 hover:bg-white/7 hover:text-white"
                 }`}
               >
@@ -146,7 +146,7 @@ export default function BusinessShell({ children }: { children: React.ReactNode 
 
         <div className="border-t border-white/10 p-4">
           <div className="mb-3 flex items-center gap-3 rounded-xl bg-white/5 p-3">
-            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#d9e4ff] text-xs font-bold text-[#2454d6]">
+            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-brand-soft text-xs font-bold text-brand">
               {initials || "U"}
             </span>
             <span className="min-w-0 flex-1">
@@ -157,7 +157,7 @@ export default function BusinessShell({ children }: { children: React.ReactNode 
           <button
             type="button"
             onClick={logout}
-            className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 px-3 py-2.5 text-sm font-medium text-slate-300 transition hover:border-rose-300/30 hover:bg-rose-400/10 hover:text-rose-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#8daeff]"
+            className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 px-3 py-2.5 text-sm font-medium text-slate-300 transition hover:border-rose-300/30 hover:bg-rose-400/10 hover:text-rose-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-glow"
           >
             <LogOut className="h-4 w-4" aria-hidden="true" />
             Sign out
@@ -166,28 +166,28 @@ export default function BusinessShell({ children }: { children: React.ReactNode 
       </aside>
 
       <div className="flex min-h-screen min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 border-b border-[#101d30]/8 bg-white/90 backdrop-blur-xl">
+        <header className="sticky top-0 z-30 border-b border-ink/8 bg-white/90 backdrop-blur-xl">
           <div className="flex h-[76px] items-center justify-between gap-4 px-5 sm:px-8">
             <div className="flex min-w-0 items-center gap-3">
               <button
                 type="button"
                 aria-label="Open business navigation"
                 aria-expanded={sidebarOpen}
-                className="rounded-xl border border-[#101d30]/10 p-2 text-[#5e6b7d] transition hover:bg-[#f6f8fb] hover:text-[#101d30] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#2454d6] md:hidden"
+                className="rounded-xl border border-ink/10 p-2 text-muted transition hover:bg-wash hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand md:hidden"
                 onClick={() => setSidebarOpen(true)}
               >
                 <Menu className="h-5 w-5" aria-hidden="true" />
               </button>
               <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-[#101d30]">{user.tenantName || "Business workspace"}</p>
-                <p className="hidden text-xs text-[#8995a4] sm:block">Complaint operations</p>
+                <p className="truncate text-sm font-semibold text-ink">{user.tenantName || "Business workspace"}</p>
+                <p className="hidden text-xs text-subtle sm:block">Complaint operations</p>
               </div>
             </div>
             <div className="flex min-w-0 items-center gap-3">
-              <span className="hidden max-w-48 truncate rounded-full border border-[#101d30]/10 bg-white px-3 py-1.5 text-xs font-medium text-[#5e6b7d] sm:inline-flex">
+              <span className="hidden max-w-48 truncate rounded-full border border-ink/10 bg-white px-3 py-1.5 text-xs font-medium text-muted sm:inline-flex">
                 {user.email}
               </span>
-              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#edf2ff] text-sm font-semibold text-[#2454d6]">
+              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-lilac text-sm font-semibold text-brand">
                 {initials || "U"}
               </span>
             </div>

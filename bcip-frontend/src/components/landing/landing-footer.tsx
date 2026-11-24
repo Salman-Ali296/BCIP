@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { HelpdeskLogo } from "@/components/brand/helpdesk-logo";
+import { BrandLogo } from "@/components/brand/brand-logo";
 import { BCIP_CONTACT_EMAIL, BCIP_SOCIAL_LINKS } from "@/lib/brand";
 
 /* ------------------------------------------------------------------
@@ -8,30 +8,28 @@ import { BCIP_CONTACT_EMAIL, BCIP_SOCIAL_LINKS } from "@/lib/brand";
 
 const FOOTER_COLUMNS = [
   {
-    title: "Platform",
+    title: "Product",
     links: [
-      { label: "Complaint Management", href: "#product" },
-      { label: "AI Classification", href: "#ai-intelligence" },
-      { label: "Analytics & Insights", href: "#ai-intelligence" },
-      { label: "How It Works", href: "#how-it-works" },
+      { label: "What it does", href: "/#capabilities" },
+      { label: "How it works", href: "/#how-it-works" },
+      { label: "Pricing", href: "/pricing" },
+      { label: "Free trial", href: "/register" },
     ],
   },
   {
-    title: "Industries",
+    title: "For customers",
     links: [
-      { label: "Retail & E-commerce", href: "#industries" },
-      { label: "Banking & Finance", href: "#industries" },
-      { label: "Telecommunications", href: "#industries" },
-      { label: "Healthcare", href: "#industries" },
+      { label: "File a complaint", href: "/support" },
+      { label: "Track a complaint", href: "/support/track" },
+      { label: "Help", href: "/support" },
     ],
   },
   {
-    title: "Account",
+    title: "For businesses",
     links: [
-      { label: "Sign In", href: "/login" },
-      { label: "Register", href: "/register" },
-      { label: "Submit Complaint", href: "/complaint/new" },
-      { label: "Support", href: "/support" },
+      { label: "Sign in", href: "/login" },
+      { label: "Create a workspace", href: "/register" },
+      { label: "Who it's for", href: "/#industries" },
     ],
   },
   {
@@ -39,8 +37,8 @@ const FOOTER_COLUMNS = [
     links: [
       { label: "About", href: "/about" },
       { label: "Contact", href: "/contact" },
-      { label: "Privacy Policy", href: "/privacy" },
-      { label: "Terms of Service", href: "/terms" },
+      { label: "Privacy policy", href: "/privacy" },
+      { label: "Terms of service", href: "/terms" },
     ],
   },
 ];
@@ -58,11 +56,11 @@ export function LandingFooter() {
           {/* Brand */}
           <div>
             <Link href="/" className="inline-flex items-center gap-2.5">
-              <HelpdeskLogo size="md" theme="dark" />
+              <BrandLogo variant="light" height={32} />
             </Link>
 
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-slate-400">
-              Enterprise complaint intelligence that helps teams organize, analyze, and act on customer complaints.
+              Complaint management for businesses. Customers file and track complaints, and your team works them from one sorted queue.
             </p>
 
             <div className="mt-5 space-y-1.5 text-xs text-slate-500">
@@ -134,7 +132,7 @@ export function LandingFooter() {
 
         {/* Bottom */}
         <div className="mt-12 pt-6 border-t border-white/8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-600">
-          <p>© {new Date().getFullYear()} BCIP — Business Complaint Intelligence Platform</p>
+          <p>© {new Date().getFullYear()} BCIP, Business Complaint Intelligence Platform</p>
           <div className="flex items-center gap-4">
             <Link href="/privacy" className="hover:text-slate-400 transition-colors">
               Privacy

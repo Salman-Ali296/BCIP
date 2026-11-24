@@ -1,9 +1,7 @@
 import {
   AlertTriangle,
-  Clock3,
   Inbox,
   ShieldCheck,
-  Sparkles,
   TrendingUp,
   UserX,
   Zap,

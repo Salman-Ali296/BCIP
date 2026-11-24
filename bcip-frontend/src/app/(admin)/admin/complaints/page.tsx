@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import {
@@ -10,7 +10,6 @@ import {
     Eye,
     ChevronLeft,
     ChevronRight,
-    Calendar,
 } from 'lucide-react';
 import {
     getAdminComplaints,
@@ -62,13 +61,7 @@ export default function AdminComplaintsPage() {
         totalPages: 0,
     });
 
-    useEffect(() => {
-        loadCategories();
-    }, []);
 
-    useEffect(() => {
-        loadComplaints();
-    }, [filters]);
 
     const loadCategories = async () => {
         try {
@@ -79,27 +72,27 @@ export default function AdminComplaintsPage() {
         }
     };
 
-    const loadComplaints = async () => {
+    const loadComplaints = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
             const result = await getAdminComplaints(filters);
             setComplaints(result.data);
             setPagination(result.pagination);
-        } catch (err: any) {
-            setError(err.message || 'Failed to load complaints');
+        } catch (err: unknown) {
+            setError((err instanceof Error && err.message) || 'Failed to load complaints');
             console.error('Load complaints error:', err);
         } finally {
             setLoading(false);
         }
-    };
+    }, [filters]);
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setFilters((prev) => ({ ...prev, search: value, page: 1 }));
     };
 
-    const handleFilterChange = (key: keyof ComplaintFilters, value: any) => {
+    const handleFilterChange = (key: keyof ComplaintFilters, value: ComplaintFilters[keyof ComplaintFilters]) => {
         setFilters((prev) => ({ ...prev, [key]: value, page: 1 }));
     };
 
@@ -170,6 +163,14 @@ export default function AdminComplaintsPage() {
         }
     };
 
+    useEffect(() => {
+        void Promise.resolve().then(() => loadCategories());
+    }, []);
+
+    useEffect(() => {
+        void Promise.resolve().then(() => loadComplaints());
+    }, [loadComplaints]);
+
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -192,7 +193,7 @@ export default function AdminComplaintsPage() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                className="bg-[#0d1322] rounded-2xl border border-white/[0.08] p-6 backdrop-blur-xl"
+                className="bg-ink rounded-2xl border border-white/[0.08] p-6 backdrop-blur-xl"
             >
                 <div className="flex flex-col lg:flex-row gap-4">
                     <div className="flex-1">
@@ -217,7 +218,7 @@ export default function AdminComplaintsPage() {
                         <Filter size={20} />
                         Filters
                         {activeFilterCount > 0 && (
-                            <span className="bg-emerald-400 text-[#0b1120] text-xs px-2 py-0.5 rounded-full font-medium">
+                            <span className="bg-emerald-400 text-ink text-xs px-2 py-0.5 rounded-full font-medium">
                                 {activeFilterCount}
                             </span>
                         )}
@@ -374,7 +375,7 @@ export default function AdminComplaintsPage() {
                 <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-[#0d1322] rounded-2xl border border-white/[0.08] p-12 text-center"
+                    className="bg-ink rounded-2xl border border-white/[0.08] p-12 text-center"
                 >
                     <FileText size={48} className="mx-auto text-slate-600 mb-4" />
                     <h3 className="text-lg font-semibold text-slate-50 mb-2">
@@ -392,7 +393,7 @@ export default function AdminComplaintsPage() {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                        className="bg-[#0d1322] rounded-2xl border border-white/[0.08] overflow-hidden backdrop-blur-xl"
+                        className="bg-ink rounded-2xl border border-white/[0.08] overflow-hidden backdrop-blur-xl"
                     >
                         <div className="overflow-x-auto">
                             <table className="w-full">
@@ -505,7 +506,7 @@ export default function AdminComplaintsPage() {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ delay: 0.3 }}
-                            className="flex items-center justify-between bg-[#0d1322] rounded-2xl border border-white/[0.08] p-4"
+                            className="flex items-center justify-between bg-ink rounded-2xl border border-white/[0.08] p-4"
                         >
                             <div className="text-sm text-slate-400">
                                 Showing {(pagination.page - 1) * pagination.limit + 1} to{' '}

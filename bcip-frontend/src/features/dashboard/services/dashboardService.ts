@@ -68,8 +68,8 @@ export async function updateDashboardComplaint(id: string, payload: { status?: s
         // Update local mock object
         const mock = MOCK_ENTERPRISE_COMPLAINTS.find((c) => c.id === id);
         if (mock) {
-            if (payload.status) mock.status = payload.status as any;
-            if (payload.priority) mock.priority = payload.priority as any;
+            if (payload.status) mock.status = payload.status as ComplaintListItem["status"];
+            if (payload.priority) mock.priority = payload.priority as ComplaintListItem["priority"];
             if (payload.assignedToId !== undefined) mock.assignedToId = payload.assignedToId;
         }
         return { success: true } as unknown as UpdateComplaintResponse;

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { authMiddleware, requireRoles } from '../../../../middleware/auth.middleware';
-import { requireActiveBusinessTrial } from '../../../../middleware/business-trial.middleware';
+import { requireBusinessFeature } from '../../../../middleware/business-plan.middleware';
 import { tenantMiddleware } from '../../../../middleware/tenant.middleware';
 import { submitComplaint } from './complaint.controller';
 
@@ -11,7 +11,7 @@ router.post(
     authMiddleware,
     tenantMiddleware,
     requireRoles('BUSINESS_ADMIN', 'MANAGER', 'AGENT', 'ESCALATION_AGENT'),
-    requireActiveBusinessTrial,
+    requireBusinessFeature('complaint_management'),
     submitComplaint,
 );
 

@@ -21,6 +21,7 @@ function hasAllowedFileSignature(file: { mimetype: string; buffer: Buffer }): bo
     return false;
 }
 
+
 /**
  * POST /complaints
  * Create new complaint with full error handling and logging
@@ -249,6 +250,22 @@ export async function getTenantBySlug(
     }
 }
 
+export async function listComplaintPortals(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+): Promise<void> {
+    try {
+        const search = typeof req.query.search === 'string'
+            ? req.query.search.trim().slice(0, 100)
+            : undefined;
+        const businesses = await complaintService.listAcceptingComplaintPortals(search);
+        res.json({ success: true, data: businesses });
+    } catch (error) {
+        next(error);
+    }
+}
+
 export async function submitCSATFeedback(
     req: Request,
     res: Response,
@@ -323,4 +340,4 @@ export async function escalateComplaint(
     } catch (error) {
         next(error);
     }
-}
+}

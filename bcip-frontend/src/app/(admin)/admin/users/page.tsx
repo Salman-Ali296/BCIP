@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
     Search,
@@ -10,7 +10,6 @@ import {
     CheckCircle,
     XCircle,
     Mail,
-    Shield,
     ChevronLeft,
     ChevronRight,
 } from 'lucide-react';
@@ -52,31 +51,28 @@ export default function UsersPage() {
         totalPages: 0,
     });
 
-    useEffect(() => {
-        loadUsers();
-    }, [filters]);
 
-    const loadUsers = async () => {
+    const loadUsers = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
             const result = await getUsers(filters);
             setUsers(result.data);
             setPagination(result.pagination);
-        } catch (err: any) {
-            setError(err.message || 'Failed to load users');
+        } catch (err: unknown) {
+            setError((err instanceof Error && err.message) || 'Failed to load users');
             console.error('Load users error:', err);
         } finally {
             setLoading(false);
         }
-    };
+    }, [filters]);
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setFilters((prev) => ({ ...prev, search: value, page: 1 }));
     };
 
-    const handleFilterChange = (key: keyof UserFilters, value: any) => {
+    const handleFilterChange = (key: keyof UserFilters, value: UserFilters[keyof UserFilters]) => {
         setFilters((prev) => ({ ...prev, [key]: value, page: 1 }));
     };
 
@@ -114,6 +110,10 @@ export default function UsersPage() {
         if (role === 'AGENT') return 'bg-green-100 text-green-800';
         return 'bg-gray-100 text-gray-800';
     };
+
+    useEffect(() => {
+        void Promise.resolve().then(() => loadUsers());
+    }, [loadUsers]);
 
     return (
         <div className="space-y-6">

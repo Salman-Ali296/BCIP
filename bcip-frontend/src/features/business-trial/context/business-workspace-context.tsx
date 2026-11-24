@@ -6,6 +6,7 @@ import type { BusinessPlan } from "@/lib/api/business-billing";
 export interface BusinessWorkspace {
     businessName: string;
     plan: BusinessPlan;
+    features: Record<string, boolean>;
     isTrial: boolean;
     trialDaysRemaining: number | null;
     complaintPortalUrl: string | null;

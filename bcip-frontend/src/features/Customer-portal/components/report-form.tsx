@@ -1,0 +1,1 @@
+export { ReportForm } from "@/features/report/ReportForm";

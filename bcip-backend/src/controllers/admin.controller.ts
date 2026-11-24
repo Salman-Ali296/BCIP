@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { AccountType, Prisma, Role } from "@prisma/client";
 import { prisma } from "../config/database";
+import { adminBusinessService } from "../modules/administration/services/admin-business.service";
 
 
 export const getPendingBusinessVerifications = async (
@@ -55,14 +56,10 @@ export const approveBusinessVerification = async (
       return res.status(400).json({ success: false, message: "A business ID and boolean approval decision are required." });
     }
 
-    const tenant = await prisma.tenant.update({
-      where: { id },
-      data: {
-        businessVerified: req.body.approved,
-        isActive: req.body.approved,
-      },
-      select: { id: true, name: true, businessVerified: true, isActive: true },
-    });
+    const tenant = await adminBusinessService.updateBusinessStatus(id, {
+      businessVerified: req.body.approved,
+      isActive: req.body.approved,
+    }, req.user?.id);
     return res.status(200).json({
       success: true,
       message: req.body.approved ? "Business verification approved." : "Business verification rejected.",

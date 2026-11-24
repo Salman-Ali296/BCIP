@@ -10,9 +10,6 @@ export default function CategoriesPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        loadCategories();
-    }, []);
 
     const loadCategories = async () => {
         try {
@@ -20,8 +17,8 @@ export default function CategoriesPage() {
             setError(null);
             const data = await getCategories();
             setCategories(data);
-        } catch (err: any) {
-            setError(err.message || 'Failed to load categories');
+        } catch (err: unknown) {
+            setError((err instanceof Error && err.message) || 'Failed to load categories');
             console.error('Load categories error:', err);
         } finally {
             setLoading(false);
@@ -42,6 +39,10 @@ export default function CategoriesPage() {
                 return 'bg-white/5 text-slate-400 border border-white/[0.08]';
         }
     };
+
+    useEffect(() => {
+        void Promise.resolve().then(() => loadCategories());
+    }, []);
 
     return (
         <motion.div
@@ -87,7 +88,7 @@ export default function CategoriesPage() {
                 <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-[#0d1322] rounded-2xl border border-white/[0.08] p-12 text-center backdrop-blur-xl"
+                    className="bg-ink rounded-2xl border border-white/[0.08] p-12 text-center backdrop-blur-xl"
                 >
                     <Tag size={48} className="mx-auto text-slate-600 mb-4" />
                     <h3 className="text-lg font-semibold text-slate-50 mb-2">No categories found</h3>
@@ -104,7 +105,7 @@ export default function CategoriesPage() {
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.05 * index, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                            className="bg-[#0d1322] rounded-2xl border border-white/[0.08] p-6 hover:border-emerald-400/30 hover:bg-white/5 transition backdrop-blur-xl group"
+                            className="bg-ink rounded-2xl border border-white/[0.08] p-6 hover:border-emerald-400/30 hover:bg-white/5 transition backdrop-blur-xl group"
                         >
                             <div className="flex items-start justify-between mb-3">
                                 <div className="flex items-center gap-2">

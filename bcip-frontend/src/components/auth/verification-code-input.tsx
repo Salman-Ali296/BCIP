@@ -30,13 +30,15 @@ export function VerificationCodeInput({
         return arr;
     });
 
-    useEffect(() => {
+    const [syncedProps, setSyncedProps] = useState({ value, length });
+    if (syncedProps.value !== value || syncedProps.length !== length) {
+        setSyncedProps({ value, length });
         const arr = new Array(length).fill("");
         for (let i = 0; i < Math.min(value.length, length); i++) {
             arr[i] = value[i];
         }
         setDigits(arr);
-    }, [value, length]);
+    }
 
     useEffect(() => {
         if (autoFocus && inputsRef.current[0]) {

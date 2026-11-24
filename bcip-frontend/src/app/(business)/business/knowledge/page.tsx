@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { BookOpen, Search, FileText, ArrowRight, ShieldCheck, CheckCircle2 } from "lucide-react";
+import { Search } from "lucide-react";
 
 export default function BusinessKnowledgePage() {
     const [search, setSearch] = useState("");

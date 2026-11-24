@@ -56,7 +56,7 @@ export default function AuditLogsPage() {
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.15 + index * 0.05, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                            className="bg-[#0d1322] rounded-2xl border border-white/[0.08] p-6 backdrop-blur-xl"
+                            className="bg-ink rounded-2xl border border-white/[0.08] p-6 backdrop-blur-xl"
                         >
                             <Icon size={24} className="text-emerald-400 mb-3" />
                             <h3 className="font-semibold text-slate-50 mb-2">{feature.title}</h3>

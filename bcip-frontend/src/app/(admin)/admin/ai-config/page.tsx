@@ -75,7 +75,7 @@ export default function AIConfigPage() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                    className="bg-[#0d1322] rounded-2xl border border-white/[0.08] p-6 backdrop-blur-xl"
+                    className="bg-ink rounded-2xl border border-white/[0.08] p-6 backdrop-blur-xl"
                 >
                     <div className="flex items-center justify-between mb-4">
                         <h3 className="font-semibold text-slate-50">AI Processing</h3>
@@ -98,7 +98,7 @@ export default function AIConfigPage() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.15, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                    className="bg-[#0d1322] rounded-2xl border border-white/[0.08] p-6 backdrop-blur-xl"
+                    className="bg-ink rounded-2xl border border-white/[0.08] p-6 backdrop-blur-xl"
                 >
                     <div className="flex items-center justify-between mb-4">
                         <h3 className="font-semibold text-slate-50">Auto Processing</h3>
@@ -121,7 +121,7 @@ export default function AIConfigPage() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                    className="bg-[#0d1322] rounded-2xl border border-white/[0.08] p-6 backdrop-blur-xl"
+                    className="bg-ink rounded-2xl border border-white/[0.08] p-6 backdrop-blur-xl"
                 >
                     <div className="flex items-center justify-between mb-4">
                         <h3 className="font-semibold text-slate-50">Duplicate Threshold</h3>
@@ -141,7 +141,7 @@ export default function AIConfigPage() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.25, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                className="bg-[#0d1322] rounded-2xl border border-white/[0.08] p-6 backdrop-blur-xl"
+                className="bg-ink rounded-2xl border border-white/[0.08] p-6 backdrop-blur-xl"
             >
                 <h2 className="text-lg font-semibold text-slate-50 mb-6">
                     AI Processing Statistics
@@ -211,7 +211,7 @@ export default function AIConfigPage() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                className="bg-[#0d1322] rounded-2xl border border-white/[0.08] p-6 backdrop-blur-xl"
+                className="bg-ink rounded-2xl border border-white/[0.08] p-6 backdrop-blur-xl"
             >
                 <h2 className="text-lg font-semibold text-slate-50 mb-4 flex items-center gap-2">
                     <Brain size={20} className="text-emerald-400" />

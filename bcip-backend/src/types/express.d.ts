@@ -2,6 +2,7 @@
 import 'express';
 import type { User } from '@prisma/client';
 import type { DecodedIdToken } from 'firebase-admin/auth';
+import type { BusinessPlanAccess } from '../modules/billing/business-plans';
 
 declare global {
     namespace Express {
@@ -20,6 +21,7 @@ declare global {
             firebaseUser?: DecodedIdToken;
 
             tenantId?: string;
+            businessPlanAccess?: BusinessPlanAccess;
             correlationId?: string;
             requestId?: string;
         }

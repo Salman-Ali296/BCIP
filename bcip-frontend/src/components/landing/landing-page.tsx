@@ -237,10 +237,10 @@ function ProductPreview() {
 
             <div>
               <p className="text-xs font-semibold text-slate-900">
-                BCIP Intelligence
+                BCIP
               </p>
               <p className="mt-0.5 text-[10px] text-slate-500">
-                Operational overview
+                Overview
               </p>
             </div>
           </div>
@@ -261,7 +261,7 @@ function ProductPreview() {
                 Complaint overview
               </p>
               <p className="mt-1 text-xs leading-5 text-slate-500">
-                Review complaint activity and emerging issues.
+                What came in this week and what needs a reply.
               </p>
             </div>
 
@@ -373,7 +373,7 @@ function ProductPreview() {
               <Sparkles className="h-4 w-4 text-violet-700" />
 
               <p className="text-xs font-semibold text-slate-900">
-                Recurring issue signals
+                Repeat problems this week
               </p>
 
               <span className="ml-auto rounded-full bg-violet-50 px-2 py-1 text-[9px] text-violet-700">
@@ -411,10 +411,10 @@ function ProductPreview() {
 
               <p className="text-[10px] leading-5 text-slate-600">
                 <span className="font-semibold text-violet-800">
-                  Intelligence opportunity:{" "}
+                  Worth a look:{" "}
                 </span>
-                Related complaints may indicate a shared operational issue
-                that deserves further investigation.
+                14 delivery complaints mention tracking that hasn&apos;t
+                updated. It may be one courier issue, not 14 separate ones.
               </p>
             </div>
           </Surface>
@@ -437,7 +437,7 @@ function ProductPreview() {
             Pattern detection
           </p>
           <p className="mt-1 text-[10px] text-slate-500">
-            Similar cases linked
+            3 complaints linked
           </p>
         </div>
       </motion.div>
@@ -453,23 +453,23 @@ const PROBLEMS = [
   {
     icon: Layers3,
     number: "01",
-    title: "Fragmented complaint data",
+    title: "Complaints arrive everywhere",
     description:
-      "Complaints across support channels, products, and teams can make it difficult to build a unified view of customer problems.",
+      "Some come by email, some through the website, some by phone. Nobody has the full list, so nobody knows how many are still open.",
   },
   {
     icon: Target,
     number: "02",
-    title: "Inconsistent prioritization",
+    title: "Urgent cases wait in line",
     description:
-      "Without clear prioritization criteria, serious complaints may compete for attention with routine service requests.",
+      "A fraud report and a late parcel sit in the same inbox, in the order they arrived. The serious one waits its turn.",
   },
   {
     icon: Network,
     number: "03",
-    title: "Hidden systemic issues",
+    title: "The same problem keeps coming back",
     description:
-      "Resolving individual cases does not necessarily reveal the shared product, process, or service failure behind them.",
+      "Agents close each case on its own. The broken checkout behind fifty of them stays broken.",
   },
 ];
 
@@ -480,44 +480,44 @@ const PROBLEMS = [
 const CAPABILITIES = [
   {
     icon: MessageSquare,
-    title: "Centralized complaint management",
+    title: "Complaint inbox",
     description:
-      "Maintain structured complaint records, categories, statuses, and assignments within a unified workflow.",
+      "One list of every complaint, with its status, category, priority and the person handling it.",
     number: "01",
   },
   {
     icon: BrainCircuit,
-    title: "AI-assisted classification",
+    title: "Automatic categories",
     description:
-      "Use text classification to organize complaint information into supported categories.",
+      "Each complaint is sorted into billing, delivery, refund, technical support and the rest as soon as it arrives.",
     number: "02",
   },
   {
     icon: Zap,
-    title: "Sentiment and urgency analysis",
+    title: "Priority and sentiment",
     description:
-      "Surface sentiment signals and apply prioritization rules to support more consistent complaint triage.",
+      "Angry wording, or words like fraud, legal or unsafe, push a complaint up the list.",
     number: "03",
   },
   {
     icon: GitMerge,
-    title: "Related-issue detection",
+    title: "Duplicate check",
     description:
-      "Use semantic similarity to identify potentially related complaints and investigate recurring patterns.",
+      "New complaints are compared with your recent ones, so twenty reports of one outage show up as one problem.",
     number: "04",
   },
   {
     icon: ClipboardCheck,
-    title: "Tracking and resolution workflows",
+    title: "Tracking for customers",
     description:
-      "Follow complaint statuses and assignments so authorized teams can manage cases systematically.",
+      "Customers follow their case with a tracking ID. Your team sees every status change and when it happened.",
     number: "05",
   },
   {
     icon: TrendingUp,
-    title: "Operational intelligence",
+    title: "Reports",
     description:
-      "Examine complaint categories, recurring issues, and available resolution metrics to support decisions.",
+      "Complaint volume, top categories and average resolution time for whatever period you pick.",
     number: "06",
   },
 ];
@@ -529,31 +529,31 @@ const CAPABILITIES = [
 const WORKFLOW_STEPS = [
   {
     number: "01",
-    title: "Capture",
+    title: "Submit",
     icon: MessageSquare,
     description:
-      "Collect complaints through the available submission workflow and organize the submitted information.",
+      "The customer fills in your complaint page, attaches photos or a PDF if they have them, and gets a tracking ID by email.",
   },
   {
     number: "02",
-    title: "Analyze",
+    title: "Sort",
     icon: BrainCircuit,
     description:
-      "Apply available classification, sentiment analysis, similarity detection, and prioritization logic.",
+      "BCIP adds a category, sentiment and priority, and checks your last 100 complaints for a duplicate.",
   },
   {
     number: "03",
-    title: "Investigate",
+    title: "Handle",
     icon: FileSearch,
     description:
-      "Review complaint details, identify related cases, and direct attention toward emerging issues.",
+      "It goes to the agent with the fewest open cases. They work it, or escalate it if a senior person needs to step in.",
   },
   {
     number: "04",
-    title: "Improve",
+    title: "Resolve",
     icon: TrendingUp,
     description:
-      "Use aggregated complaint information to understand recurring problems and inform operational decisions.",
+      "The customer sees the outcome on their tracking page and can rate how it was handled.",
   },
 ];
 
@@ -566,37 +566,37 @@ const INDUSTRIES = [
     icon: Building2,
     title: "Retail & E-commerce",
     examples:
-      "Payments, delivery delays, returns, and product quality.",
+      "Payments taken for orders that never confirmed, late deliveries, returns.",
   },
   {
     icon: LandmarkIcon,
     title: "Banking & Financial Services",
     examples:
-      "Transaction disputes, account access, and billing issues.",
+      "Failed transfers, card disputes, locked accounts.",
   },
   {
     icon: Network,
     title: "Telecommunications",
     examples:
-      "Connectivity failures, recurring outages, and billing disputes.",
+      "Outages that keep coming back, overcharged bills.",
   },
   {
     icon: ShieldCheck,
     title: "Healthcare",
     examples:
-      "Appointment access, administrative services, and patient feedback.",
+      "Appointment problems, billing queries, front-desk service.",
   },
   {
     icon: Workflow,
     title: "Logistics & Supply Chain",
     examples:
-      "Shipment tracking, fulfillment delays, and delivery problems.",
+      "Stuck shipments and tracking that doesn't update.",
   },
   {
     icon: Layers3,
     title: "Technology & SaaS",
     examples:
-      "Product defects, account problems, and recurring support issues.",
+      "Login failures, billing errors, bugs that keep returning.",
   },
 ];
 
@@ -629,21 +629,21 @@ function LandmarkIcon({
 const ENTERPRISE_PRINCIPLES = [
   {
     icon: Building2,
-    title: "Organizational separation",
+    title: "Separate workspaces",
     description:
-      "A multi-tenant architecture can keep participating organizations' data logically separated when implemented and configured correctly.",
+      "Every query is limited to your business, so one company can't see another's complaints or customers.",
   },
   {
     icon: ShieldCheck,
-    title: "Role-based permissions",
+    title: "Roles",
     description:
-      "Access policies help restrict complaint information and operations to appropriately authorized users.",
+      "Admins, managers, agents and escalation agents each get their own permissions.",
   },
   {
     icon: ClipboardCheck,
-    title: "Traceable workflows",
+    title: "Case history",
     description:
-      "Recorded complaint statuses and timestamps can support accountability and case-history review.",
+      "Each status change is saved with the time it happened, so you can see how a case moved.",
   },
 ];
 
@@ -675,7 +675,7 @@ export function LandingPage() {
               <Sparkles className="h-3.5 w-3.5" />
 
               <span className="text-[10px] font-semibold uppercase tracking-[0.15em] sm:text-xs">
-                Complaint intelligence for service teams
+                Complaint management for support teams
               </span>
             </motion.div>
 
@@ -685,9 +685,9 @@ export function LandingPage() {
               transition={{ duration: 0.7, delay: 0.08, ease: EASE }}
               className="landing-hero__title mt-6 max-w-4xl text-[2.8rem] font-semibold leading-[1.06] tracking-[-0.045em] sm:text-6xl lg:text-[4.3rem]"
             >
-              Turn every complaint into
+              Every complaint in one queue,
               <br className="hidden sm:block" />
-              <span> a clearer way forward.</span>
+              <span> sorted by what can&apos;t wait.</span>
             </motion.h1>
 
             <motion.p
@@ -696,9 +696,9 @@ export function LandingPage() {
               transition={{ duration: 0.7, delay: 0.16 }}
               className="landing-hero__description mt-5 max-w-2xl text-base leading-7 sm:text-lg sm:leading-8"
             >
-              Bring customer issues together, understand what needs attention,
-              and help your team spot recurring problems through one complaint
-              management platform.
+              Customers file complaints on your own BCIP page. Before your team
+              opens one, it already has a category, a priority and a duplicate
+              check, and the customer has a tracking ID to follow it.
             </motion.p>
 
             <motion.div
@@ -711,7 +711,7 @@ export function LandingPage() {
                 href="/register"
                 className="landing-hero__primary group inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3.5 text-sm font-semibold transition hover:-translate-y-0.5"
               >
-                Get started
+                Start free trial
 
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Link>
@@ -734,14 +734,29 @@ export function LandingPage() {
             >
               <span className="flex items-center gap-2">
                 <Check className="h-3.5 w-3.5" />
-                Structured workflows
+                14-day free trial
               </span>
 
               <span className="flex items-center gap-2">
                 <Check className="h-3.5 w-3.5" />
-                AI-assisted insights
+                No credit card needed
               </span>
             </motion.div>
+
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.7, delay: 0.55 }}
+              className="landing-hero__proof mt-4 text-sm"
+            >
+              Here to file or track a complaint?{" "}
+              <Link
+                href="/support"
+                className="font-semibold underline underline-offset-4 transition hover:opacity-80"
+              >
+                Go to the customer portal
+              </Link>
+            </motion.p>
           </div>
 
           <ProductPreview />
@@ -749,15 +764,15 @@ export function LandingPage() {
 
         <div className="landing-hero__capabilities relative mx-auto mt-12 max-w-[1120px] border-t px-5 pt-6 sm:px-8">
           <p className="text-center text-[10px] font-semibold uppercase tracking-[0.2em]">
-            One intelligence workflow. Multiple operational perspectives.
+            What your team gets
           </p>
 
           <div className="mt-7 grid grid-cols-2 gap-5 sm:grid-cols-4">
             {[
-              { icon: MessageSquare, label: "Complaint management" },
-              { icon: BrainCircuit, label: "AI-assisted analysis" },
-              { icon: GitMerge, label: "Related-issue detection" },
-              { icon: TrendingUp, label: "Operational reporting" },
+              { icon: MessageSquare, label: "Complaint inbox" },
+              { icon: BrainCircuit, label: "Automatic triage" },
+              { icon: GitMerge, label: "Duplicate check" },
+              { icon: TrendingUp, label: "Reports" },
             ].map((item) => {
               const Icon = item.icon;
 
@@ -788,7 +803,7 @@ export function LandingPage() {
             <SectionHeading
               eyebrow="The problem"
               title="Resolving a complaint isn't the same as solving the problem."
-              description="A support team can close an individual case while the underlying product defect, billing error, or service failure continues to affect other customers."
+              description="Your team can close a case while the billing bug or courier issue behind it keeps hitting other customers."
             />
           </Reveal>
 
@@ -830,13 +845,13 @@ export function LandingPage() {
 
               <div className="flex-1">
                 <h3 className="text-sm font-semibold text-white">
-                  The missing layer: complaint intelligence
+                  Where BCIP fits
                 </h3>
 
                 <p className="mt-1 text-sm leading-6 text-slate-400">
-                  BCIP is designed to connect structured case management
-                  with AI-assisted analysis, helping teams investigate
-                  patterns that individual complaints may not reveal.
+                  BCIP keeps the case-by-case work and adds a view across
+                  cases: which categories are growing, and which complaints
+                  are really about the same thing.
                 </p>
               </div>
 
@@ -844,7 +859,7 @@ export function LandingPage() {
                 href="#capabilities"
                 className="inline-flex shrink-0 items-center gap-2 text-sm font-semibold text-emerald-400 transition hover:text-emerald-300"
               >
-                Explore capabilities
+                See what it does
                 <ArrowUpRight className="h-4 w-4" />
               </a>
             </div>
@@ -869,18 +884,18 @@ export function LandingPage() {
     <Reveal>
       <div className="mx-auto max-w-3xl text-center">
         <span className="text-xs font-medium uppercase tracking-[0.18em] text-emerald-400">
-          Platform capabilities
+          What it does
         </span>
 
         <h2 className="mt-5 text-3xl font-semibold tracking-[-0.03em] text-white sm:text-4xl lg:text-5xl">
-          Turn customer feedback into
-          <span className="text-slate-500"> better decisions.</span>
+          Built for the people
+          <span className="text-slate-500"> who answer complaints.</span>
         </h2>
 
         <p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-slate-400">
-          BCIP gives businesses a clearer way to manage complaints,
-          understand recurring issues, and keep teams focused on the
-          problems that matter most.
+          BCIP does the sorting, so your team spends its time on replies
+          and fixes instead of reading every complaint to decide where it
+          goes.
         </p>
       </div>
     </Reveal>
@@ -914,13 +929,13 @@ export function LandingPage() {
 
             <div className="mt-auto pt-16">
               <h3 className="text-2xl font-semibold tracking-[-0.02em] text-white sm:text-3xl">
-                Clearer visibility into customer complaints.
+                See every open complaint and who owns it.
               </h3>
 
               <p className="mt-4 max-w-xl text-sm leading-7 text-slate-400">
-                Keep every complaint organised and give your team the
-                context they need to understand what customers are
-                experiencing.
+                Filter by status, priority or agent. Unassigned and
+                escalated cases stand out, so nothing sits forgotten in a
+                shared inbox.
               </p>
             </div>
           </div>
@@ -1006,17 +1021,17 @@ export function LandingPage() {
 
         <div>
           <p className="text-sm font-medium text-slate-300">
-            Built for teams that take customer feedback seriously.
+            Your team can change every AI suggestion.
           </p>
 
           <p className="mt-1 text-xs text-slate-600">
-            Clearer information. Better visibility. More confident decisions.
+            Nothing is sent to a customer until a person approves it.
           </p>
         </div>
 
         <div className="flex items-center gap-2 text-xs text-slate-600">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-          Business-focused complaint management
+          A person reviews every case
         </div>
 
       </div>
@@ -1036,8 +1051,8 @@ export function LandingPage() {
           <Reveal>
             <SectionHeading
               eyebrow="How it works"
-              title="A connected workflow for complaint intelligence."
-              description="Turn submitted complaints into structured information that teams can review, investigate, and use to identify recurring problems."
+              title="From complaint to resolution."
+              description="What happens between a customer pressing submit and your team closing the case."
             />
           </Reveal>
 
@@ -1079,17 +1094,17 @@ export function LandingPage() {
             <div className="mt-16 overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0b1320]">
               <div className="grid lg:grid-cols-2">
                 <div className="p-7 sm:p-10">
-                  <Eyebrow>Intelligence in context</Eyebrow>
+                  <Eyebrow>Duplicate check</Eyebrow>
 
                   <h3 className="mt-5 max-w-md text-2xl font-semibold leading-tight text-white sm:text-3xl">
-                    One complaint is a case. Related complaints can reveal a pattern.
+                    One complaint is a case. Twenty about the same thing is a problem.
                   </h3>
 
                   <p className="mt-4 max-w-lg text-sm leading-7 text-slate-400">
-                    Semantic similarity can help identify complaints
-                    describing related issues, even when customers use
-                    different wording. Teams can review those connections
-                    to investigate potential common causes.
+                    Customers describe the same issue in different words.
+                    BCIP compares meaning rather than keywords, so
+                    &ldquo;parcel never came&rdquo; and &ldquo;order not
+                    delivered&rdquo; end up linked.
                   </p>
 
                   <div className="mt-7 flex items-start gap-3">
@@ -1099,12 +1114,12 @@ export function LandingPage() {
 
                     <div>
                       <p className="text-sm font-semibold text-white">
-                        Related-issue discovery
+                        Flagged, not merged
                       </p>
 
                       <p className="mt-1 text-xs leading-6 text-slate-500">
-                        Similarity indicates a potential relationship,
-                        not proof of a shared root cause.
+                        Similar doesn&apos;t always mean the same cause, so
+                        your team makes the call.
                       </p>
                     </div>
                   </div>
@@ -1163,11 +1178,11 @@ export function LandingPage() {
 
                   <div className="mt-4 rounded-xl border border-violet-400/15 bg-violet-400/[0.04] p-4">
                     <p className="text-xs font-semibold text-violet-300">
-                      Potential recurring issue
+                      Likely the same problem
                     </p>
 
                     <p className="mt-1 text-xs leading-5 text-slate-400">
-                      Shipment tracking and notification delays
+                      Courier tracking not updating
                     </p>
                   </div>
                 </div>
@@ -1185,9 +1200,9 @@ export function LandingPage() {
         <div className="mx-auto max-w-[1280px] px-5 sm:px-8">
           <Reveal>
             <SectionHeading
-              eyebrow="Industry applications"
-              title="Built around the problems complex service teams face."
-              description="Complaint intelligence can support organizations where recurring customer issues affect service quality, operational efficiency, and customer trust."
+              eyebrow="Who it's for"
+              title="Businesses that get more complaints than they can track."
+              description="These are the kinds of businesses we designed the categories around."
             />
           </Reveal>
 
@@ -1227,23 +1242,23 @@ export function LandingPage() {
         <div className="mx-auto grid max-w-[1280px] gap-14 px-5 sm:px-8 lg:grid-cols-[0.85fr_1.15fr] lg:items-start">
           <Reveal>
             <div>
-              <Eyebrow>Enterprise architecture</Eyebrow>
+              <Eyebrow>Security and access</Eyebrow>
 
               <h2 className="mt-5 text-3xl font-semibold leading-tight tracking-tight text-white sm:text-4xl">
-                Designed with organizational separation and controlled access in mind.
+                Your complaints stay inside your business.
               </h2>
 
               <p className="mt-5 text-base leading-7 text-slate-400">
-                Enterprise complaint management requires more than a
-                dashboard. Organizations need appropriate data
-                boundaries, permission controls, and traceable workflows.
+                Each business gets its own workspace. Staff see only what
+                their role allows, and those checks run on the server, not
+                just in the browser.
               </p>
 
               <Link
                 href="/register"
                 className="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-emerald-400 transition hover:text-emerald-300"
               >
-                Explore BCIP
+                Create your workspace
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
@@ -1291,16 +1306,15 @@ export function LandingPage() {
             </div>
 
             <h2 className="mx-auto mt-7 max-w-3xl text-3xl font-semibold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
-              Don&apos;t just manage complaints.
+              Try it on your own complaints.
               <span className="block mt-2 text-emerald-400">
-                Understand what causes them.
+                Free for 14 days.
               </span>
             </h2>
 
             <p className="mx-auto mt-6 max-w-2xl text-base leading-7 text-slate-400 sm:text-lg sm:leading-8">
-              Explore how BCIP combines complaint management,
-              AI-assisted analysis, and recurring-issue discovery to
-              support better-informed operational decisions.
+              Set up your complaint page, invite your team and see where
+              complaints pile up. You don&apos;t need a credit card to start.
             </p>
 
             <div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
@@ -1308,22 +1322,21 @@ export function LandingPage() {
                 href="/register"
                 className="group inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-500 px-7 py-4 text-sm font-semibold text-[#06130e] transition hover:-translate-y-0.5 hover:bg-emerald-400"
               >
-                Explore the platform
+                Start free trial
 
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Link>
 
               <a
-                href="#capabilities"
+                href="/pricing"
                 className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.025] px-7 py-4 text-sm font-semibold text-slate-300 transition hover:bg-white/[0.06] hover:text-white"
               >
-                Review capabilities
+                See pricing
               </a>
             </div>
 
             <p className="mt-6 text-xs text-slate-600">
-              AI-assisted insights support investigation and decision-making;
-              findings should be reviewed in their operational context.
+              AI suggestions are a starting point. Your team makes the final call.
             </p>
           </Reveal>
         </div>

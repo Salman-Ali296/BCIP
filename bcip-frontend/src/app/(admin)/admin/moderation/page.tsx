@@ -104,7 +104,7 @@ export default function ModerationPage() {
                 <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-[#0d1322] rounded-2xl border border-white/[0.08] p-12 text-center backdrop-blur-xl"
+                    className="bg-ink rounded-2xl border border-white/[0.08] p-12 text-center backdrop-blur-xl"
                 >
                     <AlertTriangle size={48} className="mx-auto text-slate-600 mb-4" />
                     <h3 className="text-lg font-semibold text-slate-50 mb-2">
@@ -122,7 +122,7 @@ export default function ModerationPage() {
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.15 + index * 0.05, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                            className={`bg-[#0d1322] rounded-2xl border-2 p-6 backdrop-blur-xl ${getPriorityColor(
+                            className={`bg-ink rounded-2xl border-2 p-6 backdrop-blur-xl ${getPriorityColor(
                                 complaint.priority
                             )}`}
                         >

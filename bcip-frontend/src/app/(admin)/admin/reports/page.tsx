@@ -6,12 +6,11 @@ import {
     FileDown,
     FileText,
     Calendar,
-    Filter,
     Download,
     TrendingUp,
     Users,
     Building2,
-    BarChart3
+    BarChart3,
 } from 'lucide-react';
 
 type ReportType = 'complaints' | 'businesses' | 'users' | 'analytics' | 'performance';
@@ -91,7 +90,7 @@ export default function AdminReportsPage() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                className="bg-[#0d1322] rounded-2xl border border-white/[0.08] p-6 backdrop-blur-xl"
+                className="bg-ink rounded-2xl border border-white/[0.08] p-6 backdrop-blur-xl"
             >
                 <h2 className="text-lg font-semibold text-slate-50 mb-4 flex items-center gap-2">
                     <FileText size={20} className="text-emerald-400" />
@@ -144,7 +143,7 @@ export default function AdminReportsPage() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                    className="bg-[#0d1322] rounded-2xl border border-white/[0.08] p-6 backdrop-blur-xl"
+                    className="bg-ink rounded-2xl border border-white/[0.08] p-6 backdrop-blur-xl"
                 >
                     <h2 className="text-lg font-semibold text-slate-50 mb-4 flex items-center gap-2">
                         <Calendar size={20} className="text-emerald-400" />
@@ -203,7 +202,7 @@ export default function AdminReportsPage() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.35, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                    className="bg-[#0d1322] rounded-2xl border border-white/[0.08] p-6 backdrop-blur-xl"
+                    className="bg-ink rounded-2xl border border-white/[0.08] p-6 backdrop-blur-xl"
                 >
                     <h2 className="text-lg font-semibold text-slate-50 mb-4 flex items-center gap-2">
                         <FileDown size={20} className="text-emerald-400" />
@@ -255,7 +254,7 @@ export default function AdminReportsPage() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                className="bg-[#0d1322] rounded-2xl border border-white/[0.08] p-6 backdrop-blur-xl"
+                className="bg-ink rounded-2xl border border-white/[0.08] p-6 backdrop-blur-xl"
             >
                 <h2 className="text-lg font-semibold text-slate-50 mb-4">Recent Reports</h2>
                 <div className="space-y-3">

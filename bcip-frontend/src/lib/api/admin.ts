@@ -1,5 +1,79 @@
 import { apiClient } from './client';
 
+export interface AdminPlan {
+    id: string;
+    slug: string;
+    name: string;
+    audience: string;
+    description: string;
+    currency: string;
+    monthlyPriceCents: number | null;
+    annualPriceCents: number | null;
+    complaintLimit: number | null;
+    teamMemberLimit: number | null;
+    aiAnalysisLimit: number | null;
+    storageLimitMb: number | null;
+    retentionDays: number | null;
+    features: Record<string, boolean>;
+    isActive: boolean;
+    isPublic: boolean;
+    displayOrder: number;
+    _count?: { subscriptions: number };
+}
+
+export interface AdminSubscription {
+    id: string;
+    status: string;
+    billingCycle: string | null;
+    paymentProvider: string | null;
+    createdAt: string;
+    plan: { slug: string; name: string };
+    tenant: { id: string; name: string; email: string };
+}
+
+const adminPlanPath = '/api/v1/admin/plans';
+
+export async function getAdminPlans(): Promise<AdminPlan[]> {
+    const response = await apiClient<{ success: true; data: AdminPlan[] }>(adminPlanPath);
+    return response.data;
+}
+
+export async function createAdminPlan(
+    plan: Omit<AdminPlan, 'id' | '_count'>,
+): Promise<AdminPlan> {
+    const response = await apiClient<{ success: true; data: AdminPlan }>(adminPlanPath, {
+        method: 'POST',
+        body: JSON.stringify(plan),
+    });
+    return response.data;
+}
+
+export async function updateAdminPlan(
+    id: string,
+    plan: Partial<Omit<AdminPlan, 'id' | 'slug' | '_count'>>,
+): Promise<AdminPlan> {
+    const response = await apiClient<{ success: true; data: AdminPlan }>(
+        `${adminPlanPath}/${encodeURIComponent(id)}`,
+        { method: 'PUT', body: JSON.stringify(plan) },
+    );
+    return response.data;
+}
+
+export async function setAdminPlanStatus(id: string, isActive: boolean): Promise<AdminPlan> {
+    const response = await apiClient<{ success: true; data: AdminPlan }>(
+        `${adminPlanPath}/${encodeURIComponent(id)}/status`,
+        { method: 'PATCH', body: JSON.stringify({ isActive }) },
+    );
+    return response.data;
+}
+
+export async function getAdminSubscriptions(): Promise<AdminSubscription[]> {
+    const response = await apiClient<{ success: true; data: AdminSubscription[] }>(
+        '/api/v1/admin/subscriptions?limit=100',
+    );
+    return response.data;
+}
+
 // ============================================
 // Dashboard & Analytics
 // ============================================
@@ -137,6 +211,9 @@ export interface BusinessDetail {
     slug: string;
     email: string;
     phone: string | null;
+    country: string | null;
+    city: string | null;
+    businessAddress: string | null;
     website: string | null;
     industry: string | null;
     teamSize: string | null;

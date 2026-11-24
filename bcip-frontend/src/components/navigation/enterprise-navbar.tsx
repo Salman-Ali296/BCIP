@@ -24,9 +24,6 @@ export function EnterpriseNavbar() {
     const [userMenuOpen, setUserMenuOpen] = useState(false);
     const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
 
-    // Hide navbar on third-party embeds
-    if (pathname?.startsWith("/embed")) return null;
-
     // Global shortcut listener for Command / Ctrl + K
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -39,6 +36,9 @@ export function EnterpriseNavbar() {
         window.addEventListener("keydown", handleKeyDown);
         return () => window.removeEventListener("keydown", handleKeyDown);
     }, []);
+
+    // Hide navbar on third-party embeds
+    if (pathname?.startsWith("/embed")) return null;
 
     // Exact Enterprise Navigation links as specified
     const navItems = [
@@ -69,7 +69,7 @@ export function EnterpriseNavbar() {
             {/* Enterprise Clean Navbar Container */}
             <header className="sticky top-0 z-50 w-full px-3 sm:px-6 py-3">
                 <nav
-                    className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 rounded-xl border border-white/10 bg-[#0c1524]/90 px-4 sm:px-6 shadow-xl backdrop-blur-md"
+                    className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 rounded-xl border border-white/10 bg-ink/90 px-4 sm:px-6 shadow-xl backdrop-blur-md"
                     aria-label="Enterprise Navigation"
                 >
                     {/* Left: Brand Logo & Title */}
@@ -125,7 +125,7 @@ export function EnterpriseNavbar() {
 
                                 {userMenuOpen && (
                                     <div
-                                        className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-white/15 bg-[#0a1120] p-2 shadow-2xl z-50 text-white backdrop-blur-xl"
+                                        className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-white/15 bg-ink p-2 shadow-2xl z-50 text-white backdrop-blur-xl"
                                         onMouseLeave={() => setUserMenuOpen(false)}
                                     >
                                         <div className="border-b border-white/10 p-2.5">
@@ -178,7 +178,7 @@ export function EnterpriseNavbar() {
                                 </Link>
                                 <Link
                                     href="/signup"
-                                    className="rounded-lg bg-[#2454d6] hover:bg-[#1b43b4] text-white px-3.5 py-1.5 text-xs sm:text-sm font-bold shadow-md shadow-blue-500/20 transition whitespace-nowrap"
+                                    className="rounded-lg bg-ink hover:bg-brand text-white px-3.5 py-1.5 text-xs sm:text-sm font-bold shadow-md shadow-blue-500/20 transition whitespace-nowrap"
                                 >
                                     Get Started
                                 </Link>
@@ -199,7 +199,7 @@ export function EnterpriseNavbar() {
 
             {/* Responsive Mobile Drawer */}
             {mobileOpen && (
-                <div className="fixed top-16 inset-x-3 z-50 mx-auto max-w-sm rounded-2xl bg-[#0c1524] border border-white/15 p-4 shadow-2xl backdrop-blur-2xl md:hidden text-white">
+                <div className="fixed top-16 inset-x-3 z-50 mx-auto max-w-sm rounded-2xl bg-ink border border-white/15 p-4 shadow-2xl backdrop-blur-2xl md:hidden text-white">
                     <div className="space-y-1">
                         {navItems.map((item) => (
                             <Link
@@ -241,7 +241,7 @@ export function EnterpriseNavbar() {
                                 <Link
                                     href="/signup"
                                     onClick={() => setMobileOpen(false)}
-                                    className="flex items-center justify-center rounded-lg bg-[#2454d6] text-white py-2 text-xs font-bold hover:bg-[#1b43b4]"
+                                    className="flex items-center justify-center rounded-lg bg-ink text-white py-2 text-xs font-bold hover:bg-brand"
                                 >
                                     Get Started
                                 </Link>

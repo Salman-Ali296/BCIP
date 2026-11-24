@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Copy, Sparkles, RefreshCw } from "lucide-react";
+import { Check, Copy, Sparkles } from "lucide-react";
 import { useState, useEffect } from "react";
 
 type Tone = "empathetic" | "formal" | "concise";
@@ -18,6 +18,7 @@ export function AiResponseDraft({
     // Generate alternate tones from base draft
     useEffect(() => {
         if (!suggestedResponse) return;
+        const frame = requestAnimationFrame(() => {
         if (tone === "empathetic") {
             setDraft(suggestedResponse);
         } else if (tone === "formal") {
@@ -30,6 +31,8 @@ export function AiResponseDraft({
             );
         }
         setCopied(false);
+        });
+        return () => cancelAnimationFrame(frame);
     }, [tone, suggestedResponse]);
 
     async function copyDraft() {

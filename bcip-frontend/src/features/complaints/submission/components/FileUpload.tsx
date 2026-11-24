@@ -1,6 +1,6 @@
 "use client";
 
-import { FileText, Image, UploadCloud, X } from "lucide-react";
+import { FileText, Image as ImageIcon, UploadCloud, X } from "lucide-react";
 import { useRef, useState } from "react";
 import { useFileUpload } from "@/features/complaints/submission/hooks/useFileUpload";
 
@@ -40,7 +40,7 @@ export function FileUpload({ value, onChange, progress = {} }: FileUploadProps) 
                 const percent = progress[file.name] ?? 0;
                 return (
                     <div key={`${file.name}-${file.size}`} className="flex items-center gap-3 rounded-md border border-slate-200 bg-white p-3">
-                        {isImage ? <Image aria-hidden="true" className="h-5 w-5 text-blue-600" /> : <FileText aria-hidden="true" className="h-5 w-5 text-slate-500" />}
+                        {isImage ? <ImageIcon aria-hidden="true" className="h-5 w-5 text-blue-600" /> : <FileText aria-hidden="true" className="h-5 w-5 text-slate-500" />}
                         <div className="min-w-0 flex-1"><p className="truncate text-sm font-medium text-slate-800">{file.name}</p><p className="text-xs text-slate-500">{Math.ceil(file.size / 1024)} KB</p>{percent > 0 && percent < 100 && <div className="mt-1 h-1 rounded-full bg-slate-100"><div className="h-1 rounded-full bg-blue-600" style={{ width: `${percent}%` }} /></div>}</div>
                         <button type="button" onClick={() => remove(file.name)} aria-label={`Remove ${file.name}`} className="rounded p-1 text-slate-500 hover:bg-rose-50 hover:text-rose-600"><X aria-hidden="true" className="h-4 w-4" /></button>
                     </div>

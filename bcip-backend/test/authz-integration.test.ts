@@ -72,6 +72,124 @@ function mockAuthenticatedUser(
     );
 }
 
+test('business plan catalog is publicly available without exposing Stripe price identifiers', async (t) => {
+    const savedPrices = {
+        starter: { ...env.STRIPE_PRICES.starter },
+        growth: { ...env.STRIPE_PRICES.growth },
+        business: { ...env.STRIPE_PRICES.business },
+    };
+    for (const plan of Object.values(savedPrices)) {
+        plan.month = '';
+        plan.year = '';
+    }
+    t.after(() => {
+        Object.assign(env.STRIPE_PRICES.starter, savedPrices.starter);
+        Object.assign(env.STRIPE_PRICES.growth, savedPrices.growth);
+        Object.assign(env.STRIPE_PRICES.business, savedPrices.business);
+    });
+    mockMethod(t, prisma.businessPlan, 'findMany', async () => [
+        { id: 'starter', slug: 'starter', name: 'Starter', audience: '', description: '', currency: 'USD', monthlyPriceCents: 1900, annualPriceCents: 18240, complaintLimit: 200, teamMemberLimit: 3, aiAnalysisLimit: 100, storageLimitMb: 2048, retentionDays: 90, features: { complaint_management: true, complaint_portal: true, resolution_management: true }, displayOrder: 1 },
+        { id: 'growth', slug: 'growth', name: 'Professional', audience: '', description: '', currency: 'USD', monthlyPriceCents: 4900, annualPriceCents: 47040, complaintLimit: 1000, teamMemberLimit: 10, aiAnalysisLimit: 1000, storageLimitMb: 10240, retentionDays: 365, features: { complaint_management: true, complaint_portal: true, resolution_management: true }, displayOrder: 2 },
+        { id: 'business', slug: 'business', name: 'Business Growth', audience: '', description: '', currency: 'USD', monthlyPriceCents: 9900, annualPriceCents: 95040, complaintLimit: 5000, teamMemberLimit: 25, aiAnalysisLimit: 5000, storageLimitMb: 51200, retentionDays: 730, features: { complaint_management: true, complaint_portal: true, resolution_management: true }, displayOrder: 3 },
+        { id: 'enterprise', slug: 'enterprise', name: 'Enterprise', audience: '', description: '', currency: 'USD', monthlyPriceCents: null, annualPriceCents: null, complaintLimit: null, teamMemberLimit: null, aiAnalysisLimit: null, storageLimitMb: null, retentionDays: null, features: { complaint_management: true, complaint_portal: true, resolution_management: true }, displayOrder: 4 },
+    ] as never);
+
+    await withServer(async (baseUrl) => {
+        const response = await fetch(`${baseUrl}/api/v1/auth/billing/plans`);
+        assert.equal(response.status, 200);
+        const body = await response.json() as {
+            success: boolean;
+            data: Array<{
+                id: string;
+                billingIntervals: { month: boolean; year: boolean };
+            }>;
+        };
+        assert.equal(body.success, true);
+        assert.deepEqual(body.data.map((plan) => plan.id), [
+            'starter',
+            'growth',
+            'business',
+            'enterprise',
+        ]);
+        assert.equal('priceId' in body.data[0], false);
+    });
+});
+
+test('authenticated business trial status returns the shape required by the trial screen', async (t) => {
+    const previousSecret = env.JWT_SECRET;
+    env.JWT_SECRET = TEST_SECRET;
+    t.after(() => { env.JWT_SECRET = previousSecret; });
+    mockAuthenticatedUser(t, 'BUSINESS_ADMIN', 'tenant-trial');
+    mockMethod(t, prisma.user, 'findUnique', async () => ({
+        accountType: 'BUSINESS',
+        role: 'BUSINESS_ADMIN',
+        tenant: {
+            id: 'tenant-trial',
+            name: 'Verified business',
+            slug: 'verified-business',
+            isActive: true,
+            businessVerified: true,
+            complaintChannel: null,
+            onboardingCompletedAt: null,
+            subscriptionStatus: null,
+            subscriptionPlan: null,
+            subscriptionCurrentPeriodEnd: null,
+            subscriptionCancelAtPeriodEnd: false,
+            businessTrial: null,
+        },
+    }) as never);
+    mockMethod(t, prisma.tenant, 'findUnique', async () => ({
+        subscriptionStatus: null,
+        subscriptionPlan: null,
+        subscriptionCurrentPeriodEnd: null,
+        businessTrial: null,
+    }) as never);
+
+    await withServer(async (baseUrl) => {
+        const response = await fetch(`${baseUrl}/api/v1/auth/trial`, {
+            headers: {
+                Authorization: `Bearer ${token('BUSINESS_ADMIN', 'tenant-trial')}`,
+            },
+        });
+        assert.equal(response.status, 200);
+        const body = await response.json() as {
+            success: boolean;
+            data: {
+                canAcceptTrial: boolean;
+                trial: unknown;
+                onboardingComplete: boolean;
+            };
+        };
+        assert.deepEqual(body, {
+            success: true,
+            data: {
+                tenant: {
+                    id: 'tenant-trial',
+                    name: 'Verified business',
+                    slug: 'verified-business',
+                },
+                canAcceptTrial: true,
+                onboardingComplete: false,
+                complaintChannel: null,
+                complaintPortalUrl: null,
+                trial: null,
+                subscription: {
+                    status: null,
+                    plan: null,
+                    currentPeriodEnd: null,
+                    cancelAtPeriodEnd: false,
+                },
+                access: {
+                    active: false,
+                    plan: null,
+                    source: null,
+                    features: null,
+                },
+            },
+        });
+    });
+});
+
 test('protected complaint routes reject missing authentication', async () => {
     await withServer(async (baseUrl) => {
         const response = await fetch(`${baseUrl}/api/complaints`);
@@ -79,20 +197,55 @@ test('protected complaint routes reject missing authentication', async () => {
     });
 });
 
-test('customer complaint listing ignores requested tenant and constrains results to verified account email', async (t) => {
+test('public complaint directory returns only eligible portal identifiers and display names', async (t) => {
+    let capturedWhere: Record<string, unknown> | undefined;
+    mockMethod(t, prisma.tenant, 'findMany', async (args: {
+        where: Record<string, unknown>;
+        select: Record<string, unknown>;
+    }) => {
+        capturedWhere = args.where;
+        assert.deepEqual(args.select, { id: true, name: true, slug: true });
+        return [{ id: 'tenant-public', name: 'Verified business', slug: 'verified-business' }] as never;
+    });
+
+    await withServer(async (baseUrl) => {
+        const response = await fetch(
+            `${baseUrl}/api/complaints/businesses?search=Verified`,
+        );
+        assert.equal(response.status, 200);
+        const body = await response.json() as {
+            success: boolean;
+            data: Array<Record<string, unknown>>;
+        };
+        assert.equal(body.success, true);
+        assert.deepEqual(body.data, [{
+            id: 'tenant-public',
+            name: 'Verified business',
+            slug: 'verified-business',
+        }]);
+        assert.equal('email' in body.data[0], false);
+    });
+
+    assert.equal(capturedWhere?.isActive, true);
+    assert.equal(capturedWhere?.businessVerified, true);
+    assert.equal(capturedWhere?.complaintChannel, 'WEB_PORTAL');
+    assert.deepEqual(capturedWhere?.slug, { not: 'bcip-public-consumer-platform' });
+    assert.ok(Array.isArray(capturedWhere?.OR));
+    assert.ok(Array.isArray(capturedWhere?.AND));
+});
+
+test('legacy customer sessions cannot access protected complaint listings', async (t) => {
     const previousSecret = env.JWT_SECRET;
     env.JWT_SECRET = TEST_SECRET;
     t.after(() => { env.JWT_SECRET = previousSecret; });
     mockAuthenticatedUser(t, 'CUSTOMER');
 
-    let capturedTenantId: string | undefined;
-    let capturedEmail: string | undefined;
+    let listCalled = false;
     mockMethod(t, complaintService, 'listComplaints', async (
-        tenantId: string | undefined,
-        filters: { customerEmail?: string },
+        _tenantId: string | undefined,
+        _filters: { customerEmail?: string },
     ) => {
-        capturedTenantId = tenantId;
-        capturedEmail = filters.customerEmail;
+        listCalled = true;
         return { data: [], pagination: { total: 0, page: 1, limit: 20, pages: 0 } };
     });
 
@@ -100,47 +253,32 @@ test('customer complaint listing ignores requested tenant and constrains results
         const response = await fetch(`${baseUrl}/api/complaints?tenantId=tenant-other`, {
             headers: { Authorization: `Bearer ${token('CUSTOMER')}` },
         });
-        assert.equal(response.status, 200);
+        assert.equal(response.status, 403);
     });
 
-    assert.equal(capturedTenantId, undefined);
-    assert.equal(capturedEmail, 'customer@example.com');
+    assert.equal(listCalled, false);
 });
 
-test('customer complaint detail lookup scopes the database query to the verified account email', async (t) => {
+test('legacy customer sessions cannot access protected complaint details', async (t) => {
     const previousSecret = env.JWT_SECRET;
     env.JWT_SECRET = TEST_SECRET;
     t.after(() => { env.JWT_SECRET = previousSecret; });
     mockAuthenticatedUser(t, 'CUSTOMER');
 
-    let capturedWhere: Record<string, unknown> | undefined;
-    mockMethod(t, prisma.complaint, 'findFirst', async (args: { where: Record<string, unknown> }) => {
-        capturedWhere = args.where;
-        return {
-            id: 'complaint-one',
-            trackingId: 'COMP-20261023-ABCDEF',
-            title: 'Customer complaint',
-            description: 'Private customer description',
-            status: ComplaintStatus.OPEN,
-            priority: Priority.MEDIUM,
-            aiCategory: null,
-            aiSentiment: null,
-            customer: { email: 'customer@example.com', fullName: 'Customer' },
-            statusHistory: [],
-        } as never;
+    let complaintLookupCalled = false;
+    mockMethod(t, prisma.complaint, 'findFirst', async () => {
+        complaintLookupCalled = true;
+        return null as never;
     });
 
     await withServer(async (baseUrl) => {
         const response = await fetch(`${baseUrl}/api/complaints/complaint-one`, {
             headers: { Authorization: `Bearer ${token('CUSTOMER')}` },
         });
-        assert.equal(response.status, 200);
+        assert.equal(response.status, 403);
     });
 
-    assert.deepEqual(capturedWhere, {
-        id: 'complaint-one',
-        customer: { is: { email: 'customer@example.com' } },
-    });
+    assert.equal(complaintLookupCalled, false);
 });
 
 test('business complaint detail lookup remains restricted to the authenticated tenant', async (t) => {
@@ -148,9 +286,21 @@ test('business complaint detail lookup remains restricted to the authenticated t
     env.JWT_SECRET = TEST_SECRET;
     t.after(() => { env.JWT_SECRET = previousSecret; });
     mockAuthenticatedUser(t, 'AGENT', 'tenant-one');
-    mockMethod(t, prisma.businessTrial, 'findUnique', async () => ({
-        acceptedAt: new Date(Date.now() - 60_000),
-        expiresAt: new Date(Date.now() + 60_000),
+    mockMethod(t, prisma.tenant, 'findUnique', async () => ({
+        subscriptionStatus: null,
+        subscriptionPlan: null,
+        businessTrial: {
+            acceptedAt: new Date(Date.now() - 60_000),
+            expiresAt: new Date(Date.now() + 60_000),
+        },
+    }) as never);
+    mockMethod(t, prisma.businessPlan, 'findUnique', async (args: { where: { slug: string } }) => ({
+        slug: args.where.slug,
+        features: { complaint_management: true },
+        complaintLimit: 200,
+        teamMemberLimit: 3,
+        aiAnalysisLimit: 100,
+        storageLimitMb: 2048,
     }) as never);
 
     let capturedWhere: Record<string, unknown> | undefined;
@@ -169,6 +319,37 @@ test('business complaint detail lookup remains restricted to the authenticated t
     assert.deepEqual(capturedWhere, {
         id: 'complaint-other',
         tenantId: 'tenant-one',
+    });
+});
+
+test('a paid business subscription keeps complaint access after its trial expires', async (t) => {
+    const previousSecret = env.JWT_SECRET;
+    env.JWT_SECRET = TEST_SECRET;
+    t.after(() => { env.JWT_SECRET = previousSecret; });
+    mockAuthenticatedUser(t, 'AGENT', 'tenant-one');
+    mockMethod(t, prisma.tenant, 'findUnique', async () => ({
+        subscriptionStatus: 'active',
+        subscriptionPlan: 'growth',
+        businessTrial: {
+            acceptedAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000),
+            expiresAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
+        },
+    }) as never);
+    mockMethod(t, prisma.businessPlan, 'findUnique', async (args: { where: { slug: string } }) => ({
+        slug: args.where.slug,
+        features: { complaint_management: true },
+        complaintLimit: 1000,
+        teamMemberLimit: 10,
+        aiAnalysisLimit: 1000,
+        storageLimitMb: 10240,
+    }) as never);
+    mockMethod(t, prisma.complaint, 'findFirst', async () => null as never);
+
+    await withServer(async (baseUrl) => {
+        const response = await fetch(`${baseUrl}/api/complaints/complaint-other`, {
+            headers: { Authorization: `Bearer ${token('AGENT', 'tenant-one')}` },
+        });
+        assert.equal(response.status, 404, await response.text());
     });
 });
 
@@ -379,7 +560,7 @@ test('public complaint submissions reject file content that does not match its M
     });
 });
 
-test('customer trial acceptance and business onboarding are role-restricted', async (t) => {
+test('customer trial acceptance and workspace onboarding are role-restricted', async (t) => {
     const previousSecret = env.JWT_SECRET;
     env.JWT_SECRET = TEST_SECRET;
     t.after(() => { env.JWT_SECRET = previousSecret; });
@@ -395,10 +576,9 @@ test('customer trial acceptance and business onboarding are role-restricted', as
             headers,
             body: JSON.stringify({ accepted: true }),
         });
-        const onboarding = await fetch(`${baseUrl}/api/v1/auth/trial/onboarding`, {
-            method: 'POST',
+        const onboarding = await fetch(`${baseUrl}/api/v1/auth/onboarding`, {
+            method: 'GET',
             headers,
-            body: JSON.stringify({ complaintChannel: 'WEB_PORTAL' }),
         });
         assert.equal(trial.status, 403);
         assert.equal(onboarding.status, 403);

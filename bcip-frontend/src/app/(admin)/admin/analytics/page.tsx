@@ -57,7 +57,7 @@ export default function AnalyticsPage() {
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.15 + index * 0.05, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                            className="bg-[#0d1322] rounded-2xl border border-white/[0.08] p-6 backdrop-blur-xl"
+                            className="bg-ink rounded-2xl border border-white/[0.08] p-6 backdrop-blur-xl"
                         >
                             <div className="flex items-center justify-between mb-2">
                                 <span className="text-sm text-slate-400">{stat.label}</span>
@@ -74,7 +74,7 @@ export default function AnalyticsPage() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.35, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                className="bg-[#0d1322] rounded-2xl border border-white/[0.08] p-6 backdrop-blur-xl"
+                className="bg-ink rounded-2xl border border-white/[0.08] p-6 backdrop-blur-xl"
             >
                 <h2 className="text-lg font-semibold text-slate-50 mb-4">Available Reports</h2>
                 <div className="space-y-3">

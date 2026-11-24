@@ -4,14 +4,11 @@ import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import {
     Search,
-    Filter,
     PlusCircle,
     Clock,
     AlertCircle,
     CheckCircle2,
     ArrowRight,
-    ExternalLink,
-    ShieldCheck,
     FileText,
 } from "lucide-react";
 import {
@@ -26,6 +23,7 @@ export function CustomerComplaintsLedger() {
     const [localComplaints, setLocalComplaints] = useState<CustomerComplaint[]>([]);
 
     useEffect(() => {
+        const timer = setTimeout(() => {
         try {
             const raw = localStorage.getItem("bcip:customer-complaints");
             if (raw) {
@@ -66,6 +64,8 @@ export function CustomerComplaintsLedger() {
         } catch {
             // Ignore parse errors
         }
+        }, 0);
+        return () => clearTimeout(timer);
     }, []);
 
     const allComplaints: CustomerComplaint[] = useMemo(() => {

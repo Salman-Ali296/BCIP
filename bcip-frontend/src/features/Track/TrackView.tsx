@@ -10,16 +10,11 @@ import {
   CheckCircle2,
   Clock,
   Copy,
-  ExternalLink,
-  MessageSquare,
-  ShieldCheck,
   Sparkles,
   User,
-  Zap,
 } from "lucide-react";
 import { FeedbackForm } from "./Feedbackform";
 import { acceptResolution, getComplaint, requestAlternative } from "@/lib/api/complaints";
-import { tenant } from "@/config/tenant";
 import type { Complaint } from "@/types/complaint";
 
 const STATUS_STEPS = [
@@ -47,9 +42,12 @@ export function TrackView({ id }: { id: string }) {
   }, [id]);
 
   useEffect(() => {
-    void load();
+    const first = setTimeout(() => void load(), 0);
     const t = setInterval(() => void load(), 4000);
-    return () => clearInterval(t);
+    return () => {
+      clearTimeout(first);
+      clearInterval(t);
+    };
   }, [load]);
 
   const copyTrackingId = async () => {
@@ -77,14 +75,14 @@ export function TrackView({ id }: { id: string }) {
 
   if (c === undefined && error)
     return (
-      <div className="min-h-screen bg-[#0d1526] text-white flex items-center justify-center p-6">
-        <div className="rounded-2xl border border-rose-500/30 bg-rose-950/20 p-8 text-center max-w-md">
-          <AlertTriangle className="mx-auto h-8 w-8 text-rose-400 mb-3" />
+      <div className="min-h-screen bg-wash text-ink flex items-center justify-center p-6">
+        <div className="rounded-2xl border border-danger/30 bg-danger-soft p-8 text-center max-w-md">
+          <AlertTriangle className="mx-auto h-8 w-8 text-danger mb-3" />
           <h2 className="font-bold text-lg">Error Loading Incident</h2>
-          <p className="text-xs text-rose-300 mt-2">{error}</p>
+          <p className="text-xs text-danger mt-2">{error}</p>
           <Link
             href="/support/track"
-            className="mt-5 inline-block rounded-xl bg-slate-800 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-700"
+            className="mt-5 inline-block rounded-xl bg-lilac-soft px-4 py-2 text-xs font-semibold text-ink hover:bg-line"
           >
             Try Another ID
           </Link>
@@ -94,34 +92,34 @@ export function TrackView({ id }: { id: string }) {
 
   if (c === undefined)
     return (
-      <div className="min-h-screen bg-[#0d1526] text-white flex items-center justify-center p-6">
+      <div className="min-h-screen bg-wash text-ink flex items-center justify-center p-6">
         <div className="flex flex-col items-center gap-4">
-          <span className="h-10 w-10 animate-spin rounded-full border-3 border-blue-500 border-t-transparent" />
-          <p className="text-sm font-medium text-slate-400">Loading incident #{id} telemetry...</p>
+          <span className="h-10 w-10 animate-spin rounded-full border-3 border-brand-soft border-t-transparent" />
+          <p className="text-sm font-medium text-muted">Loading incident #{id} telemetry...</p>
         </div>
       </div>
     );
 
   if (c === null)
     return (
-      <div className="min-h-screen bg-[#0d1526] text-white flex items-center justify-center p-6">
-        <div className="rounded-3xl border border-slate-800 bg-slate-900/90 p-10 text-center max-w-md shadow-2xl">
-          <AlertTriangle className="mx-auto h-10 w-10 text-amber-400 mb-4" />
+      <div className="min-h-screen bg-wash text-ink flex items-center justify-center p-6">
+        <div className="rounded-3xl border border-line bg-white p-10 text-center max-w-md shadow-2xl">
+          <AlertTriangle className="mx-auto h-10 w-10 text-warning mb-4" />
           <h2 className="text-xl font-bold">Incident Not Found</h2>
-          <p className="text-xs text-slate-400 mt-2">
-            No incident matching tracking ID <strong className="text-white font-mono">{id}</strong> was
+          <p className="text-xs text-muted mt-2">
+            No incident matching tracking ID <strong className="text-ink font-mono">{id}</strong> was
             found in the enterprise registry.
           </p>
           <div className="mt-6 flex flex-col gap-2.5">
             <Link
               href="/support/track"
-              className="rounded-xl bg-blue-600 hover:bg-blue-500 px-4 py-2.5 text-xs font-bold text-white transition shadow-lg shadow-blue-600/30"
+              className="rounded-xl bg-ink hover:bg-brand px-4 py-2.5 text-xs font-bold text-white transition shadow-lg shadow-brand/15"
             >
               Search Again
             </Link>
             <Link
               href="/support/report"
-              className="rounded-xl border border-slate-700 hover:bg-slate-800 px-4 py-2 text-xs font-semibold text-slate-300 transition"
+              className="rounded-xl border border-line hover:bg-lilac-soft px-4 py-2 text-xs font-semibold text-ink-soft transition"
             >
               Submit New Complaint
             </Link>
@@ -145,50 +143,50 @@ export function TrackView({ id }: { id: string }) {
     : 1;
 
   return (
-    <div className="min-h-screen bg-[#0d1526] text-slate-100 py-12 px-4 sm:px-6 lg:px-8 font-sans">
+    <div className="min-h-screen bg-wash text-ink py-12 px-4 sm:px-6 lg:px-8 font-sans">
       <div className="mx-auto max-w-5xl space-y-8">
         {/* Navigation & Header */}
         <div className="flex flex-wrap items-center justify-between gap-4">
           <Link
             href="/support"
-            className="inline-flex items-center gap-2 text-xs font-semibold text-slate-400 hover:text-white transition"
+            className="inline-flex items-center gap-2 text-xs font-semibold text-muted hover:text-ink transition"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             Back to Support Center
           </Link>
 
           <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-1 font-mono text-xs text-blue-300">
-              <span className="h-2 w-2 rounded-full bg-blue-400 animate-pulse" />
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-soft bg-lilac px-3 py-1 font-mono text-xs text-brand">
+              <span className="h-2 w-2 rounded-full bg-brand-glow animate-pulse" />
               Live SLA Tracking
             </span>
           </div>
         </div>
 
         {/* Hero Incident Card */}
-        <div className="rounded-3xl border border-slate-800 bg-slate-900/90 p-6 sm:p-8 shadow-2xl backdrop-blur-md space-y-6">
-          <div className="flex flex-wrap items-start justify-between gap-4 border-b border-slate-800 pb-6">
+        <div className="rounded-3xl border border-line bg-white p-6 sm:p-8 shadow-2xl backdrop-blur-md space-y-6">
+          <div className="flex flex-wrap items-start justify-between gap-4 border-b border-line pb-6">
             <div>
               <div className="flex flex-wrap items-center gap-2.5">
-                <span className="rounded-lg bg-slate-800 px-2.5 py-1 font-mono text-xs font-bold text-slate-200 border border-slate-700">
+                <span className="rounded-lg bg-lilac-soft px-2.5 py-1 font-mono text-xs font-bold text-ink border border-line">
                   {c.trackingId || c.id}
                 </span>
                 <button
                   type="button"
                   onClick={copyTrackingId}
-                  className="inline-flex items-center gap-1 text-[11px] text-slate-400 hover:text-blue-400 transition"
+                  className="inline-flex items-center gap-1 text-[11px] text-muted hover:text-brand transition"
                   title="Copy Tracking ID"
                 >
-                  {copied ? <Check className="h-3 w-3 text-emerald-400" /> : <Copy className="h-3 w-3" />}
+                  {copied ? <Check className="h-3 w-3 text-success" /> : <Copy className="h-3 w-3" />}
                   {copied ? "Copied" : "Copy"}
                 </button>
                 {c.orderRef && (
-                  <span className="rounded-lg bg-blue-950/60 px-2.5 py-1 font-mono text-xs text-blue-300 border border-blue-800/60">
+                  <span className="rounded-lg bg-lilac-soft px-2.5 py-1 font-mono text-xs text-brand border border-line">
                     Ref: {c.orderRef}
                   </span>
                 )}
               </div>
-              <h1 className="mt-3 text-2xl sm:text-3xl font-black tracking-tight text-white">
+              <h1 className="mt-3 text-2xl sm:text-3xl font-black tracking-tight text-ink">
                 {c.title}
               </h1>
             </div>
@@ -198,16 +196,16 @@ export function TrackView({ id }: { id: string }) {
               <span
                 className={`rounded-xl px-3.5 py-1.5 text-xs font-extrabold uppercase tracking-wider border ${
                   isResolved
-                    ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                    ? "bg-success-soft text-success border-success/30"
                     : isAwaitingCustomer
-                    ? "bg-blue-500/10 text-blue-400 border-blue-500/30"
-                    : "bg-amber-500/10 text-amber-400 border-amber-500/30"
+                    ? "bg-lilac text-brand border-brand-soft"
+                    : "bg-warning-soft text-warning border-warning/30"
                 }`}
               >
                 {isResolved ? "Incident Resolved" : isAwaitingCustomer ? "Response Ready" : "In Investigation"}
               </span>
-              <span className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-400">
-                <Clock className="h-3.5 w-3.5 text-blue-400" />
+              <span className="flex items-center gap-1.5 text-[11px] font-semibold text-muted">
+                <Clock className="h-3.5 w-3.5 text-brand" />
                 {isResolved ? "Completed within SLA window" : "SLA Remaining: 1h 42m"}
               </span>
             </div>
@@ -215,7 +213,7 @@ export function TrackView({ id }: { id: string }) {
 
           {/* Interactive Milestone Timeline */}
           <div className="pt-2">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-6">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-muted mb-6">
               Incident Milestone Progression
             </h3>
 
@@ -228,26 +226,26 @@ export function TrackView({ id }: { id: string }) {
                     key={step.key}
                     className={`relative rounded-2xl border p-3.5 text-left transition ${
                       isCurrent
-                        ? "border-blue-500 bg-blue-950/30 shadow-lg shadow-blue-500/10"
+                        ? "border-brand-soft bg-lilac-soft shadow-lg shadow-brand/15"
                         : isPassed
-                        ? "border-emerald-500/40 bg-emerald-950/20"
-                        : "border-slate-800 bg-slate-950/40 opacity-50"
+                        ? "border-success/30 bg-success-soft"
+                        : "border-line bg-wash opacity-50"
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-mono text-[10px] font-bold text-slate-400">
+                      <span className="font-mono text-[10px] font-bold text-muted">
                         0{idx + 1}
                       </span>
                       {isPassed && (
                         <CheckCircle2
                           className={`h-3.5 w-3.5 ${
-                            isCurrent ? "text-blue-400 animate-pulse" : "text-emerald-400"
+                            isCurrent ? "text-brand animate-pulse" : "text-success"
                           }`}
                         />
                       )}
                     </div>
-                    <p className="mt-2 text-xs font-bold text-white">{step.label}</p>
-                    <p className="mt-1 text-[10px] text-slate-400 leading-tight">{step.desc}</p>
+                    <p className="mt-2 text-xs font-bold text-ink">{step.label}</p>
+                    <p className="mt-1 text-[10px] text-muted leading-tight">{step.desc}</p>
                   </div>
                 );
               })}
@@ -261,28 +259,28 @@ export function TrackView({ id }: { id: string }) {
           <div className="md:col-span-2 space-y-6">
             {/* Proposed Resolution Offer (When available) */}
             {c.response && (
-              <div className="rounded-3xl border border-blue-500/30 bg-gradient-to-br from-blue-950/40 to-slate-900 p-6 sm:p-8 shadow-2xl space-y-4">
+              <div className="rounded-3xl border border-brand-soft bg-gradient-to-br from-lilac to-wash p-6 sm:p-8 shadow-2xl space-y-4">
                 <div className="flex items-center gap-2">
-                  <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-blue-500/20 text-blue-400">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-lilac text-brand">
                     <Sparkles className="h-4 w-4" />
                   </span>
-                  <h3 className="font-bold text-white text-base">
+                  <h3 className="font-bold text-ink text-base">
                     Official Enterprise Resolution Proposed
                   </h3>
                 </div>
 
-                <div className="rounded-2xl border border-slate-800 bg-black/30 p-4.5 space-y-2">
-                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                <div className="rounded-2xl border border-line bg-ink/10 p-4.5 space-y-2">
+                  <p className="text-xs font-semibold text-muted uppercase tracking-wider">
                     Executive Response:
                   </p>
-                  <p className="text-sm leading-relaxed text-slate-200">{c.response.message}</p>
+                  <p className="text-sm leading-relaxed text-ink">{c.response.message}</p>
                 </div>
 
-                <div className="rounded-2xl border border-blue-500/20 bg-blue-500/10 p-4.5 space-y-2">
-                  <p className="text-xs font-bold text-blue-300 uppercase tracking-wider">
+                <div className="rounded-2xl border border-brand-soft bg-lilac p-4.5 space-y-2">
+                  <p className="text-xs font-bold text-brand uppercase tracking-wider">
                     Proposed Remedy & Adjustment:
                   </p>
-                  <p className="text-sm font-semibold text-white leading-relaxed">
+                  <p className="text-sm font-semibold text-ink leading-relaxed">
                     {c.response.proposedResolution}
                   </p>
                 </div>
@@ -293,7 +291,7 @@ export function TrackView({ id }: { id: string }) {
                       type="button"
                       disabled={busy}
                       onClick={() => act(acceptResolution)}
-                      className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 px-5 py-2.5 text-xs font-bold text-white shadow-lg shadow-emerald-600/30 transition disabled:opacity-50"
+                      className="inline-flex items-center gap-2 rounded-xl bg-success hover:bg-success px-5 py-2.5 text-xs font-bold text-white shadow-lg shadow-success/15 transition disabled:opacity-50"
                     >
                       <Check className="h-4 w-4" />
                       Accept Resolution & Close Incident
@@ -302,7 +300,7 @@ export function TrackView({ id }: { id: string }) {
                       type="button"
                       disabled={busy}
                       onClick={() => act(requestAlternative)}
-                      className="rounded-xl border border-slate-700 hover:bg-slate-800 px-4 py-2.5 text-xs font-bold text-slate-300 transition disabled:opacity-50"
+                      className="rounded-xl border border-line hover:bg-lilac-soft px-4 py-2.5 text-xs font-bold text-ink-soft transition disabled:opacity-50"
                     >
                       Request Alternative Solution
                     </button>
@@ -312,16 +310,16 @@ export function TrackView({ id }: { id: string }) {
             )}
 
             {/* Complaint Narrative Card */}
-            <div className="rounded-3xl border border-slate-800 bg-slate-900/90 p-6 sm:p-8 shadow-xl space-y-4">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+            <div className="rounded-3xl border border-line bg-white p-6 sm:p-8 shadow-xl space-y-4">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-muted">
                 Submitted Incident Description
               </h3>
-              <p className="text-sm leading-relaxed text-slate-200 whitespace-pre-wrap bg-slate-950/60 p-4.5 rounded-2xl border border-slate-800">
+              <p className="text-sm leading-relaxed text-ink whitespace-pre-wrap bg-wash p-4.5 rounded-2xl border border-line">
                 {c.description}
               </p>
-              <div className="flex flex-wrap items-center justify-between text-xs text-slate-400 pt-2 border-t border-slate-800">
+              <div className="flex flex-wrap items-center justify-between text-xs text-muted pt-2 border-t border-line">
                 <span>
-                  Submitted via <strong className="capitalize text-slate-200">{c.channel || "text"}</strong> intake
+                  Submitted via <strong className="capitalize text-ink">{c.channel || "text"}</strong> intake
                 </span>
                 <span>{new Date(c.createdAt).toLocaleString()}</span>
               </div>
@@ -329,17 +327,17 @@ export function TrackView({ id }: { id: string }) {
 
             {/* Post-Resolution Feedback CSAT (Proposal Section 3.2.2) */}
             {isResolved && (
-              <div className="rounded-3xl border border-emerald-500/30 bg-slate-900/90 p-6 sm:p-8 shadow-2xl space-y-4">
+              <div className="rounded-3xl border border-success/30 bg-white p-6 sm:p-8 shadow-2xl space-y-4">
                 <div className="flex items-center gap-2">
-                  <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-emerald-500/20 text-emerald-400">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-success-soft text-success">
                     <CheckCircle2 className="h-4 w-4" />
                   </span>
-                  <h3 className="font-bold text-white text-base">
+                  <h3 className="font-bold text-ink text-base">
                     Customer Satisfaction & Service Quality (CSAT)
                   </h3>
                 </div>
                 {c.feedback ? (
-                  <p className="text-xs text-emerald-400 bg-emerald-950/30 p-3 rounded-xl border border-emerald-500/30">
+                  <p className="text-xs text-success bg-success-soft p-3 rounded-xl border border-success/30">
                     ✓ Feedback received with {c.feedback.rating} / 5 stars. Thank you for helping us improve our enterprise service quality!
                   </p>
                 ) : (
@@ -352,60 +350,60 @@ export function TrackView({ id }: { id: string }) {
           {/* Right Column (1 col): AI Understanding & Organization Metadata */}
           <div className="space-y-6">
             {/* AI Intelligence Insights Card */}
-            <div className="rounded-3xl border border-blue-500/20 bg-gradient-to-b from-blue-950/30 via-slate-900/90 to-slate-900 p-6 shadow-xl space-y-4">
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-blue-300">
-                <BrainCircuit className="h-4 w-4 text-blue-400" />
+            <div className="rounded-3xl border border-brand-soft bg-gradient-to-b from-lilac via-wash to-wash p-6 shadow-xl space-y-4">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-brand">
+                <BrainCircuit className="h-4 w-4 text-brand" />
                 AI Triage Classification
               </div>
 
               <div className="space-y-3 text-xs">
-                <div className="flex items-center justify-between rounded-xl bg-slate-950/60 p-3 border border-slate-800">
-                  <span className="text-slate-400">Classified Category:</span>
-                  <span className="font-bold text-blue-400">{c.category}</span>
+                <div className="flex items-center justify-between rounded-xl bg-wash p-3 border border-line">
+                  <span className="text-muted">Classified Category:</span>
+                  <span className="font-bold text-brand">{c.category}</span>
                 </div>
 
-                <div className="flex items-center justify-between rounded-xl bg-slate-950/60 p-3 border border-slate-800">
-                  <span className="text-slate-400">Urgency Level:</span>
-                  <span className="font-bold text-rose-400 uppercase">{c.priority}</span>
+                <div className="flex items-center justify-between rounded-xl bg-wash p-3 border border-line">
+                  <span className="text-muted">Urgency Level:</span>
+                  <span className="font-bold text-danger uppercase">{c.priority}</span>
                 </div>
 
-                <div className="flex items-center justify-between rounded-xl bg-slate-950/60 p-3 border border-slate-800">
-                  <span className="text-slate-400">Emotional Sentiment:</span>
-                  <span className="font-bold text-purple-400 capitalize">{c.sentiment || "Negative"}</span>
+                <div className="flex items-center justify-between rounded-xl bg-wash p-3 border border-line">
+                  <span className="text-muted">Emotional Sentiment:</span>
+                  <span className="font-bold text-brand capitalize">{c.sentiment || "Negative"}</span>
                 </div>
               </div>
 
               {c.aiSummary && (
-                <div className="rounded-xl border border-blue-500/20 bg-blue-950/20 p-3.5 text-xs text-slate-300 space-y-1">
-                  <span className="font-bold text-blue-300 block">AI Executive Summary:</span>
+                <div className="rounded-xl border border-brand-soft bg-lilac-soft p-3.5 text-xs text-ink-soft space-y-1">
+                  <span className="font-bold text-brand block">AI Executive Summary:</span>
                   <p className="leading-relaxed">{c.aiSummary}</p>
                 </div>
               )}
             </div>
 
             {/* Enterprise Assignment Card */}
-            <div className="rounded-3xl border border-slate-800 bg-slate-900/90 p-6 shadow-xl space-y-4 text-xs">
-              <h3 className="font-bold text-white text-sm flex items-center gap-2">
-                <User className="h-4 w-4 text-blue-400" />
+            <div className="rounded-3xl border border-line bg-white p-6 shadow-xl space-y-4 text-xs">
+              <h3 className="font-bold text-ink text-sm flex items-center gap-2">
+                <User className="h-4 w-4 text-brand" />
                 Assigned Specialist
               </h3>
-              <div className="rounded-2xl bg-slate-950/60 p-4 border border-slate-800 space-y-2">
-                <p className="font-bold text-white text-sm">
-                  {(c as any).assignedToName || c.assignedTo || "Senior Enterprise Escalation Desk"}
+              <div className="rounded-2xl bg-wash p-4 border border-line space-y-2">
+                <p className="font-bold text-ink text-sm">
+                  {(c as typeof c & { assignedToName?: string | null }).assignedToName || c.assignedTo || "Senior Enterprise Escalation Desk"}
                 </p>
-                <p className="text-[11px] text-slate-400">
+                <p className="text-[11px] text-muted">
                   Direct SLA oversight · Level-2 Certified Incident Specialist
                 </p>
               </div>
 
-              <div className="border-t border-slate-800 pt-3 space-y-1.5 text-slate-400">
+              <div className="border-t border-line pt-3 space-y-1.5 text-muted">
                 <p className="flex justify-between">
                   <span>Registered Contact:</span>
-                  <strong className="text-slate-200">{c.email || c.customerEmail}</strong>
+                  <strong className="text-ink">{c.email || c.customerEmail}</strong>
                 </p>
                 <p className="flex justify-between">
                   <span>Enterprise SLA:</span>
-                  <strong className="text-emerald-400">Tier-1 Guaranteed</strong>
+                  <strong className="text-success">Tier-1 Guaranteed</strong>
                 </p>
               </div>
             </div>

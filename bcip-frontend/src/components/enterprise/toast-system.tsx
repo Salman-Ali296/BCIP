@@ -52,7 +52,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
               <AlertCircle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
             )}
             {t.variant === "info" && (
-              <Info className="h-5 w-5 text-[#2454d6] shrink-0 mt-0.5" />
+              <Info className="h-5 w-5 text-brand shrink-0 mt-0.5" />
             )}
             <div className="flex-1 min-w-0">
               <p className="text-xs font-bold leading-tight">{t.title}</p>

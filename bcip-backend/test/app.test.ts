@@ -242,3 +242,29 @@ test('authenticated business APIs reject direct requests without a verified sess
         });
     }
 });
+
+test('versioned business onboarding step route is mounted', async () => {
+    const server = createApp().listen(0);
+    await new Promise<void>(resolve => server.once('listening', resolve));
+
+    try {
+        const address = server.address();
+        assert.ok(address && typeof address !== 'string');
+        const response = await fetch(
+            `http://127.0.0.1:${address.port}/api/v1/auth/onboarding/steps/1`,
+            {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ version: 0, data: {} }),
+            },
+        );
+        const body = await response.json() as { error?: { code?: string } };
+
+        assert.equal(response.status, 401);
+        assert.equal(body.error?.code, 'UNAUTHORIZED');
+    } finally {
+        await new Promise<void>((resolve, reject) => {
+            server.close(error => error ? reject(error) : resolve());
+        });
+    }
+});

@@ -45,7 +45,7 @@ export default function VerifyEmailPage({ params }: VerifyEmailPageProps) {
     }
 
     return (
-        <div className="min-h-screen bg-[#29104f]">
+        <div className="min-h-screen bg-deep">
             <EmailVerificationShell
                 heading={
                     state === "verified"

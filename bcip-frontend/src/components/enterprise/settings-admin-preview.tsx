@@ -2,18 +2,11 @@
 
 import React, { useState } from "react";
 import {
-  Bell,
-  CheckCircle2,
   Cpu,
   Database,
-  FileText,
   Key,
-  Layers,
-  Lock,
   Save,
-  Server,
   Settings,
-  Shield,
   Sliders,
   Users,
 } from "lucide-react";
@@ -51,10 +44,10 @@ export function SettingsAdminPreview() {
             <span className="status-dot" />
             Operational Administration
           </div>
-          <h2 className="heading-xl mt-4 text-[#101d30]">
+          <h2 className="heading-xl mt-4 text-ink">
             Enterprise-grade configuration
             <br />
-            <span className="text-[#2454d6]">and policy control.</span>
+            <span className="text-brand">and policy control.</span>
           </h2>
           <p className="mt-4 text-base leading-7 text-slate-600">
             BCIP provides granular administrative controls for AI thresholds, department queues,
@@ -63,7 +56,7 @@ export function SettingsAdminPreview() {
         </div>
 
         {/* Administration Workbench Preview */}
-        <div className="mt-12 rounded-2xl border border-slate-200 bg-[#f8fafc] overflow-hidden shadow-sm">
+        <div className="mt-12 rounded-2xl border border-slate-200 bg-wash overflow-hidden shadow-sm">
           <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr]">
             {/* Settings Sidebar */}
             <div className="border-b lg:border-b-0 lg:border-r border-slate-200 bg-white p-4 space-y-1">
@@ -86,7 +79,7 @@ export function SettingsAdminPreview() {
                     onClick={() => setActiveNav(item.id as SettingsNav)}
                     className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-semibold transition ${
                       isSelected
-                        ? "bg-[#2454d6] text-white shadow-2xs"
+                        ? "bg-ink text-white shadow-2xs"
                         : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                     }`}
                   >
@@ -121,7 +114,7 @@ export function SettingsAdminPreview() {
                           AI categorisation below this threshold will be flagged as &quot;Needs Human Review&quot;.
                         </span>
                       </div>
-                      <span className="font-mono text-sm font-bold text-[#2454d6] bg-blue-50 border border-blue-200 px-2 py-0.5 rounded">
+                      <span className="font-mono text-sm font-bold text-brand bg-blue-50 border border-blue-200 px-2 py-0.5 rounded">
                         {confidenceThreshold}%
                       </span>
                     </div>
@@ -132,7 +125,7 @@ export function SettingsAdminPreview() {
                       max={98}
                       value={confidenceThreshold}
                       onChange={(e) => setConfidenceThreshold(Number(e.target.value))}
-                      className="w-full accent-[#2454d6] cursor-pointer"
+                      className="w-full accent-brand cursor-pointer"
                     />
 
                     <div className="flex justify-between text-[10px] font-mono text-slate-400">
@@ -156,7 +149,7 @@ export function SettingsAdminPreview() {
                       type="checkbox"
                       checked={humanApprovalRequired}
                       onChange={(e) => setHumanApprovalRequired(e.target.checked)}
-                      className="h-4 w-4 accent-[#2454d6] rounded cursor-pointer"
+                      className="h-4 w-4 accent-brand rounded cursor-pointer"
                     />
                   </div>
                 </div>
@@ -298,7 +291,7 @@ export function SettingsAdminPreview() {
                 </span>
                 <button
                   onClick={handleSave}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-[#2454d6] px-4 py-2 text-xs font-bold text-white hover:bg-[#1b43b4] transition"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-ink px-4 py-2 text-xs font-bold text-white hover:bg-brand transition"
                 >
                   <Save className="h-3.5 w-3.5" /> Save Configuration
                 </button>

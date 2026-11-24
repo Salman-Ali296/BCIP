@@ -7,8 +7,8 @@ export default function CustomerBillingPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-[#101d30]">Billing & Subscription</h1>
-        <p className="mt-1 text-sm text-[#5e6b7d]">
+        <h1 className="text-2xl font-bold tracking-tight text-ink">Billing & Subscription</h1>
+        <p className="mt-1 text-sm text-muted">
           Review your current plan, payment methods, and invoice history.
         </p>
       </div>
@@ -21,12 +21,12 @@ export default function CustomerBillingPage() {
               Active
             </span>
           </div>
-          <p className="mt-4 text-2xl font-bold text-[#101d30]">Enterprise Dedicated</p>
-          <p className="mt-1 text-xs text-[#5e6b7d]">Renews on the 1st of every calendar month.</p>
+          <p className="mt-4 text-2xl font-bold text-ink">Enterprise Dedicated</p>
+          <p className="mt-1 text-xs text-muted">Renews on the 1st of every calendar month.</p>
           <div className="mt-6 border-t border-slate-100 pt-4">
             <Link
               href="/pricing"
-              className="inline-flex items-center gap-1 text-xs font-bold text-[#2454d6] hover:underline"
+              className="inline-flex items-center gap-1 text-xs font-bold text-brand hover:underline"
             >
               Explore plan options <ArrowRight className="h-3 w-3" />
             </Link>
@@ -38,8 +38,8 @@ export default function CustomerBillingPage() {
             <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Payment Method</span>
             <CreditCard className="h-4 w-4 text-slate-400" />
           </div>
-          <p className="mt-4 text-sm font-semibold text-[#101d30]">Corporate ACH / Wire</p>
-          <p className="mt-1 text-xs text-[#5e6b7d]">Net 30 automated invoicing via finance portal.</p>
+          <p className="mt-4 text-sm font-semibold text-ink">Corporate ACH / Wire</p>
+          <p className="mt-1 text-xs text-muted">Net 30 automated invoicing via finance portal.</p>
           <div className="mt-6 border-t border-slate-100 pt-4">
             <span className="inline-flex items-center gap-1.5 text-xs text-slate-500">
               <Shield className="h-3.5 w-3.5 text-emerald-600" /> Verified business billing profile
@@ -52,10 +52,10 @@ export default function CustomerBillingPage() {
             <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Invoicing Contact</span>
             <Receipt className="h-4 w-4 text-slate-400" />
           </div>
-          <p className="mt-4 text-sm font-semibold text-[#101d30]">billing-ops@acme-global.com</p>
-          <p className="mt-1 text-xs text-[#5e6b7d]">Invoices and receipts delivered automatically.</p>
+          <p className="mt-4 text-sm font-semibold text-ink">billing-ops@acme-global.com</p>
+          <p className="mt-1 text-xs text-muted">Invoices and receipts delivered automatically.</p>
           <div className="mt-6 border-t border-slate-100 pt-4">
-            <Link href="/customer/settings" className="text-xs font-bold text-[#2454d6] hover:underline">
+            <Link href="/customer/settings" className="text-xs font-bold text-brand hover:underline">
               Update billing contact
             </Link>
           </div>
@@ -63,8 +63,8 @@ export default function CustomerBillingPage() {
       </div>
 
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs">
-        <h2 className="text-base font-semibold text-[#101d30]">Recent Statements & Invoices</h2>
-        <p className="mt-1 text-xs text-[#5e6b7d]">Download historical invoices for accounting reconciliation.</p>
+        <h2 className="text-base font-semibold text-ink">Recent Statements & Invoices</h2>
+        <p className="mt-1 text-xs text-muted">Download historical invoices for accounting reconciliation.</p>
 
         <div className="mt-4 divide-y divide-slate-100 border-t border-slate-100">
           {[
@@ -74,14 +74,14 @@ export default function CustomerBillingPage() {
           ].map((inv) => (
             <div key={inv.id} className="flex items-center justify-between py-3.5 text-xs">
               <div className="flex items-center gap-3">
-                <span className="font-mono font-semibold text-[#101d30]">{inv.id}</span>
+                <span className="font-mono font-semibold text-ink">{inv.id}</span>
                 <span className="text-slate-500">{inv.date}</span>
                 <span className="inline-flex items-center gap-1 rounded bg-emerald-50 px-2 py-0.5 font-medium text-emerald-700">
                   <CheckCircle2 className="h-3 w-3" /> {inv.status}
                 </span>
               </div>
               <div className="flex items-center gap-4">
-                <span className="font-mono font-semibold text-[#101d30]">{inv.amount}</span>
+                <span className="font-mono font-semibold text-ink">{inv.amount}</span>
                 <button
                   type="button"
                   className="inline-flex items-center gap-1 rounded-md border border-slate-200 px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50"

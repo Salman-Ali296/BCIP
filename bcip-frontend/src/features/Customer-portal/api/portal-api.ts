@@ -2,11 +2,14 @@ import type {
   Complaint,
   NewComplaint,
 } from "@/features/complaints/types/complaint";
+import {
+  readStoredComplaints,
+  writeStoredComplaints,
+} from "@/lib/api/complaint-storage";
 
 type DraftChannel = "text" | "voice";
 
 const draftKey = (channel: DraftChannel) => `bcip:complaint-draft:${channel}`;
-const complaintsKey = "bcip:customer-complaints";
 const draftChangedEvent = "bcip:draft-changed";
 
 export function getDraftSnapshot(channel: DraftChannel): string | null {
@@ -54,17 +57,6 @@ export function clearDraft(channel: DraftChannel): void {
   window.dispatchEvent(new CustomEvent(draftChangedEvent, { detail: channel }));
 }
 
-function readComplaints(): Complaint[] {
-  const serialized = window.localStorage.getItem(complaintsKey);
-  if (!serialized) return [];
-
-  try {
-    return JSON.parse(serialized) as Complaint[];
-  } catch {
-    throw new Error("Saved complaints could not be read.");
-  }
-}
-
 export async function createComplaint(payload: NewComplaint): Promise<Complaint> {
   const createdAt = Date.now();
   const id = `BCIP-${crypto.randomUUID()}`;
@@ -81,9 +73,6 @@ export async function createComplaint(payload: NewComplaint): Promise<Complaint>
     updatedAt: createdAt,
   };
 
-  window.localStorage.setItem(
-    complaintsKey,
-    JSON.stringify([...readComplaints(), complaint]),
-  );
+  writeStoredComplaints([...readStoredComplaints(), complaint]);
   return complaint;
 }

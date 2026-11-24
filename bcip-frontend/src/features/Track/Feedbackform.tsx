@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check, Star, ThumbsUp, ThumbsDown } from "lucide-react";
+import { Star, ThumbsUp, ThumbsDown } from "lucide-react";
 import { submitFeedback } from "@/lib/api/complaints";
 
 export function FeedbackForm({ id, onDone }: { id: string; onDone: () => void }) {
@@ -55,7 +55,7 @@ export function FeedbackForm({ id, onDone }: { id: string; onDone: () => void })
     <div className="space-y-6 pt-2">
       {/* Resolved Confirmation */}
       <div>
-        <label className="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-2.5">
+        <label className="text-xs font-bold uppercase tracking-wider text-muted block mb-2.5">
           Did this action resolve your grievance?
         </label>
         <div className="grid gap-3 sm:grid-cols-2">
@@ -64,20 +64,20 @@ export function FeedbackForm({ id, onDone }: { id: string; onDone: () => void })
             onClick={() => setResolved(true)}
             className={`flex items-center gap-3 rounded-2xl border p-4 text-left transition ${
               resolved
-                ? "border-emerald-500 bg-emerald-950/30 text-white"
-                : "border-slate-800 bg-slate-950/50 text-slate-400 hover:text-white"
+                ? "border-success/30 bg-success-soft text-ink"
+                : "border-line bg-wash text-muted hover:text-ink"
             }`}
           >
             <span
               className={`flex h-8 w-8 items-center justify-center rounded-xl ${
-                resolved ? "bg-emerald-500 text-white" : "bg-slate-800 text-slate-400"
+                resolved ? "bg-success text-white" : "bg-lilac-soft text-muted"
               }`}
             >
               <ThumbsUp className="h-4 w-4" />
             </span>
             <div>
-              <p className="text-xs font-bold text-white">Yes, fully resolved</p>
-              <p className="text-[11px] text-slate-400">Remedy was completed to our satisfaction</p>
+              <p className="text-xs font-bold text-ink">Yes, fully resolved</p>
+              <p className="text-[11px] text-muted">Remedy was completed to our satisfaction</p>
             </div>
           </button>
 
@@ -86,20 +86,20 @@ export function FeedbackForm({ id, onDone }: { id: string; onDone: () => void })
             onClick={() => setResolved(false)}
             className={`flex items-center gap-3 rounded-2xl border p-4 text-left transition ${
               !resolved
-                ? "border-amber-500 bg-amber-950/30 text-white"
-                : "border-slate-800 bg-slate-950/50 text-slate-400 hover:text-white"
+                ? "border-warning/30 bg-warning-soft text-ink"
+                : "border-line bg-wash text-muted hover:text-ink"
             }`}
           >
             <span
               className={`flex h-8 w-8 items-center justify-center rounded-xl ${
-                !resolved ? "bg-amber-500 text-white" : "bg-slate-800 text-slate-400"
+                !resolved ? "bg-amber-500 text-white" : "bg-lilac-soft text-muted"
               }`}
             >
               <ThumbsDown className="h-4 w-4" />
             </span>
             <div>
-              <p className="text-xs font-bold text-white">Not completely resolved</p>
-              <p className="text-[11px] text-slate-400">Additional assistance is still required</p>
+              <p className="text-xs font-bold text-ink">Not completely resolved</p>
+              <p className="text-[11px] text-muted">Additional assistance is still required</p>
             </div>
           </button>
         </div>
@@ -107,7 +107,7 @@ export function FeedbackForm({ id, onDone }: { id: string; onDone: () => void })
 
       {/* Star Rating Suite */}
       <div>
-        <label className="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-2">
+        <label className="text-xs font-bold uppercase tracking-wider text-muted block mb-2">
           Rate Support Experience ({hoverRating || rating} / 5 Stars)
         </label>
         <div className="flex items-center gap-2">
@@ -123,8 +123,8 @@ export function FeedbackForm({ id, onDone }: { id: string; onDone: () => void })
               <Star
                 className={`h-7 w-7 ${
                   star <= (hoverRating || rating)
-                    ? "fill-amber-400 text-amber-400 drop-shadow-md"
-                    : "text-slate-700"
+                    ? "fill-amber-400 text-warning drop-shadow-md"
+                    : "text-faint"
                 }`}
               />
             </button>
@@ -134,7 +134,7 @@ export function FeedbackForm({ id, onDone }: { id: string; onDone: () => void })
 
       {/* Feedback Pills */}
       <div>
-        <label className="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-2">
+        <label className="text-xs font-bold uppercase tracking-wider text-muted block mb-2">
           What contributed to your rating?
         </label>
         <div className="flex flex-wrap gap-2">
@@ -147,8 +147,8 @@ export function FeedbackForm({ id, onDone }: { id: string; onDone: () => void })
                 onClick={() => toggleTag(tag)}
                 className={`rounded-xl border px-3 py-1.5 text-xs font-semibold transition ${
                   active
-                    ? "border-blue-500 bg-blue-500/20 text-blue-300"
-                    : "border-slate-800 bg-slate-950/50 text-slate-400 hover:text-slate-200"
+                    ? "border-brand-soft bg-lilac text-brand"
+                    : "border-line bg-wash text-muted hover:text-ink"
                 }`}
               >
                 {active && "✓ "}
@@ -161,7 +161,7 @@ export function FeedbackForm({ id, onDone }: { id: string; onDone: () => void })
 
       {/* Optional Note */}
       <div>
-        <label className="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-2">
+        <label className="text-xs font-bold uppercase tracking-wider text-muted block mb-2">
           Additional Comments for Management (Optional)
         </label>
         <textarea
@@ -170,18 +170,18 @@ export function FeedbackForm({ id, onDone }: { id: string; onDone: () => void })
           value={comment}
           onChange={(e) => setComment(e.target.value)}
           placeholder="Share feedback on how we can improve our resolution timeline..."
-          className="w-full rounded-2xl border border-slate-700 bg-slate-950/60 p-3.5 text-xs text-slate-100 placeholder-slate-500 shadow-inner focus:border-blue-500 focus:outline-none"
+          className="w-full rounded-2xl border border-line bg-wash p-3.5 text-xs text-ink placeholder-faint shadow-inner focus:border-brand focus:outline-none"
         />
       </div>
 
-      {error && <p className="text-xs text-rose-400 font-medium">{error}</p>}
+      {error && <p className="text-xs text-danger font-medium">{error}</p>}
 
       {/* Submit Action */}
       <div className="flex items-center justify-end gap-3 pt-2">
         <button
           type="button"
           onClick={() => router.push("/support")}
-          className="rounded-xl border border-slate-700 hover:bg-slate-800 px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white transition"
+          className="rounded-xl border border-line hover:bg-lilac-soft px-4 py-2 text-xs font-semibold text-muted hover:text-ink transition"
         >
           Skip for Now
         </button>
@@ -190,7 +190,7 @@ export function FeedbackForm({ id, onDone }: { id: string; onDone: () => void })
           type="button"
           disabled={busy}
           onClick={send}
-          className="inline-flex items-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-500 px-5 py-2 text-xs font-bold text-white shadow-lg shadow-blue-600/30 transition disabled:opacity-50"
+          className="inline-flex items-center gap-2 rounded-xl bg-ink hover:bg-brand px-5 py-2 text-xs font-bold text-white shadow-lg shadow-brand/15 transition disabled:opacity-50"
         >
           {busy ? "Submitting..." : "Submit Quality Rating"}
         </button>

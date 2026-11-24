@@ -32,7 +32,7 @@ const principles = [
 export default function AboutPage() {
     return (
         <main className="overflow-hidden bg-white text-slate-950">
-            <section className="bg-[#f4f7fd]">
+            <section className="bg-wash">
                 <div className="mx-auto grid max-w-7xl items-center gap-12 px-6 py-20 lg:grid-cols-[.9fr_1.1fr] lg:px-8 lg:py-28">
                     <div>
                         <span className="inline-flex rounded-full border border-blue-200 bg-white px-3 py-1.5 text-[11px] font-bold uppercase tracking-[.14em] text-blue-700">
@@ -45,7 +45,7 @@ export default function AboutPage() {
                             BCIP is a business complaint intelligence platform designed to help organisations move from scattered feedback to a clearer, more actionable view of customer issues.
                         </p>
                         <div className="mt-8 flex flex-wrap gap-3">
-                            <Link href="/contact" className="inline-flex items-center gap-2 rounded-xl bg-[#2454d6] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#1b43b4]">
+                            <Link href="/contact" className="inline-flex items-center gap-2 rounded-xl bg-ink px-5 py-3 text-sm font-semibold text-white transition hover:bg-brand">
                                 Talk to our team <ArrowRight size={16} />
                             </Link>
                             <Link href="/#workflow" className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-800 transition hover:bg-slate-50">
@@ -89,7 +89,7 @@ export default function AboutPage() {
                 </div>
             </section>
 
-            <section className="bg-[#101d30] text-white">
+            <section className="bg-ink text-white">
                 <div className="mx-auto grid max-w-7xl gap-8 px-6 py-16 md:grid-cols-[1fr_auto] md:items-center lg:px-8">
                     <div className="flex gap-4">
                         <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-white/10 text-[#b8edcf]"><Building2 size={22} /></span>

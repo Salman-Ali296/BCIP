@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { AlertTriangle, X, ShieldAlert, ArrowRight } from "lucide-react";
+import { X, ShieldAlert, ArrowRight } from "lucide-react";
 import { useEnterprise } from "../context/enterprise-context";
 
 export function EscalationDialog() {

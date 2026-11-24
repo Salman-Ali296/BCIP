@@ -1,5 +1,6 @@
 import { prisma } from '../../../config/database';
 import { Prisma } from '@prisma/client';
+import { Errors } from '../../../utils/error';
 
 export interface BusinessFilters {
     search?: string;
@@ -37,6 +38,9 @@ export interface BusinessDetail {
     slug: string;
     email: string;
     phone: string | null;
+    country: string | null;
+    city: string | null;
+    businessAddress: string | null;
     website: string | null;
     industry: string | null;
     teamSize: string | null;
@@ -69,6 +73,8 @@ export interface BusinessDetail {
         id: string;
         documentType: string;
         fileName: string;
+        fileUrl: string;
+        metadata: Prisma.JsonValue | null;
         status: string;
         createdAt: Date;
     }>;
@@ -160,6 +166,9 @@ export class AdminBusinessService {
                 slug: true,
                 email: true,
                 phone: true,
+                country: true,
+                city: true,
+                businessAddress: true,
                 website: true,
                 industry: true,
                 teamSize: true,
@@ -188,6 +197,8 @@ export class AdminBusinessService {
                         id: true,
                         documentType: true,
                         fileName: true,
+                        fileUrl: true,
+                        metadata: true,
                         status: true,
                         createdAt: true,
                     },
@@ -264,8 +275,78 @@ export class AdminBusinessService {
         data: {
             isActive?: boolean;
             businessVerified?: boolean;
-        }
+        },
+        reviewedById?: string,
     ): Promise<{ id: string; isActive: boolean; businessVerified: boolean }> {
+        if (data.businessVerified !== undefined) {
+            if (!reviewedById) {
+                throw Errors.unauthorized('Reviewer identity is required');
+            }
+
+            if (data.businessVerified) {
+                const verifiedBusinessAdmin = await prisma.user.findFirst({
+                    where: {
+                        tenantId: id,
+                        accountType: 'BUSINESS',
+                        role: 'BUSINESS_ADMIN',
+                        emailVerified: true,
+                    },
+                    select: { id: true },
+                });
+                if (!verifiedBusinessAdmin) {
+                    throw Errors.forbidden(
+                        'A business administrator must verify their email before the business can be approved',
+                    );
+                }
+
+            }
+
+            return prisma.$transaction(async transaction => {
+                const previous = await transaction.tenant.findUnique({
+                    where: { id },
+                    select: { isActive: true, businessVerified: true },
+                });
+                if (!previous) throw Errors.notFound('Business');
+                const updated = await transaction.tenant.update({
+                    where: { id },
+                    data,
+                    select: {
+                        id: true,
+                        isActive: true,
+                        businessVerified: true,
+                    },
+                });
+                if (data.businessVerified) {
+                    await transaction.accountDocument.updateMany({
+                        where: {
+                            tenantId: id,
+                            documentType: 'BUSINESS_REGISTRATION',
+                            status: { in: ['PENDING', 'APPROVED'] },
+                        },
+                        data: {
+                            status: 'APPROVED',
+                            reviewedAt: new Date(),
+                            reviewedById,
+                        },
+                    });
+                }
+                await transaction.auditLog.create({
+                    data: {
+                        action: data.businessVerified
+                            ? 'BUSINESS_REGISTRATION_APPROVED'
+                            : 'BUSINESS_REGISTRATION_REJECTED',
+                        entity: 'Tenant',
+                        entityId: id,
+                        userId: reviewedById,
+                        tenantId: id,
+                        oldValue: previous,
+                        newValue: updated,
+                    },
+                });
+                return updated;
+            });
+        }
+
         const updated = await prisma.tenant.update({
             where: { id },
             data,

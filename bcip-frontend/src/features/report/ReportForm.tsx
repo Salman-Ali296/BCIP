@@ -1,18 +1,15 @@
 "use client";
 
-import { useMemo, useState, useRef, useEffect, useSyncExternalStore } from "react";
+import { useMemo, useState, useRef, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  AlertTriangle,
   ArrowRight,
   BrainCircuit,
-  CheckCircle2,
   FileText,
   Mic,
   MicOff,
   Paperclip,
-  RotateCcw,
   ShieldCheck,
   Sparkles,
   Upload,
@@ -215,18 +212,18 @@ export function ReportForm() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0d1526] text-slate-100 py-12 px-4 sm:px-6 lg:px-8 font-sans">
+    <div className="min-h-screen bg-wash text-ink py-12 px-4 sm:px-6 lg:px-8 font-sans">
       <div className="mx-auto max-w-4xl space-y-8">
         {/* Navigation Breadcrumb */}
-        <div className="flex items-center justify-between text-xs text-slate-400">
+        <div className="flex items-center justify-between text-xs text-muted">
           <div className="flex items-center gap-2">
-            <Link href="/support" className="hover:text-blue-400 transition">
+            <Link href="/support" className="hover:text-brand transition">
               Enterprise Support
             </Link>
             <span>/</span>
-            <span className="text-slate-200 font-semibold">Incident Intake Studio</span>
+            <span className="text-ink font-semibold">Incident Intake Studio</span>
           </div>
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 font-mono text-[11px] text-emerald-400">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-success/30 bg-success-soft px-2.5 py-0.5 font-mono text-[11px] text-success">
             <ShieldCheck className="h-3 w-3" />
             256-Bit Encrypted
           </span>
@@ -234,24 +231,24 @@ export function ReportForm() {
 
         {/* Title Header */}
         <div>
-          <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-white">
+          <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-ink">
             Register Business Grievance
           </h1>
-          <p className="mt-2 text-sm text-slate-400">
+          <p className="mt-2 text-sm text-muted">
             Submit your incident details. Our AI pipeline categorizes, scores urgency, and attaches
             it to the senior enterprise resolution queue.
           </p>
         </div>
 
         {/* Mode Selector Tabs */}
-        <div className="flex rounded-2xl border border-slate-800 bg-slate-900/80 p-1.5 shadow-xl">
+        <div className="flex rounded-2xl border border-line bg-white p-1.5 shadow-xl">
           <button
             type="button"
             onClick={() => setActiveTab("text")}
             className={`flex flex-1 items-center justify-center gap-2 rounded-xl py-3 text-xs sm:text-sm font-bold transition ${
               activeTab === "text"
-                ? "bg-blue-600 text-white shadow-lg shadow-blue-600/30"
-                : "text-slate-400 hover:text-white"
+                ? "bg-ink text-white shadow-lg shadow-brand/15"
+                : "text-muted hover:text-ink"
             }`}
           >
             <FileText className="h-4 w-4" />
@@ -262,13 +259,13 @@ export function ReportForm() {
             onClick={() => setActiveTab("voice")}
             className={`flex flex-1 items-center justify-center gap-2 rounded-xl py-3 text-xs sm:text-sm font-bold transition ${
               activeTab === "voice"
-                ? "bg-purple-600 text-white shadow-lg shadow-purple-600/30"
-                : "text-slate-400 hover:text-white"
+                ? "bg-ink text-white shadow-lg shadow-brand/15"
+                : "text-muted hover:text-ink"
             }`}
           >
             <Mic className="h-4 w-4" />
             AI Voice Complaint Assistant
-            <span className="hidden sm:inline-block rounded-full bg-purple-400/20 px-2 py-0.5 text-[10px] text-purple-200">
+            <span className="hidden sm:inline-block rounded-full bg-lilac px-2 py-0.5 text-[10px] text-brand">
               Zero Typing
             </span>
           </button>
@@ -276,13 +273,13 @@ export function ReportForm() {
 
         {/* VOICE ASSISTANT TAB */}
         {activeTab === "voice" && (
-          <div className="rounded-3xl border border-purple-500/30 bg-gradient-to-b from-purple-950/40 via-slate-900/90 to-slate-900 p-6 sm:p-10 shadow-2xl space-y-6">
+          <div className="rounded-3xl border border-brand-soft bg-gradient-to-b from-lilac via-wash to-wash p-6 sm:p-10 shadow-2xl space-y-6">
             <div className="text-center space-y-2">
-              <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-purple-500/20 text-purple-400">
+              <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-lilac text-brand">
                 <Volume2 className="h-6 w-6" />
               </span>
-              <h2 className="text-xl font-bold text-white">AI Voice Intake Assistant</h2>
-              <p className="text-xs sm:text-sm text-slate-300 max-w-lg mx-auto">
+              <h2 className="text-xl font-bold text-ink">AI Voice Intake Assistant</h2>
+              <p className="text-xs sm:text-sm text-ink-soft max-w-lg mx-auto">
                 Speak naturally. Our speech engine transcribes your voice, parses emotional urgency,
                 and generates structured complaint fields.
               </p>
@@ -293,20 +290,20 @@ export function ReportForm() {
               <button
                 type="button"
                 onClick={isRecording ? stopRecording : startRecording}
-                className={`relative flex h-24 w-24 items-center justify-center rounded-full text-white shadow-2xl transition-all duration-300 ${
+                className={`relative flex h-24 w-24 items-center justify-center rounded-full text-ink shadow-2xl transition-all duration-300 ${
                   isRecording
-                    ? "bg-rose-600 ring-8 ring-rose-600/30 animate-pulse"
-                    : "bg-purple-600 hover:bg-purple-500 hover:scale-105 ring-8 ring-purple-600/20"
+                    ? "bg-danger ring-8 ring-danger/20 animate-pulse"
+                    : "bg-ink hover:bg-brand hover:scale-105 ring-8 ring-brand/20"
                 }`}
               >
                 {isRecording ? <MicOff className="h-10 w-10" /> : <Mic className="h-10 w-10" />}
               </button>
 
               <div className="text-center">
-                <p className="font-mono text-sm font-semibold text-purple-300">
+                <p className="font-mono text-sm font-semibold text-brand">
                   {isRecording ? `Recording Live... [${voiceSeconds}s]` : "Click to Start Speaking"}
                 </p>
-                <p className="text-[11px] text-slate-400 mt-1">
+                <p className="text-[11px] text-muted mt-1">
                   Supports English, Urdu, and Regional Enterprise Accents
                 </p>
               </div>
@@ -319,7 +316,7 @@ export function ReportForm() {
                   <span
                     key={i}
                     style={{ height: `${h}%` }}
-                    className="w-1.5 rounded-full bg-purple-400 animate-pulse transition-all"
+                    className="w-1.5 rounded-full bg-brand-glow animate-pulse transition-all"
                   />
                 ))}
               </div>
@@ -327,21 +324,21 @@ export function ReportForm() {
 
             {/* Live Transcript Preview */}
             {voiceTranscript && (
-              <div className="rounded-2xl border border-purple-500/20 bg-purple-950/30 p-5 space-y-3">
+              <div className="rounded-2xl border border-brand-soft bg-lilac-soft p-5 space-y-3">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="font-bold text-purple-300 flex items-center gap-1.5">
+                  <span className="font-bold text-brand flex items-center gap-1.5">
                     <Sparkles className="h-3.5 w-3.5" />
                     Speech-to-Text Transcription
                   </span>
-                  <span className="text-emerald-400 font-semibold text-[11px]">99.2% Accuracy</span>
+                  <span className="text-success font-semibold text-[11px]">99.2% Accuracy</span>
                 </div>
-                <p className="text-sm text-slate-200 leading-relaxed italic bg-black/20 p-3 rounded-xl">
+                <p className="text-sm text-ink leading-relaxed italic bg-ink/10 p-3 rounded-xl">
                   &ldquo;{voiceTranscript}&rdquo;
                 </p>
                 <button
                   type="button"
                   onClick={applyVoiceTranscript}
-                  className="inline-flex items-center gap-2 rounded-xl bg-purple-600 hover:bg-purple-500 px-4 py-2 text-xs font-bold text-white transition shadow-md"
+                  className="inline-flex items-center gap-2 rounded-xl bg-ink hover:bg-brand px-4 py-2 text-xs font-bold text-white transition shadow-md"
                 >
                   Use Transcript in Intake Form
                   <ArrowRight className="h-3.5 w-3.5" />
@@ -354,16 +351,16 @@ export function ReportForm() {
         {/* STRUCTURED FORM TAB */}
         {activeTab === "text" && (
           <form onSubmit={submit} className="space-y-6" noValidate>
-            <div className="rounded-3xl border border-slate-800 bg-slate-900/90 p-6 sm:p-10 shadow-2xl space-y-6 backdrop-blur-md">
+            <div className="rounded-3xl border border-line bg-white p-6 sm:p-10 shadow-2xl space-y-6 backdrop-blur-md">
               {/* Duplicate Detection Alert Banner (Proposal Section 3.2.1) */}
               {aiAnalysis?.duplicateMatch && (
-                <div className="rounded-2xl border border-amber-500/40 bg-amber-500/10 p-4.5 text-xs text-amber-200 space-y-1.5 shadow-lg">
-                  <div className="flex items-center justify-between font-bold text-amber-300">
+                <div className="rounded-2xl border border-warning/30 bg-warning-soft p-4.5 text-xs text-warning space-y-1.5 shadow-lg">
+                  <div className="flex items-center justify-between font-bold text-warning">
                     <span className="flex items-center gap-1.5">
-                      <Zap className="h-4 w-4 text-amber-400" />
+                      <Zap className="h-4 w-4 text-warning" />
                       Semantic Duplicate Cluster Warning ({aiAnalysis.duplicateMatch.similarity}% Match)
                     </span>
-                    <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] text-amber-300">
+                    <span className="rounded-full bg-warning-soft px-2 py-0.5 text-[10px] text-warning">
                       Sentence-BERT
                     </span>
                   </div>
@@ -378,10 +375,10 @@ export function ReportForm() {
               {/* Description Input */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold uppercase tracking-wider text-slate-300">
-                    Detailed Complaint Narrative <span className="text-rose-400">*</span>
+                  <label className="text-xs font-bold uppercase tracking-wider text-ink-soft">
+                    Detailed Complaint Narrative <span className="text-danger">*</span>
                   </label>
-                  <span className="text-[11px] font-mono text-slate-400">
+                  <span className="text-[11px] font-mono text-muted">
                     {f.description.length} / {MAX}
                   </span>
                 </div>
@@ -391,38 +388,38 @@ export function ReportForm() {
                   maxLength={MAX}
                   rows={5}
                   placeholder="Provide precise details: what occurred, when did it happen, financial impact, or affected items..."
-                  className="w-full rounded-2xl border border-slate-700 bg-slate-950/60 p-4 text-sm text-slate-100 placeholder-slate-500 shadow-inner focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                  className="w-full rounded-2xl border border-line bg-wash p-4 text-sm text-ink placeholder-faint shadow-inner focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
                 />
                 {err.description && (
-                  <p className="text-xs text-rose-400 font-medium">{err.description}</p>
+                  <p className="text-xs text-danger font-medium">{err.description}</p>
                 )}
               </div>
 
               {/* Real-Time AI NLP Telemetry Radar */}
               {aiAnalysis && (
-                <div className="rounded-2xl border border-blue-500/20 bg-blue-950/20 p-4 flex flex-wrap items-center justify-between gap-3 text-xs">
+                <div className="rounded-2xl border border-brand-soft bg-lilac-soft p-4 flex flex-wrap items-center justify-between gap-3 text-xs">
                   <div className="flex items-center gap-2">
-                    <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-blue-500/20 text-blue-400">
+                    <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-lilac text-brand">
                       <BrainCircuit className="h-3.5 w-3.5" />
                     </span>
-                    <span className="font-bold text-blue-300">AI Live NLP Analysis:</span>
+                    <span className="font-bold text-brand">AI Live NLP Analysis:</span>
                   </div>
 
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="rounded-lg bg-slate-800 px-2.5 py-1 text-[11px] font-medium text-slate-300 border border-slate-700">
-                      Category: <strong className="text-blue-400">{aiAnalysis.predictedCategory}</strong>
+                    <span className="rounded-lg bg-lilac-soft px-2.5 py-1 text-[11px] font-medium text-ink-soft border border-line">
+                      Category: <strong className="text-brand">{aiAnalysis.predictedCategory}</strong>
                     </span>
                     <span
                       className={`rounded-lg px-2.5 py-1 text-[11px] font-bold border ${
                         aiAnalysis.urgency === "Critical"
-                          ? "bg-rose-500/20 text-rose-300 border-rose-500/30"
-                          : "bg-amber-500/20 text-amber-300 border-amber-500/30"
+                          ? "bg-danger-soft text-danger border-danger/30"
+                          : "bg-warning-soft text-warning border-warning/30"
                       }`}
                     >
                       Urgency: {aiAnalysis.urgency}
                     </span>
-                    <span className="rounded-lg bg-slate-800 px-2.5 py-1 text-[11px] font-medium text-slate-300 border border-slate-700">
-                      Sentiment: <strong className="text-purple-300">{aiAnalysis.sentiment}</strong>
+                    <span className="rounded-lg bg-lilac-soft px-2.5 py-1 text-[11px] font-medium text-ink-soft border border-line">
+                      Sentiment: <strong className="text-brand">{aiAnalysis.sentiment}</strong>
                     </span>
                   </div>
                 </div>
@@ -431,13 +428,13 @@ export function ReportForm() {
               {/* Grid: Category & Reference */}
               <div className="grid gap-5 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-wider text-slate-300">
+                  <label className="text-xs font-bold uppercase tracking-wider text-ink-soft">
                     Grievance Category
                   </label>
                   <select
                     value={f.category}
                     onChange={setField("category")}
-                    className="w-full rounded-xl border border-slate-700 bg-slate-950/60 px-3.5 py-2.5 text-sm text-slate-100 shadow-inner focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                    className="w-full rounded-xl border border-line bg-wash px-3.5 py-2.5 text-sm text-ink shadow-inner focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
                   >
                     {CATEGORIES.map((cat) => (
                       <option key={cat} value={cat}>
@@ -448,7 +445,7 @@ export function ReportForm() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-wider text-slate-300">
+                  <label className="text-xs font-bold uppercase tracking-wider text-ink-soft">
                     Order / Invoice / Contract ID (Optional)
                   </label>
                   <input
@@ -456,7 +453,7 @@ export function ReportForm() {
                     value={f.orderRef}
                     onChange={setField("orderRef")}
                     placeholder="e.g. INV-8821 or MSA-9021"
-                    className="w-full rounded-xl border border-slate-700 bg-slate-950/60 px-3.5 py-2.5 text-sm text-slate-100 shadow-inner focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                    className="w-full rounded-xl border border-line bg-wash px-3.5 py-2.5 text-sm text-ink shadow-inner focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
                   />
                 </div>
               </div>
@@ -465,13 +462,13 @@ export function ReportForm() {
               <div className="grid gap-5 sm:grid-cols-2">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-bold uppercase tracking-wider text-slate-300">
-                      Corporate Email <span className="text-rose-400">*</span>
+                    <label className="text-xs font-bold uppercase tracking-wider text-ink-soft">
+                      Corporate Email <span className="text-danger">*</span>
                     </label>
                     <button
                       type="button"
                       onClick={() => setFormState((p) => ({ ...(p ?? f), email: ACCOUNT_EMAIL }))}
-                      className="text-[11px] text-blue-400 hover:underline"
+                      className="text-[11px] text-brand hover:underline"
                     >
                       Fill Demo Email
                     </button>
@@ -481,13 +478,13 @@ export function ReportForm() {
                     value={f.email}
                     onChange={setField("email")}
                     placeholder="your.email@company.com"
-                    className="w-full rounded-xl border border-slate-700 bg-slate-950/60 px-3.5 py-2.5 text-sm text-slate-100 shadow-inner focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                    className="w-full rounded-xl border border-line bg-wash px-3.5 py-2.5 text-sm text-ink shadow-inner focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
                   />
-                  {err.email && <p className="text-xs text-rose-400 font-medium">{err.email}</p>}
+                  {err.email && <p className="text-xs text-danger font-medium">{err.email}</p>}
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-wider text-slate-300">
+                  <label className="text-xs font-bold uppercase tracking-wider text-ink-soft">
                     Company / Organization Name
                   </label>
                   <input
@@ -495,7 +492,7 @@ export function ReportForm() {
                     value={f.companyName}
                     onChange={setField("companyName")}
                     placeholder="e.g. Apex Global Logistics"
-                    className="w-full rounded-xl border border-slate-700 bg-slate-950/60 px-3.5 py-2.5 text-sm text-slate-100 shadow-inner focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                    className="w-full rounded-xl border border-line bg-wash px-3.5 py-2.5 text-sm text-ink shadow-inner focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
                   />
                 </div>
               </div>
@@ -507,31 +504,31 @@ export function ReportForm() {
                   e.preventDefault();
                   pickFile(e.dataTransfer.files[0]);
                 }}
-                className="relative rounded-2xl border-2 border-dashed border-slate-700 hover:border-blue-500/50 bg-slate-950/40 p-6 text-center transition"
+                className="relative rounded-2xl border-2 border-dashed border-line hover:border-brand bg-wash p-6 text-center transition"
               >
                 {file ? (
-                  <div className="flex items-center justify-between rounded-xl bg-slate-800 p-3 text-xs text-slate-200">
+                  <div className="flex items-center justify-between rounded-xl bg-lilac-soft p-3 text-xs text-ink">
                     <div className="flex items-center gap-2">
-                      <Paperclip className="h-4 w-4 text-blue-400" />
+                      <Paperclip className="h-4 w-4 text-brand" />
                       <span className="font-semibold">{file.name}</span>
-                      <span className="text-slate-400 font-mono">
+                      <span className="text-muted font-mono">
                         ({(file.size / (1024 * 1024)).toFixed(2)} MB)
                       </span>
                     </div>
                     <button
                       type="button"
                       onClick={() => setFile(null)}
-                      className="text-slate-400 hover:text-rose-400 p-1"
+                      className="text-muted hover:text-danger p-1"
                     >
                       <X className="h-4 w-4" />
                     </button>
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    <Upload className="mx-auto h-7 w-7 text-slate-400" />
-                    <p className="text-xs font-semibold text-slate-300">
+                    <Upload className="mx-auto h-7 w-7 text-muted" />
+                    <p className="text-xs font-semibold text-ink-soft">
                       Drag evidence files here or{" "}
-                      <label className="text-blue-400 hover:underline cursor-pointer">
+                      <label className="text-brand hover:underline cursor-pointer">
                         browse documents
                         <input
                           type="file"
@@ -541,26 +538,26 @@ export function ReportForm() {
                         />
                       </label>
                     </p>
-                    <p className="text-[11px] text-slate-500">
+                    <p className="text-[11px] text-subtle">
                       PDF, PNG, JPG logs, invoices, or error screenshots (Up to 10 MB)
                     </p>
                   </div>
                 )}
-                {fileErr && <p className="mt-2 text-xs text-rose-400">{fileErr}</p>}
+                {fileErr && <p className="mt-2 text-xs text-danger">{fileErr}</p>}
               </div>
 
               {/* Form Action Buttons */}
-              <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-slate-800">
+              <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-line">
                 <Link
                   href="/support"
-                  className="rounded-xl border border-slate-700 hover:bg-slate-800 px-4 py-2.5 text-xs font-bold text-slate-300 transition"
+                  className="rounded-xl border border-line hover:bg-lilac-soft px-4 py-2.5 text-xs font-bold text-ink-soft transition"
                 >
                   Cancel
                 </Link>
 
                 <div className="flex items-center gap-3">
                   {saveMsg && (
-                    <span className="text-xs text-emerald-400 font-medium">{saveMsg}</span>
+                    <span className="text-xs text-success font-medium">{saveMsg}</span>
                   )}
                   <button
                     type="button"
@@ -569,7 +566,7 @@ export function ReportForm() {
                       setSaveMsg("Draft saved locally");
                       setTimeout(() => setSaveMsg(""), 3000);
                     }}
-                    className="rounded-xl border border-slate-700 hover:bg-slate-800 px-4 py-2.5 text-xs font-bold text-slate-300 transition"
+                    className="rounded-xl border border-line hover:bg-lilac-soft px-4 py-2.5 text-xs font-bold text-ink-soft transition"
                   >
                     Save Draft
                   </button>
@@ -577,11 +574,11 @@ export function ReportForm() {
                   <button
                     type="submit"
                     disabled={busy}
-                    className="inline-flex items-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-500 px-6 py-2.5 text-xs font-bold text-white shadow-lg shadow-blue-600/30 transition disabled:opacity-50"
+                    className="inline-flex items-center gap-2 rounded-xl bg-ink hover:bg-brand px-6 py-2.5 text-xs font-bold text-white shadow-lg shadow-brand/15 transition disabled:opacity-50"
                   >
                     {busy ? (
                       <>
-                        <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                        <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-line border-t-transparent" />
                         Analyzing & Registering...
                       </>
                     ) : (

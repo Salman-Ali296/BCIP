@@ -3,22 +3,14 @@
 import React, { useState } from "react";
 import {
   Bell,
-  Check,
   CheckCircle2,
   Clock,
   Copy,
-  Database,
   Globe,
   Key,
-  Layers,
-  Lock,
-  Mail,
-  RefreshCw,
   Save,
   Shield,
-  Sliders,
   Sparkles,
-  Users,
 } from "lucide-react";
 
 type SettingsTab = "general" | "sla" | "ai" | "integrations" | "notifications" | "security";
@@ -55,10 +47,10 @@ export default function BusinessSettingsPage() {
       {/* Page Title & Save Banner */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-[#101d30]">
+          <h1 className="text-2xl font-bold tracking-tight text-ink">
             Workspace Settings
           </h1>
-          <p className="mt-1 text-xs text-[#5e6b7d]">
+          <p className="mt-1 text-xs text-muted">
             Manage organization policies, SLA thresholds, AI triage parameters, and API access.
           </p>
         </div>
@@ -72,7 +64,7 @@ export default function BusinessSettingsPage() {
           <button
             type="button"
             onClick={handleSave}
-            className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-[#2454d6] px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-[#1b43b4] transition"
+            className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-ink px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-brand transition"
           >
             <Save className="h-4 w-4" />
             Save Preferences
@@ -95,7 +87,7 @@ export default function BusinessSettingsPage() {
             onClick={() => setActiveTab(id as SettingsTab)}
             className={`flex items-center gap-2 whitespace-nowrap border-b-2 px-4 py-3 transition-colors ${
               activeTab === id
-                ? "border-[#2454d6] text-[#2454d6]"
+                ? "border-brand text-brand"
                 : "border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300"
             }`}
           >
@@ -111,8 +103,8 @@ export default function BusinessSettingsPage() {
         {activeTab === "general" && (
           <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-6">
             <div>
-              <h2 className="text-sm font-bold text-[#101d30]">Organization Profile</h2>
-              <p className="mt-0.5 text-xs text-[#5e6b7d]">
+              <h2 className="text-sm font-bold text-ink">Organization Profile</h2>
+              <p className="mt-0.5 text-xs text-muted">
                 Basic details identifying your business on complaint receipts and portals.
               </p>
             </div>
@@ -124,7 +116,7 @@ export default function BusinessSettingsPage() {
                   type="text"
                   value={workspaceName}
                   onChange={(e) => setWorkspaceName(e.target.value)}
-                  className="h-10 w-full rounded-xl border border-slate-200 px-3 text-xs text-slate-900 focus:border-[#2454d6] focus:outline-none"
+                  className="h-10 w-full rounded-xl border border-slate-200 px-3 text-xs text-slate-900 focus:border-brand focus:outline-none"
                 />
               </div>
 
@@ -134,7 +126,7 @@ export default function BusinessSettingsPage() {
                   type="email"
                   value={inboundEmail}
                   onChange={(e) => setInboundEmail(e.target.value)}
-                  className="h-10 w-full rounded-xl border border-slate-200 px-3 text-xs text-slate-900 focus:border-[#2454d6] focus:outline-none"
+                  className="h-10 w-full rounded-xl border border-slate-200 px-3 text-xs text-slate-900 focus:border-brand focus:outline-none"
                 />
               </div>
 
@@ -143,7 +135,7 @@ export default function BusinessSettingsPage() {
                 <select
                   value={timezone}
                   onChange={(e) => setTimezone(e.target.value)}
-                  className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-900 focus:border-[#2454d6] focus:outline-none"
+                  className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-900 focus:border-brand focus:outline-none"
                 >
                   <option>Asia/Karachi (UTC+05:00)</option>
                   <option>Europe/London (UTC+00:00)</option>
@@ -162,8 +154,8 @@ export default function BusinessSettingsPage() {
         {activeTab === "sla" && (
           <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-6">
             <div>
-              <h2 className="text-sm font-bold text-[#101d30]">Service Level Agreements (SLAs)</h2>
-              <p className="mt-0.5 text-xs text-[#5e6b7d]">
+              <h2 className="text-sm font-bold text-ink">Service Level Agreements (SLAs)</h2>
+              <p className="mt-0.5 text-xs text-muted">
                 Define target times for first agent response and full case resolution.
               </p>
             </div>
@@ -179,7 +171,7 @@ export default function BusinessSettingsPage() {
                     type="number"
                     value={firstResponseHours}
                     onChange={(e) => setFirstResponseHours(e.target.value)}
-                    className="h-10 w-24 rounded-lg border border-slate-200 px-3 font-mono text-sm text-slate-900 focus:border-[#2454d6] focus:outline-none"
+                    className="h-10 w-24 rounded-lg border border-slate-200 px-3 font-mono text-sm text-slate-900 focus:border-brand focus:outline-none"
                   />
                   <span className="text-xs font-semibold text-slate-600">Hours</span>
                 </div>
@@ -195,7 +187,7 @@ export default function BusinessSettingsPage() {
                     type="number"
                     value={resolutionHours}
                     onChange={(e) => setResolutionHours(e.target.value)}
-                    className="h-10 w-24 rounded-lg border border-slate-200 px-3 font-mono text-sm text-slate-900 focus:border-[#2454d6] focus:outline-none"
+                    className="h-10 w-24 rounded-lg border border-slate-200 px-3 font-mono text-sm text-slate-900 focus:border-brand focus:outline-none"
                   />
                   <span className="text-xs font-semibold text-slate-600">Hours</span>
                 </div>
@@ -208,7 +200,7 @@ export default function BusinessSettingsPage() {
                   type="checkbox"
                   checked={autoEscalateCritical}
                   onChange={(e) => setAutoEscalateCritical(e.target.checked)}
-                  className="mt-0.5 h-4 w-4 rounded border-slate-300 text-[#2454d6]"
+                  className="mt-0.5 h-4 w-4 rounded border-slate-300 text-brand"
                 />
                 <div>
                   <span className="text-xs font-semibold text-slate-900">
@@ -228,23 +220,23 @@ export default function BusinessSettingsPage() {
           <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-6">
             <div>
               <div className="flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-[#2454d6]" />
-                <h2 className="text-sm font-bold text-[#101d30]">
+                <Sparkles className="h-4 w-4 text-brand" />
+                <h2 className="text-sm font-bold text-ink">
                   AI Governance & Triage Thresholds
                 </h2>
               </div>
-              <p className="mt-0.5 text-xs text-[#5e6b7d]">
+              <p className="mt-0.5 text-xs text-muted">
                 Configure how the NLP engine surfaces signals, detects semantic duplicates, and drafts responses.
               </p>
             </div>
 
             <div className="space-y-4">
-              <div className="rounded-xl border border-blue-100 bg-[#edf2ff]/30 p-4 space-y-2">
+              <div className="rounded-xl border border-blue-100 bg-lilac/30 p-4 space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-slate-900">
                     Semantic Duplicate Similarity Cutoff (Cosine Threshold)
                   </span>
-                  <span className="font-mono text-xs font-bold text-[#2454d6]">
+                  <span className="font-mono text-xs font-bold text-brand">
                     {duplicateThreshold}
                   </span>
                 </div>
@@ -259,7 +251,7 @@ export default function BusinessSettingsPage() {
                     step="0.05"
                     value={duplicateThreshold}
                     onChange={(e) => setDuplicateThreshold(e.target.value)}
-                    className="w-full h-1.5 bg-slate-200 rounded-lg accent-[#2454d6] cursor-pointer"
+                    className="w-full h-1.5 bg-slate-200 rounded-lg accent-brand cursor-pointer"
                   />
                   <span className="text-xs font-mono text-slate-500 whitespace-nowrap">
                     Recommended: 0.80
@@ -273,7 +265,7 @@ export default function BusinessSettingsPage() {
                     type="checkbox"
                     checked={aiAssistedDrafts}
                     onChange={(e) => setAiAssistedDrafts(e.target.checked)}
-                    className="mt-0.5 h-4 w-4 rounded border-slate-300 text-[#2454d6]"
+                    className="mt-0.5 h-4 w-4 rounded border-slate-300 text-brand"
                   />
                   <div>
                     <span className="text-xs font-semibold text-slate-900">
@@ -286,7 +278,7 @@ export default function BusinessSettingsPage() {
                 </label>
               </div>
 
-              <div className="rounded-xl border border-slate-200 bg-[#fafbfd] p-3 text-[11px] text-slate-600">
+              <div className="rounded-xl border border-slate-200 bg-wash p-3 text-[11px] text-slate-600">
                 <strong>Human-in-the-loop statement:</strong> In accordance with BCIP governance policies, AI strictly assists with classification and signal detection. All customer commitments, financial adjustments, and final ticket closures require explicit operator confirmation.
               </div>
             </div>
@@ -297,8 +289,8 @@ export default function BusinessSettingsPage() {
         {activeTab === "integrations" && (
           <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-6">
             <div>
-              <h2 className="text-sm font-bold text-[#101d30]">REST API & Ingestion Webhooks</h2>
-              <p className="mt-0.5 text-xs text-[#5e6b7d]">
+              <h2 className="text-sm font-bold text-ink">REST API & Ingestion Webhooks</h2>
+              <p className="mt-0.5 text-xs text-muted">
                 Connect ERP, CRM, and customer portal pipelines directly into BCIP intake.
               </p>
             </div>
@@ -344,8 +336,8 @@ export default function BusinessSettingsPage() {
         {activeTab === "notifications" && (
           <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-6">
             <div>
-              <h2 className="text-sm font-bold text-[#101d30]">Operational Alert Routing</h2>
-              <p className="mt-0.5 text-xs text-[#5e6b7d]">
+              <h2 className="text-sm font-bold text-ink">Operational Alert Routing</h2>
+              <p className="mt-0.5 text-xs text-muted">
                 Configure when team leads and agents receive escalation notifications.
               </p>
             </div>
@@ -361,7 +353,7 @@ export default function BusinessSettingsPage() {
                   <input
                     type="checkbox"
                     defaultChecked
-                    className="mt-0.5 h-4 w-4 rounded border-slate-300 text-[#2454d6]"
+                    className="mt-0.5 h-4 w-4 rounded border-slate-300 text-brand"
                   />
                   <div>
                     <span className="text-xs font-bold text-slate-900 block">{item.title}</span>
@@ -377,8 +369,8 @@ export default function BusinessSettingsPage() {
         {activeTab === "security" && (
           <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-6">
             <div>
-              <h2 className="text-sm font-bold text-[#101d30]">Security, Auditing & Data Retention</h2>
-              <p className="mt-0.5 text-xs text-[#5e6b7d]">
+              <h2 className="text-sm font-bold text-ink">Security, Auditing & Data Retention</h2>
+              <p className="mt-0.5 text-xs text-muted">
                 Strict tenant isolation, immutable activity logging, and retention rules.
               </p>
             </div>

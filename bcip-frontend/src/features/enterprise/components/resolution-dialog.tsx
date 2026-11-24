@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle2, X, ShieldCheck, ArrowRight } from "lucide-react";
+import { CheckCircle2, X, ArrowRight } from "lucide-react";
 import { useEnterprise } from "../context/enterprise-context";
 
 export function ResolutionDialog() {

@@ -9,9 +9,10 @@ import {
     submitCSATFeedback,
     getAIResponseSuggestion,
     escalateComplaint,
+    listComplaintPortals,
 } from '../controllers/complaintController';
 import { authMiddleware, requireRoles } from '../middleware/auth.middleware';
-import { requireActiveBusinessTrial } from '../middleware/business-trial.middleware';
+import { requireBusinessFeature } from '../middleware/business-plan.middleware';
 import { tenantMiddleware } from '../middleware/tenant.middleware';
 import multer from 'multer';
 import { uploadComplaintFiles } from '../controllers/complaintController';
@@ -58,6 +59,13 @@ const publicTrackingLimiter = rateLimit({
     },
 });
 
+const publicDirectoryLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 30,
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
 const router = Router();
 
 function parseComplaintFiles(req: Request, res: Response, next: NextFunction): void {
@@ -92,6 +100,10 @@ router.get('/tenant/:slug', async (req: Request, res: Response, next: NextFuncti
     await getTenantBySlug(req, res, next);
 });
 
+router.get('/businesses', publicDirectoryLimiter, async (req: Request, res: Response, next: NextFunction) => {
+    await listComplaintPortals(req, res, next);
+});
+
 /**
  * GET /api/complaints
  * Protected - business views their complaints
@@ -100,10 +112,8 @@ router.get(
     '/',
     authMiddleware,
     tenantMiddleware,
-    requireRoles('SUPER_ADMIN', 'BUSINESS_ADMIN', 'MANAGER', 'AGENT', 'ESCALATION_AGENT', 'CUSTOMER'),
-    (req, res, next) => req.user?.role === 'CUSTOMER'
-        ? next()
-        : requireActiveBusinessTrial(req, res, next),
+    requireRoles('SUPER_ADMIN', 'BUSINESS_ADMIN', 'MANAGER', 'AGENT', 'ESCALATION_AGENT'),
+    requireBusinessFeature('complaint_management'),
     async (req: Request, res: Response, next: NextFunction) => {
         await listComplaints(req, res, next);
     }
@@ -113,10 +123,8 @@ router.get(
     '/:id',
     authMiddleware,
     tenantMiddleware,
-    requireRoles('SUPER_ADMIN', 'BUSINESS_ADMIN', 'MANAGER', 'AGENT', 'ESCALATION_AGENT', 'CUSTOMER'),
-    (req, res, next) => req.user?.role === 'CUSTOMER'
-        ? next()
-        : requireActiveBusinessTrial(req, res, next),
+    requireRoles('SUPER_ADMIN', 'BUSINESS_ADMIN', 'MANAGER', 'AGENT', 'ESCALATION_AGENT'),
+    requireBusinessFeature('complaint_management'),
     async (req: Request, res: Response, next: NextFunction) => {
         await getComplaint(req, res, next);
     }
@@ -131,7 +139,7 @@ router.patch(
     authMiddleware,
     tenantMiddleware,
     requireRoles('SUPER_ADMIN', 'BUSINESS_ADMIN', 'MANAGER', 'AGENT', 'ESCALATION_AGENT'),
-    requireActiveBusinessTrial,
+    requireBusinessFeature('complaint_management'),
     async (req: Request, res: Response, next: NextFunction) => {
         await updateComplaintStatus(req, res, next);
     }
@@ -142,7 +150,7 @@ router.post(
     authMiddleware,
     tenantMiddleware,
     requireRoles('SUPER_ADMIN', 'BUSINESS_ADMIN', 'MANAGER', 'AGENT', 'ESCALATION_AGENT'),
-    requireActiveBusinessTrial,
+    requireBusinessFeature('complaint_management'),
     parseComplaintFiles,
     async (req: Request, res: Response, next: NextFunction) => {
         await uploadComplaintFiles(req, res, next);
@@ -166,7 +174,7 @@ router.post(
     authMiddleware,
     tenantMiddleware,
     requireRoles('SUPER_ADMIN', 'BUSINESS_ADMIN', 'MANAGER', 'AGENT', 'ESCALATION_AGENT'),
-    requireActiveBusinessTrial,
+    requireBusinessFeature('ai_response_suggestions'),
     async (req: Request, res: Response, next: NextFunction) => {
         await getAIResponseSuggestion(req, res, next);
     }
@@ -181,7 +189,7 @@ router.post(
     authMiddleware,
     tenantMiddleware,
     requireRoles('SUPER_ADMIN', 'BUSINESS_ADMIN', 'MANAGER', 'ESCALATION_AGENT'),
-    requireActiveBusinessTrial,
+    requireBusinessFeature('escalations'),
     async (req: Request, res: Response, next: NextFunction) => {
         await escalateComplaint(req, res, next);
     }

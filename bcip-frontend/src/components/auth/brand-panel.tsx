@@ -2,13 +2,14 @@
 
 import React from "react";
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, ChevronRight, Clock, ShieldCheck, Sparkles } from "lucide-react";
+import { BrandLogo } from "@/components/brand/brand-logo";
+import { CheckCircle2, Clock, ShieldCheck } from "lucide-react";
 
 export function BrandPanel() {
     return (
         <aside
             aria-label="BCIP Product Intelligence Overview"
-            className="hidden lg:flex flex-col justify-between w-full h-full bg-[#0d1526] text-slate-100 p-10 xl:p-14 border-r border-slate-800/80 relative overflow-hidden select-none"
+            className="hidden lg:flex flex-col justify-between w-full h-full bg-ink text-slate-100 p-10 xl:p-14 border-r border-slate-800/80 relative overflow-hidden select-none"
         >
             {/* Ambient structural background grid & restrained lighting */}
             <div
@@ -27,17 +28,7 @@ export function BrandPanel() {
                     href="/"
                     className="inline-flex items-center gap-2.5 text-white group focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md"
                 >
-                    <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-white shadow-sm shadow-blue-500/30 group-hover:bg-blue-500 transition-colors">
-                        <span className="text-sm font-semibold tracking-wider">B</span>
-                    </div>
-                    <div className="flex flex-col">
-                        <span className="text-base font-bold tracking-tight text-white leading-none">
-                            BCIP
-                        </span>
-                        <span className="text-[10px] text-slate-400 font-medium tracking-wide uppercase mt-0.5">
-                            Business Complaint Intelligence Platform
-                        </span>
-                    </div>
+                    <BrandLogo variant="light" height={36} />
                 </Link>
 
                 <div className="pt-2">

@@ -11,28 +11,15 @@ import type {
   NewComplaint,
 } from "@/features/complaints/types/complaint";
 import { MOCK_ENTERPRISE_COMPLAINTS } from "@/features/dashboard/data/mockComplaints";
-
-const complaintsKey = "bcip:customer-complaints";
+import {
+  readStoredComplaints,
+  writeStoredComplaints,
+} from "@/lib/api/complaint-storage";
 
 export { clearDraft, loadDraft, saveDraft };
 
 function pause(milliseconds = 200): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
-}
-
-function readComplaints(): Complaint[] {
-  const serialized = window.localStorage.getItem(complaintsKey);
-  if (!serialized) return [];
-
-  try {
-    return JSON.parse(serialized) as Complaint[];
-  } catch {
-    throw new Error("Saved complaints could not be read.");
-  }
-}
-
-function writeComplaints(complaints: Complaint[]): void {
-  window.localStorage.setItem(complaintsKey, JSON.stringify(complaints));
 }
 
 export async function createComplaint(
@@ -45,7 +32,7 @@ export async function createComplaint(
 export async function getComplaint(id: string): Promise<Complaint | null> {
   await pause();
   const normalizedId = id.toUpperCase();
-  const stored = readComplaints().find(
+  const stored = readStoredComplaints().find(
     (c) => c.id.toUpperCase() === normalizedId || c.trackingId.toUpperCase() === normalizedId
   );
   if (stored) return stored;
@@ -56,9 +43,9 @@ export async function getComplaint(id: string): Promise<Complaint | null> {
   if (mock) {
     return {
       ...mock,
-      status: mock.status.toLowerCase() as any,
-      priority: mock.priority.toLowerCase() as any,
-      sentiment: mock.sentiment?.toLowerCase() as any,
+      status: mock.status.toLowerCase() as Complaint["status"],
+      priority: mock.priority.toLowerCase() as Complaint["priority"],
+      sentiment: mock.sentiment?.toLowerCase() as Complaint["sentiment"],
     };
   }
 
@@ -67,13 +54,13 @@ export async function getComplaint(id: string): Promise<Complaint | null> {
 
 export async function getComplaints(): Promise<Complaint[]> {
   await pause();
-  const stored = readComplaints();
+  const stored = readStoredComplaints();
   if (stored.length > 0) return stored;
   return MOCK_ENTERPRISE_COMPLAINTS.map((mock) => ({
     ...mock,
-    status: mock.status.toLowerCase() as any,
-    priority: mock.priority.toLowerCase() as any,
-    sentiment: mock.sentiment?.toLowerCase() as any,
+    status: mock.status.toLowerCase() as Complaint["status"],
+    priority: mock.priority.toLowerCase() as Complaint["priority"],
+    sentiment: mock.sentiment?.toLowerCase() as Complaint["sentiment"],
   }));
 }
 
@@ -104,7 +91,10 @@ export async function classify(text: string): Promise<Classification> {
   return { category, priority, sentiment };
 }
 
-export async function transcribeVoice(_recording: Blob): Promise<string> {
+export async function transcribeVoice(recording: Blob): Promise<string> {
+  if (recording.size === 0) {
+    throw new Error("The recording is empty. Please record your complaint again.");
+  }
   await pause(500);
   return "I need help resolving a problem with my recent purchase.";
 }
@@ -114,12 +104,12 @@ async function updateComplaint(
   update: (complaint: Complaint) => Complaint,
 ): Promise<void> {
   await pause();
-  const complaints = readComplaints();
+  const complaints = readStoredComplaints();
   const index = complaints.findIndex((complaint) => complaint.id === id);
   if (index < 0) throw new Error("The complaint could not be found.");
 
   complaints[index] = update(complaints[index]);
-  writeComplaints(complaints);
+  writeStoredComplaints(complaints);
 }
 
 export function acceptResolution(id: string): Promise<void> {
