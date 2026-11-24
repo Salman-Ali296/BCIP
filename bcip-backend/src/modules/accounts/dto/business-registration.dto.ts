@@ -19,8 +19,17 @@ const phoneSchema = z
     .trim()
     .regex(/^\+?[0-9\s\-()]{7,30}$/, 'Use a valid phone number');
 
-// Current email comes from the authenticated session, not the body
+// Stored with en dashes (matches onboarding); plain hyphens are accepted and normalized.
+const TEAM_SIZES = ['1–10', '11–50', '51–200', '201–500', '501–1000', '1000+'] as const;
+const teamSizeSchema = z
+    .string()
+    .trim()
+    .transform(value => value.replace(/-/g, '–'))
+    .pipe(z.enum(TEAM_SIZES));
+
+// Public pre-verification route: the current email and password in the body authenticate the request.
 export const changeRegistrationEmailSchema = z.object({
+    email: emailAddressSchema,
     newEmail: emailAddressSchema,
     password: z.string().min(1).max(128),
 });
@@ -71,7 +80,7 @@ export const completeBusinessRegistrationSchema = z.object({
         'Other',
     ]),
     website: websiteUrlSchema.optional().or(z.literal('')),
-    teamSize: z.enum(['1-10', '11-50', '51-200', '201-500', '501-1000', '1000+']),
+    teamSize: teamSizeSchema,
     phone: phoneSchema,
     country: z.string().trim().min(2).max(100),
     city: z.string().trim().min(2).max(100),
